@@ -7,11 +7,12 @@ from authlib.integrations.starlette_client import OAuth
 from dotenv import load_dotenv
 import os
 
-from Database.getItemsFromDatabase import get_person
+from Database.getItemsFromDatabase import get_person, get_tree
 
 ##########################################
 #            Global Variables            #
 ##########################################
+
 load_dotenv()
 app = FastAPI()
 AUTH0_DOMAIN = os.getenv("VITE_AUTH0_DOMAIN")
@@ -23,7 +24,7 @@ app.add_middleware(
     secret_key=MIDDLEWARE_SECRET_KEY
 )
 
-# TODO: USet up oauth with Auth0.
+# TODO: Yan -- Set up oauth with Auth0.
 # oauth = OAuth()
 # oauth.register(
 #     "auth0",
@@ -34,12 +35,12 @@ app.add_middleware(
 # )
 
 
-
 ############################################
 #               Helper Functions           #
 ############################################
 
-class NeedLoginException(Exception):  # Gemini helped me with figuring out how to handle cases where login is needed.
+class NeedLoginException(Exception):
+    # Gemini helped me with figuring out how to handle cases where login is needed.
     pass
 
 @app.exception_handler(NeedLoginException)
@@ -53,6 +54,30 @@ def is_student(user_reference: str) -> bool:
         return True
     return False
 
+def apply_event(treeID, eventID):
+    # TODO: Implement event application logic here. Events will be used to modify tree stats.
+    return False
+
+def recompute_tree_health(treeID):
+    # TODO: Implement tree health recomputation logic here.
+    # Will update apperance, health status, bars, etc.
+    return False
+
+def get_user_ID(request: Request):
+    """Extracts the accountID from the database based on the session user."""
+    user_ref = request.session.get("user")
+    if not user_ref:
+        return None
+    person = get_person(user_ref)
+    return person.get('accountID') if person else None
+
+def get_tree_ID(request: Request):
+    """Retrieves the treeID for the currently logged-in user."""
+    user_ref = request.session.get("user")
+    tree_object = get_tree(user_ref)
+    
+    return tree_object['treeID'] if tree_object else None
+
 
 ##########################################
 #             Dependencies               #
@@ -61,7 +86,6 @@ def is_student(user_reference: str) -> bool:
 # Checks if User is Authenticated
 async def get_current_user(request: Request):
     """
-    FastAPI replacement for login_required. 
     Checks your session/cookie/token for the user reference.
     """
     user_ref = request.session.get("user")
@@ -97,6 +121,7 @@ async def student_required(request: Request, user_ref: str = Depends(get_current
 ############################################
 #                   Routes                 #
 ############################################
+
 @app.get("/")
 def default_page():
     return {"message": "Welcome to the Tree Game API! This will be the intro page."}
@@ -109,19 +134,31 @@ def home(student=Depends(student_required)):
 
 @app.get("/login")
 def login():
-    # TODO: Implement Auth0 login flow here.
+    # TODO: Yan - Implement Auth0 login flow here.
     return {"message": "This will be the login page. Implement Auth0 login here."}
 
 @app.get("/callback")
 async def auth_callback(request: Request):
-    # TODO: Implement Auth0 callback handling here.
+    # TODO: Yan - Implement Auth0 callback handling here.
     return {"message": "This will handle the Auth0 callback."}
 
 @app.get("/logout")
 async def logout(request: Request):
     request.session.clear()
-    # TODO: Redirect to Auth0 logout URL if needed.
+    # TODO: Yan - Redirect to Auth0 logout URL if needed.
     return RedirectResponse(url="/")
+
+@app.get("/manageAccount")
+def manage_account(account=Depends(get_current_user)):
+    return {"message": f"Manage account page for {account['displayName']}"}
+
+@app.get("/soilGame")
+def soil_game(student=Depends(student_required)):
+    return {"message": f"Soil Game page for {student['displayName']}"}
+
+@app.get("/rainGame")
+def tree_game(student=Depends(student_required)):
+    return {"message": f"Tree Game page for {student['displayName']}"}
 
 ############################################
 #                  Server                  #
