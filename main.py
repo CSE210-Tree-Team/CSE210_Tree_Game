@@ -39,7 +39,7 @@ app.add_middleware(
 #               Helper Functions           #
 ############################################
 
-class NeedLoginException(Exception):
+class NeedLoginException(Exception):  # Gemini helped me with figuring out how to handle cases where login is needed.
     pass
 
 @app.exception_handler(NeedLoginException)
