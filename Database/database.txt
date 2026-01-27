@@ -1,0 +1,167 @@
+Successfully connected to game_database.db
+
+==================== TABLE: Account ====================
+COLUMNS: ['accountID', 'username', 'email', 'passwordHash', 'displayName', 'accountReference', 'dateOfBirth', 'lastLogin']
+---------------------------------------------------------------------------------------------------------------------------
+   ('cd0698f7-d7a3-4811-8e6c-35fa733e9b82', 'adrian', 'adrian@student.edu', 'pass123', 'Adrian', None, '2010-01-01', '2026-01-26 18:38:42')
+   ('dd08ec35-79d5-43e4-9aae-49ab0fed2706', 'dhaivat', 'dhaivat@student.edu', 'pass123', 'Dhaivat', None, '2010-01-01', '2026-01-26 18:38:42')
+   ('ac4c2585-107d-44b7-93ef-f530fe9eb38a', 'cash', 'cash@student.edu', 'pass123', 'Cash', None, '2010-01-01', '2026-01-26 18:38:42')
+   ('520590f7-45c6-4c9d-8647-05110bbc4fb2', 'kathy', 'kathy@student.edu', 'pass123', 'Kathy', None, '2010-01-01', '2026-01-26 18:38:42')
+   ('3085d123-bb84-40d4-8dcc-683a88c6f859', 'alex', 'alex@student.edu', 'pass123', 'Alex', None, '2010-01-01', '2026-01-26 18:38:42')
+   ('9795f9a2-1cfb-4ca4-bbe1-4a938da277b2', 'stanley', 'stanley@student.edu', 'pass123', 'Stanley', None, '2010-01-01', '2026-01-26 18:38:42')
+
+
+==================== TABLE: AccountRole ====================
+COLUMNS: ['accountID', 'role']
+-------------------------------
+   ('cd0698f7-d7a3-4811-8e6c-35fa733e9b82', 'Student')
+   ('dd08ec35-79d5-43e4-9aae-49ab0fed2706', 'Student')
+   ('ac4c2585-107d-44b7-93ef-f530fe9eb38a', 'Student')
+   ('520590f7-45c6-4c9d-8647-05110bbc4fb2', 'Student')
+   ('3085d123-bb84-40d4-8dcc-683a88c6f859', 'Student')
+   ('9795f9a2-1cfb-4ca4-bbe1-4a938da277b2', 'Student')
+
+
+==================== TABLE: Tree ====================
+COLUMNS: ['treeID', 'ownerAccountID', 'health', 'growthStage', 'lastUpdated']
+------------------------------------------------------------------------------
+   ('26ecd00f-12b7-4102-b758-0299c73d7a3c', 'cd0698f7-d7a3-4811-8e6c-35fa733e9b82', 'Healthy', 0, '2026-01-26 18:38:42')
+   ('80ae861a-fcca-4ca6-bb33-a7b9b2fac39c', 'dd08ec35-79d5-43e4-9aae-49ab0fed2706', 'Healthy', 0, '2026-01-26 18:38:42')
+   ('b0552ed6-081c-47c6-bb4f-54b7eecfad00', 'ac4c2585-107d-44b7-93ef-f530fe9eb38a', 'Healthy', 0, '2026-01-26 18:38:42')
+   ('3274ce23-4277-49ff-8fcd-55b3850b1122', '520590f7-45c6-4c9d-8647-05110bbc4fb2', 'Healthy', 0, '2026-01-26 18:38:42')
+   ('3a1ea22f-025e-4626-b21c-9d5f3ffa2cf5', '3085d123-bb84-40d4-8dcc-683a88c6f859', 'Healthy', 0, '2026-01-26 18:38:42')
+   ('574e0a1d-7ed4-435b-b311-51b8a636c369', '9795f9a2-1cfb-4ca4-bbe1-4a938da277b2', 'Healthy', 0, '2026-01-26 18:38:42')
+
+
+==================== TABLE: TreeResources ====================
+COLUMNS: ['treeID', 'water', 'earth', 'sun']
+---------------------------------------------
+   ('26ecd00f-12b7-4102-b758-0299c73d7a3c', 100, 100, 100)
+   ('80ae861a-fcca-4ca6-bb33-a7b9b2fac39c', 100, 100, 100)
+   ('b0552ed6-081c-47c6-bb4f-54b7eecfad00', 100, 100, 100)
+   ('3274ce23-4277-49ff-8fcd-55b3850b1122', 100, 100, 100)
+   ('3a1ea22f-025e-4626-b21c-9d5f3ffa2cf5', 100, 100, 100)
+   ('574e0a1d-7ed4-435b-b311-51b8a636c369', 100, 100, 100)
+
+
+==================== TABLE: TreeDecoration ====================
+COLUMNS: ['decorationID', 'treeID', 'appearanceID']
+----------------------------------------------------
+   [EMPTY TABLE] - No data rows found.
+
+
+==================== TABLE: Event ====================
+COLUMNS: ['eventID', 'eventType', 'resourceAffected', 'description', 'percentChange', 'conditions']
+----------------------------------------------------------------------------------------------------
+   [EMPTY TABLE] - No data rows found.
+
+
+==================== TABLE: Class ====================
+COLUMNS: ['classID', 'className', 'classLevel', 'teacherID', 'active', 'levelPolicy']
+--------------------------------------------------------------------------------------
+   [EMPTY TABLE] - No data rows found.
+
+
+==================== TABLE: Enrollment ====================
+COLUMNS: ['accountID', 'classID']
+----------------------------------
+   [EMPTY TABLE] - No data rows found.
+
+
+==================== TABLE: Question ====================
+COLUMNS: ['questionID', 'text', 'type', 'difficulty', 'resourceType']
+----------------------------------------------------------------------
+   ('29704867-c73f-40db-817f-c2f7017badaf', 'What color is the sun?', 'MCQ', 1, 'Sun')
+   ('f5717769-1ba3-4744-a263-a16f41a50b76', '2 + 2 = ?', 'MCQ', 1, 'General')
+   ('afb7f29b-8331-4946-8ddb-1eb2a306ff64', 'How do trees drink?', 'FreeResponse', 1, 'Water')
+   ('9a094494-6cfb-4629-94a8-592cc3ad2013', 'Select all primary colors.', 'MultiSelect', 1, 'General')
+
+
+==================== TABLE: QuestionChoice ====================
+COLUMNS: ['choiceID', 'questionID', 'text', 'isCorrect']
+---------------------------------------------------------
+   ('d67bf85e-551d-4998-8c12-3899bea1e526', '29704867-c73f-40db-817f-c2f7017badaf', 'Yellow', 1)
+   ('4657e5c8-5a83-44f7-b917-ba219ac3540b', '29704867-c73f-40db-817f-c2f7017badaf', 'Green', 0)
+   ('1e1f5693-1747-4015-a15d-5ccd62f5a480', '29704867-c73f-40db-817f-c2f7017badaf', 'Blue', 0)
+   ('e78f1e93-784d-40b2-be1c-887461b7d462', 'f5717769-1ba3-4744-a263-a16f41a50b76', '3', 0)
+   ('e8d150f6-5631-499c-bf7c-488d5d4ebc96', 'f5717769-1ba3-4744-a263-a16f41a50b76', '4', 1)
+   ('346ae046-f157-41ce-a7cb-b7d77e601d10', 'f5717769-1ba3-4744-a263-a16f41a50b76', '5', 0)
+   ('a1926b98-d4ac-4784-a43c-915cc3b93e75', '9a094494-6cfb-4629-94a8-592cc3ad2013', 'Red', 1)
+   ('50be5851-3e8e-480d-9dcf-2be32710e042', '9a094494-6cfb-4629-94a8-592cc3ad2013', 'Green', 0)
+   ('2d0634e4-4241-4c64-a149-6d3e3eae1b8c', '9a094494-6cfb-4629-94a8-592cc3ad2013', 'Blue', 1)
+   ('27720e98-f40d-4450-898c-1b585c681cc6', '9a094494-6cfb-4629-94a8-592cc3ad2013', 'Yellow', 0)
+
+
+==================== TABLE: QuestionClass ====================
+COLUMNS: ['questionID', 'classID']
+-----------------------------------
+   [EMPTY TABLE] - No data rows found.
+
+
+==================== TABLE: QuestionAttempt ====================
+COLUMNS: ['attemptID', 'accountID', 'questionID', 'isCorrect', 'resourceAwarded', 'timestamp']
+-----------------------------------------------------------------------------------------------
+   [EMPTY TABLE] - No data rows found.
+
+
+==================== TABLE: StudentDetails ====================
+COLUMNS: ['studentID', 'studentLevel', 'studentStats', 'parentEmail']
+----------------------------------------------------------------------
+   ('cd0698f7-d7a3-4811-8e6c-35fa733e9b82', 1, '{"xp": 0}', None)
+   ('dd08ec35-79d5-43e4-9aae-49ab0fed2706', 1, '{"xp": 0}', None)
+   ('ac4c2585-107d-44b7-93ef-f530fe9eb38a', 1, '{"xp": 0}', None)
+   ('520590f7-45c6-4c9d-8647-05110bbc4fb2', 1, '{"xp": 0}', None)
+   ('3085d123-bb84-40d4-8dcc-683a88c6f859', 1, '{"xp": 0}', None)
+   ('9795f9a2-1cfb-4ca4-bbe1-4a938da277b2', 1, '{"xp": 0}', None)
+
+
+End of Database Dump.
+
+
+=================== End of Database Contents ====================
+
+
+
+=================== User Overview ===================
+
+User: Adrian (adrian) [ID: cd0698f7]
+  Email: adrian@student.edu
+  Roles: Student
+  Status: Level 1 | Stats: {"xp": 0} | Last login: 2026-01-26 18:38:42
+  Tree 26ecd00f | Health: Healthy | Growth: 0 | Updated: 2026-01-26 18:38:42
+    Resources -> Water: 100, Earth: 100, Sun: 100
+
+User: Dhaivat (dhaivat) [ID: dd08ec35]
+  Email: dhaivat@student.edu
+  Roles: Student
+  Status: Level 1 | Stats: {"xp": 0} | Last login: 2026-01-26 18:38:42
+  Tree 80ae861a | Health: Healthy | Growth: 0 | Updated: 2026-01-26 18:38:42
+    Resources -> Water: 100, Earth: 100, Sun: 100
+
+User: Cash (cash) [ID: ac4c2585]
+  Email: cash@student.edu
+  Roles: Student
+  Status: Level 1 | Stats: {"xp": 0} | Last login: 2026-01-26 18:38:42
+  Tree b0552ed6 | Health: Healthy | Growth: 0 | Updated: 2026-01-26 18:38:42
+    Resources -> Water: 100, Earth: 100, Sun: 100
+
+User: Kathy (kathy) [ID: 520590f7]
+  Email: kathy@student.edu
+  Roles: Student
+  Status: Level 1 | Stats: {"xp": 0} | Last login: 2026-01-26 18:38:42
+  Tree 3274ce23 | Health: Healthy | Growth: 0 | Updated: 2026-01-26 18:38:42
+    Resources -> Water: 100, Earth: 100, Sun: 100
+
+User: Alex (alex) [ID: 3085d123]
+  Email: alex@student.edu
+  Roles: Student
+  Status: Level 1 | Stats: {"xp": 0} | Last login: 2026-01-26 18:38:42
+  Tree 3a1ea22f | Health: Healthy | Growth: 0 | Updated: 2026-01-26 18:38:42
+    Resources -> Water: 100, Earth: 100, Sun: 100
+
+User: Stanley (stanley) [ID: 9795f9a2]
+  Email: stanley@student.edu
+  Roles: Student
+  Status: Level 1 | Stats: {"xp": 0} | Last login: 2026-01-26 18:38:42
+  Tree 574e0a1d | Health: Healthy | Growth: 0 | Updated: 2026-01-26 18:38:42
+    Resources -> Water: 100, Earth: 100, Sun: 100
