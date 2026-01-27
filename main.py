@@ -66,6 +66,10 @@ def recompute_tree_health(treeID):
     # Will update apperance, health status, bars, etc.
     return False
 
+def get_user_ref(request: Request):
+    """Extracts the accountReference from the session user."""
+    return request.session.get("user")
+    
 def get_user_ID(request: Request):
     """Extracts the accountID from the database based on the session user."""
     user_ref = request.session.get("user")
@@ -103,6 +107,7 @@ async def get_current_user(request: Request):
         
     return person
 
+# Checks if User is Student
 async def student_required(request: Request, user_ref: str = Depends(get_current_user)):
     """
     Checks if the authenticated user is a student.
@@ -174,14 +179,45 @@ def tree_game(student=Depends(student_required)):
 @app.get("/api/get-user-info")
 def get_user_info(request: Request, student=Depends(student_required)):
     """
-    Returns the IDs to the frontend.
-    Since student_required is a dependency, this only works if logged in.
+    Returns the IDs to the frontend, as well as tree stats.
+
+    Returns:
+        dict: {
+            "accountID": str,
+            "treeID": str,
+            "resourceLevels": dict {'water': x, 'earth': x, 'sun': x},
+            "displayName": str
+        }
     """
+    user_ID = get_user_ID(request) if student else None
+    tree = get_tree(get_user_ref(request))
+    tree_ID = tree['treeID'] if tree else None
+    resource_levels = tree['resourceLevels'] if tree else None
+
     return {
-        "accountID": get_user_ID(request),
-        "treeID": get_tree_ID(request),
+        "accountID": user_ID,
+        "treeID": tree_ID,
+        "resourceLevels": resource_levels,
         "displayName": student.get("displayName")
     }
+
+@app.post("/api/update-stat/{stat_name}")
+def update_stat(stat_name: str, value: int, request: Request, student=Depends(student_required)):
+    """
+    Updates a specific stat for the student's tree. Treats this update as an event.
+    stat_name: Name of the stat to update (e.g., "water", "earth", "sun").
+    value: New value for the stat.
+    """
+    # TODO: Implement stat update logic here.
+    return None
+
+@app.post("/api/add-question")
+def api_add_question(request: Request, student=Depends(student_required)):
+    """
+    API endpoint to add a question to the database.
+    """
+    # TODO: Implement question addition logic here.
+    return None
 
 
 
