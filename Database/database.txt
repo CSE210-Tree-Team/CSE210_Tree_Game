@@ -116,3 +116,52 @@ COLUMNS: ['studentID', 'studentLevel', 'studentStats', 'parentEmail']
 
 
 End of Database Dump.
+
+
+=================== End of Database Contents ====================
+
+
+
+=================== User Overview ===================
+
+User: Adrian (adrian) [ID: cd0698f7]
+  Email: adrian@student.edu
+  Roles: Student
+  Status: Level 1 | Stats: {"xp": 0} | Last login: 2026-01-26 18:38:42
+  Tree 26ecd00f | Health: Healthy | Growth: 0 | Updated: 2026-01-26 18:38:42
+    Resources -> Water: 100, Earth: 100, Sun: 100
+
+User: Dhaivat (dhaivat) [ID: dd08ec35]
+  Email: dhaivat@student.edu
+  Roles: Student
+  Status: Level 1 | Stats: {"xp": 0} | Last login: 2026-01-26 18:38:42
+  Tree 80ae861a | Health: Healthy | Growth: 0 | Updated: 2026-01-26 18:38:42
+    Resources -> Water: 100, Earth: 100, Sun: 100
+
+User: Cash (cash) [ID: ac4c2585]
+  Email: cash@student.edu
+  Roles: Student
+  Status: Level 1 | Stats: {"xp": 0} | Last login: 2026-01-26 18:38:42
+  Tree b0552ed6 | Health: Healthy | Growth: 0 | Updated: 2026-01-26 18:38:42
+    Resources -> Water: 100, Earth: 100, Sun: 100
+
+User: Kathy (kathy) [ID: 520590f7]
+  Email: kathy@student.edu
+  Roles: Student
+  Status: Level 1 | Stats: {"xp": 0} | Last login: 2026-01-26 18:38:42
+  Tree 3274ce23 | Health: Healthy | Growth: 0 | Updated: 2026-01-26 18:38:42
+    Resources -> Water: 100, Earth: 100, Sun: 100
+
+User: Alex (alex) [ID: 3085d123]
+  Email: alex@student.edu
+  Roles: Student
+  Status: Level 1 | Stats: {"xp": 0} | Last login: 2026-01-26 18:38:42
+  Tree 3a1ea22f | Health: Healthy | Growth: 0 | Updated: 2026-01-26 18:38:42
+    Resources -> Water: 100, Earth: 100, Sun: 100
+
+User: Stanley (stanley) [ID: 9795f9a2]
+  Email: stanley@student.edu
+  Roles: Student
+  Status: Level 1 | Stats: {"xp": 0} | Last login: 2026-01-26 18:38:42
+  Tree 574e0a1d | Health: Healthy | Growth: 0 | Updated: 2026-01-26 18:38:42
+    Resources -> Water: 100, Earth: 100, Sun: 100

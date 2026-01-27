@@ -4,7 +4,7 @@ import random
 import datetime
 from createDatabase import create_schema, DB_NAME
 
-# Pre-defined data lists for variety
+### SAMPLE INPUT TEST DATA FOR GENERATION ###
 STUDENT_NAMES = ["Adrian", "Dhaivat", "Cash", "Kathy", "Alex", "Stanley"]
 QUESTIONS = [
     ("What color is the sun?", "MCQ", "Sun", ["Yellow", "Green", "Blue"], 0),
@@ -12,6 +12,10 @@ QUESTIONS = [
     ("How do trees drink?", "FreeResponse", "Water", [], None),
     ("Select all primary colors.", "MultiSelect", "General", ["Red", "Green", "Blue", "Yellow"], [0, 2]),
 ]
+DEFAULT_HEALTH_STATUS = "Healthy"
+DEFAULT_RESOURCE_LEVEL = 100
+DEFAULT_GROWTH_STAGE = 0
+
 
 def generate_uuid():
     return str(uuid.uuid4())
@@ -22,14 +26,14 @@ def get_date_str():
 # Create a tree for a given account and return the treeID
 def create_tree(conn, cursor, owner_id):
     tree_id = generate_uuid()
-    health_status = 'Healthy'
+    health_status = DEFAULT_HEALTH_STATUS
     cursor.execute('''
         INSERT INTO Tree (treeID, ownerAccountID, health, growthStage, lastUpdated) 
         VALUES (?, ?, ?, ?, ?)
-    ''', (tree_id, owner_id, health_status, 0, get_date_str()))
+    ''', (tree_id, owner_id, health_status, DEFAULT_GROWTH_STAGE, get_date_str()))
 
     cursor.execute("INSERT INTO TreeResources (treeID, water, earth, sun) VALUES (?, ?, ?, ?)",
-                   (tree_id, 100, 100, 100))
+                   (tree_id, DEFAULT_RESOURCE_LEVEL, DEFAULT_RESOURCE_LEVEL, DEFAULT_RESOURCE_LEVEL))
     return tree_id
 
 # Creates account, makes tree for the account, and assigns them student role
