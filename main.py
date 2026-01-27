@@ -50,9 +50,9 @@ class NeedLoginException(Exception):
 async def redirect_to_login(request: Request, exc: NeedLoginException):
     return RedirectResponse(url="/login")
     
-def is_student(user_reference: str) -> bool:
+def is_student(user_ref: str) -> bool:
     """Check if the user with the given accountReference is a Student."""
-    person = get_person(user_reference)
+    person = get_person(user_ref)
     if person and 'Student' in person.get('roles', []):
         return True
     return False
@@ -67,7 +67,7 @@ def recompute_tree_health(treeID):
     return False
 
 def get_user_ref(request: Request):
-    """Extracts the accountReference from the session user."""
+    """Extracts the accountReference from the session user. This is used in the getItemsFromDatabase functions."""
     return request.session.get("user")
     
 def get_user_ID(request: Request):
@@ -184,18 +184,21 @@ def get_user_info(request: Request, student=Depends(student_required)):
     Returns:
         dict: {
             "accountID": str,
+            "userRef": str,
             "treeID": str,
             "resourceLevels": dict {'water': x, 'earth': x, 'sun': x},
             "displayName": str
         }
     """
     user_ID = get_user_ID(request) if student else None
-    tree = get_tree(get_user_ref(request))
+    user_ref = get_user_ref(request) if student else None
+    tree = get_tree(user_ref) if student else None
     tree_ID = tree['treeID'] if tree else None
     resource_levels = tree['resourceLevels'] if tree else None
 
     return {
         "accountID": user_ID,
+        "userRef": user_ref,
         "treeID": tree_ID,
         "resourceLevels": resource_levels,
         "displayName": student.get("displayName")
