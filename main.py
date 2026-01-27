@@ -9,6 +9,8 @@ import os
 
 from Database.getItemsFromDatabase import get_person, get_tree
 
+
+
 ##########################################
 #            Global Variables            #
 ##########################################
@@ -33,6 +35,7 @@ app.add_middleware(
 #     server_metadata_url=  ,
 #     client_kwargs=   ,
 # )
+
 
 
 ############################################
@@ -79,6 +82,7 @@ def get_tree_ID(request: Request):
     return tree_object['treeID'] if tree_object else None
 
 
+
 ##########################################
 #             Dependencies               #
 ##########################################
@@ -116,6 +120,7 @@ async def student_required(request: Request, user_ref: str = Depends(get_current
         )
         
     return person
+
 
 
 ############################################
@@ -160,8 +165,29 @@ def soil_game(student=Depends(student_required)):
 def tree_game(student=Depends(student_required)):
     return {"message": f"Tree Game page for {student['displayName']}"}
 
+
+
+############################################
+#               API Endpoints              #
+#############################################
+
+@app.get("/api/get-user-info")
+def get_user_info(request: Request, student=Depends(student_required)):
+    """
+    Returns the IDs to the frontend.
+    Since student_required is a dependency, this only works if logged in.
+    """
+    return {
+        "accountID": get_user_ID(request),
+        "treeID": get_tree_ID(request),
+        "displayName": student.get("displayName")
+    }
+
+
+
 ############################################
 #                  Server                  #
 ############################################
+
 if __name__ == "__main__":
     uvicorn.run(app, host="127.0.0.1", port=8000)
