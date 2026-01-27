@@ -3,7 +3,7 @@ import uuid
 import random
 import datetime
 import os
-from createDatabase import create_schema
+from Database import createDatabase
 from constants import DB_NAME
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -90,7 +90,7 @@ def add_questions(conn, cursor):
 
 def generate_data(db_path=DB_PATH):
     # Ensure schema exists first
-    create_schema(db_path=db_path)
+    createDatabase.create_schema(db_path=db_path)
     
     conn = sqlite3.connect(db_path)
     cursor = conn.cursor()

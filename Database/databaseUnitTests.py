@@ -1,8 +1,8 @@
 import unittest
 import sqlite3
 import os
-import createDatabase
-import generateTestData
+from Database import createDatabase
+from Database import generateTestData
 from constants import DB_NAME
 
 class TestGameDatabaseSystem(unittest.TestCase):

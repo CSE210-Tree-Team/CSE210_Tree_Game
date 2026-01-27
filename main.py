@@ -4,7 +4,7 @@ from starlette.middleware.sessions import SessionMiddleware
 from fastapi.responses import RedirectResponse
 from authlib.integrations.starlette_client import OAuth
 from dotenv import load_dotenv
-import dataclasses
+import dataRecords
 import os
 
 from Database.getItemsFromDatabase import get_person, get_tree
