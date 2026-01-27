@@ -3,22 +3,19 @@ import sqlite3
 import os
 import createDatabase
 import generateTestData
+from constants import DB_NAME
 
 class TestGameDatabaseSystem(unittest.TestCase):
     TEST_DB = "test_game_database.db"
 
     def setUp(self):
         """Set up a fresh database before each test."""
-        # Override DB_NAME to point to our test file
-        createDatabase.DB_NAME = self.TEST_DB
-        generateTestData.DB_NAME = self.TEST_DB
-        
         # Ensure we start with a clean slate
         if os.path.exists(self.TEST_DB):
             os.remove(self.TEST_DB)
             
         # Create the schema
-        createDatabase.create_schema()
+        createDatabase.create_schema(db_path=self.TEST_DB)
         
         # Connect for verification
         self.conn = sqlite3.connect(self.TEST_DB)

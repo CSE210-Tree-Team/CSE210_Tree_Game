@@ -1,15 +1,16 @@
-
 import uvicorn
 from fastapi import FastAPI, Request, Depends, HTTPException, status
 from starlette.middleware.sessions import SessionMiddleware
 from fastapi.responses import RedirectResponse
 from authlib.integrations.starlette_client import OAuth
 from dotenv import load_dotenv
+import dataclasses
 import os
 
 from Database.getItemsFromDatabase import get_person, get_tree
 
-
+# TODO: We should consistently be updating the 
+# last login time to ensure accuracy while student is doing stuff.
 
 ##########################################
 #            Global Variables            #

@@ -1,20 +1,23 @@
 import sqlite3
 import os
+from constants import DB_NAME
+
+
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+DB_PATH = os.path.join(BASE_DIR, DB_NAME)
 
 # Credit to Gemini for generating this script.
 # I would suggest running this with redirection to a file for easier viewing:
 # python Database/print_database.py > db_dump.txt
 
-DB_NAME = "game_database.db"
-
-def print_database_contents():
+def print_database_contents(db_path=DB_PATH):
     # Check if DB exists
-    if not os.path.exists(DB_NAME):
-        print(f"Error: Database '{DB_NAME}' not found.")
+    if not os.path.exists(db_path):
+        print(f"Error: Database '{db_path}' not found.")
         print("Please run your generation script first.")
         return
 
-    conn = sqlite3.connect(DB_NAME)
+    conn = sqlite3.connect(db_path)
     cursor = conn.cursor()
 
     # 1. Get a list of all tables in the database dynamically
@@ -26,7 +29,7 @@ def print_database_contents():
         print("Connected to database, but no tables found.")
         return
 
-    print(f"Successfully connected to {DB_NAME}\n")
+    print(f"Successfully connected to {db_path}\n")
 
     # 2. Iterate through every table and print contents
     for table_name_tuple in tables:
@@ -62,13 +65,13 @@ def print_database_contents():
     conn.close()
     print("End of Database Dump.")
 
-def print_condensed_user_info():
-    if not os.path.exists(DB_NAME):
-        print(f"Error: Database '{DB_NAME}' not found.")
+def print_condensed_user_info(db_path=DB_PATH):
+    if not os.path.exists(db_path):
+        print(f"Error: Database '{db_path}' not found.")
         print("Please run your generation script first.")
         return
 
-    conn = sqlite3.connect(DB_NAME)
+    conn = sqlite3.connect(db_path)
     cursor = conn.cursor()
 
     try:
@@ -151,8 +154,8 @@ def print_condensed_user_info():
     conn.close()
 
 if __name__ == "__main__":
-    print_database_contents()
+    print_database_contents(db_path=DB_PATH)
 
     print("\n\n=================== End of Database Contents ====================\n\n")
 
-    print_condensed_user_info()
+    print_condensed_user_info(db_path=DB_PATH)

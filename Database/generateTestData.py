@@ -2,7 +2,12 @@ import sqlite3
 import uuid
 import random
 import datetime
-from createDatabase import create_schema, DB_NAME
+import os
+from createDatabase import create_schema
+from constants import DB_NAME
+
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+DB_PATH = os.path.join(BASE_DIR, DB_NAME)
 
 ### SAMPLE INPUT TEST DATA FOR GENERATION ###
 STUDENT_NAMES = ["Adrian", "Dhaivat", "Cash", "Kathy", "Alex", "Stanley"]
@@ -83,11 +88,11 @@ def add_questions(conn, cursor):
                 cursor.execute("INSERT INTO QuestionChoice (choiceID, questionID, text, isCorrect) VALUES (?, ?, ?, ?)",
                                (generate_uuid(), q_id, choice_text, is_correct))
 
-def generate_data():
+def generate_data(db_path=DB_PATH):
     # Ensure schema exists first
-    create_schema()
+    create_schema(db_path=db_path)
     
-    conn = sqlite3.connect(DB_NAME)
+    conn = sqlite3.connect(db_path)
     cursor = conn.cursor()
     cursor.execute("PRAGMA foreign_keys = ON;")
 
@@ -102,4 +107,4 @@ def generate_data():
     print("Data generation complete.")
 
 if __name__ == "__main__":
-    generate_data()
+    generate_data(db_path=DB_PATH)

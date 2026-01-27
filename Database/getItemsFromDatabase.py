@@ -1,16 +1,19 @@
 import sqlite3
 import os
+from constants import DB_NAME
 
-DB_NAME = "game_database.db"
+
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+DB_PATH = os.path.join(BASE_DIR, DB_NAME)
 
 def _query(sql, params=(), fetchone=False):
     """Internal helper to handle database connections and clean up. 
        Used Gemini to help refactor into this query function"""
 
-    if not os.path.exists(DB_NAME):
+    if not os.path.exists(DB_PATH):
         return None
     
-    with sqlite3.connect(DB_NAME) as conn:
+    with sqlite3.connect(DB_PATH) as conn:
         conn.row_factory = sqlite3.Row
         cursor = conn.cursor()
         cursor.execute(sql, params)
