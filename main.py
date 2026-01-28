@@ -136,18 +136,18 @@ def default_page():
     if os.path.exists(index_path):
         return FileResponse(index_path)
 
-@app.get("/api/auth/callback")
-async def auth_callback(request: Request):
-    """Handle Auth0 callback and store user info in session."""
-    token = await oauth.auth0.authorize_access_token(request)
-    user_info = token.get('userinfo')
+# @app.get("/api/auth/callback")
+# async def auth_callback(request: Request):
+#     """Handle Auth0 callback and store user info in session."""
+#     token = await oauth.auth0.authorize_access_token(request)
+#     user_info = token.get('userinfo')
     
-    if user_info:
-        # Store user reference (email or sub) in session
-        request.session["user"] = user_info.get("email") or user_info.get("sub")
-        request.session["user_info"] = dict(user_info)
+#     if user_info:
+#         # Store user reference (email or sub) in session
+#         request.session["user"] = user_info.get("email") or user_info.get("sub")
+#         request.session["user_info"] = dict(user_info)
     
-    return RedirectResponse(url="/")
+#     return RedirectResponse(url="/")
 
 @app.post("/api/auth/verify")
 async def verify_auth(request: Request):
@@ -189,28 +189,28 @@ async def verify_auth(request: Request):
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
 
-@app.get("/api/auth/login")
-async def login(request: Request):
-    """Initiate Auth0 login."""
-    redirect_uri = request.url_for('auth_callback')
-    return await oauth.auth0.authorize_redirect(request, redirect_uri)
+# @app.get("/api/auth/login")
+# async def login(request: Request):
+#     """Initiate Auth0 login."""
+#     redirect_uri = request.url_for('auth_callback')
+#     return await oauth.auth0.authorize_redirect(request, redirect_uri)
 
-@app.get("/api/auth/logout")
-async def logout(request: Request):
-    """Clear session and logout."""
-    request.session.clear()
-    return RedirectResponse(url="/")
+# @app.get("/api/auth/logout")
+# async def logout(request: Request):
+#     """Clear session and logout."""
+#     request.session.clear()
+#     return RedirectResponse(url="/")
 
-@app.get("/api/auth/session")
-async def get_session(request: Request):
-    """Check if user is authenticated and return session info."""
-    user_ref = request.session.get("user")
-    if user_ref:
-        return {
-            "authenticated": True,
-            "user": request.session.get("user_info", {})
-        }
-    return {"authenticated": False}
+# @app.get("/api/auth/session")
+# async def get_session(request: Request):
+#     """Check if user is authenticated and return session info."""
+#     user_ref = request.session.get("user")
+#     if user_ref:
+#         return {
+#             "authenticated": True,
+#             "user": request.session.get("user_info", {})
+#         }
+#     return {"authenticated": False}
 
 @app.get("/manageAccount")
 def manage_account(account=Depends(get_current_user)):
@@ -222,7 +222,7 @@ def soil_game(student=Depends(student_required)):
 
 @app.get("/rainGame")
 def tree_game(student=Depends(student_required)):
-    return {"message": f"Tree Game page for {student['displayName']}"}
+    return {"message": f"Rain Game page for {student['displayName']}"}
 
 
 
