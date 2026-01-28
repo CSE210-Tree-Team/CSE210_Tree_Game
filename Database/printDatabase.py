@@ -75,7 +75,7 @@ def print_condensed_user_info(db_path=DB_PATH):
     cursor = conn.cursor()
 
     try:
-        cursor.execute("SELECT accountID, username, displayName, email, lastLogin FROM Account")
+        cursor.execute("SELECT username, displayName, email, lastLogin FROM Account")
         accounts = cursor.fetchall()
     except sqlite3.OperationalError as e:
         print(f"Unable to read Account table: {e}")
@@ -87,19 +87,18 @@ def print_condensed_user_info(db_path=DB_PATH):
         conn.close()
         return
 
-    cursor.execute("SELECT accountID, role FROM AccountRole")
+    cursor.execute("SELECT username, role FROM AccountRole")
     roles = cursor.fetchall()
     role_map = {}
-    for account_id, role in roles:
-        role_map.setdefault(account_id, []).append(role)
-
-    cursor.execute("SELECT studentID, studentLevel, studentStats FROM StudentDetails")
+    for username, role in roles:
+        role_map.setdefault(username, []).append(role)
+    cursor.execute("SELECT studentUsername, studentLevel, studentStats FROM StudentDetails")
     student_rows = cursor.fetchall()
-    student_map = {student_id: (level, stats) for student_id, level, stats in student_rows}
+    student_map = {student_username: (level, stats) for student_username, level, stats in student_rows}
 
     cursor.execute(
         """
-        SELECT t.ownerAccountID, t.treeID, t.health, t.growthStage, t.lastUpdated,
+        SELECT t.ownerUsername, t.treeID, t.health, t.growthStage, t.lastUpdated,
                COALESCE(r.water, 0), COALESCE(r.earth, 0), COALESCE(r.sun, 0)
         FROM Tree t
         LEFT JOIN TreeResources r ON t.treeID = r.treeID
@@ -107,8 +106,8 @@ def print_condensed_user_info(db_path=DB_PATH):
     )
     tree_rows = cursor.fetchall()
     tree_map = {}
-    for owner_id, tree_id, health, growth, updated, water, earth, sun in tree_rows:
-        tree_map.setdefault(owner_id, []).append({
+    for owner_username, tree_id, health, growth, updated, water, earth, sun in tree_rows:
+        tree_map.setdefault(owner_username, []).append({
             "tree_id": tree_id,
             "health": health,
             "growth": growth,
@@ -119,13 +118,13 @@ def print_condensed_user_info(db_path=DB_PATH):
         })
 
     print("\n=================== User Overview ===================")
-    for account_id, username, display_name, email, last_login in accounts:
-        friendly_id = account_id[:8]
+    for username, display_name, email, last_login in accounts:
+        friendly_id = username[:8]
         name = display_name or "(no display name)"
-        user_roles = ", ".join(role_map.get(account_id, ["(no role)"]))
+        user_roles = ", ".join(role_map.get(username, ["(no role)"]))
         status_parts = []
-        if account_id in student_map:
-            level, stats = student_map[account_id]
+        if username in student_map:
+            level, stats = student_map[username]
             status_parts.append(f"Level {level}")
             if stats:
                 status_parts.append(f"Stats: {stats}")
@@ -138,7 +137,7 @@ def print_condensed_user_info(db_path=DB_PATH):
         print(f"  Roles: {user_roles}")
         print(f"  Status: {status}")
 
-        trees = tree_map.get(account_id, [])
+        trees = tree_map.get(username, [])
         if not trees:
             print("  Tree: None assigned")
         else:

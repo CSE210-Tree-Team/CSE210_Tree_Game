@@ -6,22 +6,25 @@ from fastapi.responses import FileResponse, RedirectResponse
 from starlette.middleware.sessions import SessionMiddleware
 from dotenv import load_dotenv
 from Database.getItemsFromDatabase import get_person, get_tree
-from Database.addItemsToDatabase import new_account
+from Database.addItemsToDatabase import add_account, generate_tree
 from constants import ROLE_STUDENT
+from dataRecords import Tree, Event
+
+
+############################################
+#               App Setup                  #
+############################################
 
 load_dotenv()
-
 app = FastAPI()
-
 MIDDLEWARE_SECRET_KEY = os.getenv("MIDDLEWARE_SECRET_KEY")
-
 app.add_middleware(SessionMiddleware, secret_key=MIDDLEWARE_SECRET_KEY)
 
 # --- Static File Serving ---
 if os.path.exists("Home Page/dist"):
     app.mount("/assets", StaticFiles(directory="Home Page/dist/assets"), name="static")
 
-
+# TODO: Need to fix log out process so that session is properly cleared.
 
 
 ############################################
@@ -36,9 +39,9 @@ class NeedLoginException(Exception):
 async def redirect_to_login(request: Request, exc: NeedLoginException):
     return RedirectResponse(url="/?autoLogin=true")
     
-def is_student(user_ref: str) -> bool:
-    """Check if the user with the given accountReference is a Student."""
-    person = get_person(user_ref)
+def is_student(username: str) -> bool:
+    """Check if the user with the given username is a Student."""
+    person = get_person(username)
     if person and 'Student' in person.get('roles', []):
         return True
     return False
@@ -51,26 +54,39 @@ def recompute_tree_health(treeID):
     # TODO: Implement tree health recomputation logic here.
     # Will update apperance, health status, bars, etc.
     return False
-
-def get_user_ref(request: Request):
-    """Extracts the accountReference from the session user. This is used in the getItemsFromDatabase functions."""
-    return request.session.get("user")
     
-def get_user_ID(request: Request):
-    """Extracts the accountID from the database based on the session user."""
-    user_ref = request.session.get("user")
-    if not user_ref:
-        return None
-    person = get_person(user_ref)
-    return person.get('accountID') if person else None
+def get_username(request: Request):
+    """Extracts the username from the session."""
+    return request.session.get("user")
 
 def get_tree_ID(request: Request):
     """Retrieves the treeID for the currently logged-in user."""
-    user_ref = request.session.get("user")
-    tree_object = get_tree(user_ref)
+    username = request.session.get("user")
+    tree_object = get_tree(username)
     
     return tree_object['treeID'] if tree_object else None
 
+def create_account(username: str, user_data: dict):
+    # Create new student account
+    try:
+        output_username = add_account(
+            username=username,
+            email=user_data.get("email", ""),
+            passwordHash="auth0",  # Not used for Auth0 users
+            displayName=user_data.get("name", user_data.get("nickname", "Student")),
+            accountReference=user_data.get("nickname", user_data.get("email", "user")),
+            dateOfBirth="2000-01-01",  # Default date  # TODO: Get DOB from user later
+            role=ROLE_STUDENT
+        )
+
+        output_tree_id = generate_tree(username)
+
+        print(f"Created new account for {username} with tree ID {output_tree_id}")
+
+        
+    except Exception as e:
+        print(f"Error creating account: {e}")
+        raise HTTPException(status_code=500, detail="Failed to create account")
 
 
 ##########################################
@@ -80,14 +96,14 @@ def get_tree_ID(request: Request):
 # Checks if User is Authenticated
 async def get_current_user(request: Request):
     """
-    Checks your session/cookie/token for the user reference.
+    Checks your session/cookie/token for the username.
     """
-    user_ref = request.session.get("user")
+    username = request.session.get("user")
     
-    if not user_ref:
+    if not username:
         raise NeedLoginException()
 
-    person = get_person(user_ref)
+    person = get_person(username)
     if not person or 'Student' not in person.get('roles', []):
         raise HTTPException(status_code=403, detail="Student role required")
         
@@ -122,46 +138,6 @@ def default_page():
     if os.path.exists(index_path):
         return FileResponse(index_path)
 
-@app.post("/api/auth/verify")
-async def verify_auth(request: Request):
-    """Verify Auth0 token and establish backend session."""
-    try:
-        data = await request.json()
-        user_data = data.get('user', {})
-        
-        if user_data:
-            # Get user reference (email or sub)
-            user_ref = user_data.get("email") or user_data.get("sub")
-            
-            # Check if user exists in database
-            person = get_person(user_ref)
-            
-            if not person:
-                # Create new student account
-                try:
-                    new_account(
-                        username=user_data.get("nickname", user_data.get("email", "user")),
-                        email=user_data.get("email", ""),
-                        passwordHash="auth0",  # Not used for Auth0 users
-                        displayName=user_data.get("name", user_data.get("nickname", "Student")),
-                        accountReference=user_ref,
-                        dateOfBirth="2000-01-01",  # Default date
-                        role=ROLE_STUDENT
-                    )
-                except Exception as e:
-                    print(f"Error creating account: {e}")
-                    raise HTTPException(status_code=500, detail="Failed to create account")
-            
-            # Store user reference in session
-            request.session["user"] = user_ref
-            request.session["user_info"] = user_data
-            
-            return {"success": True, "message": "Session established"}
-        
-        return {"success": False, "message": "No user data provided"}
-    except Exception as e:
-        raise HTTPException(status_code=400, detail=str(e))
-
 @app.get("/manageAccount")
 def manage_account(account=Depends(get_current_user)):
     return {"message": f"Manage account page for {account['displayName']}"}
@@ -180,6 +156,35 @@ def tree_game(student=Depends(student_required)):
 #               API Endpoints              #
 #############################################
 
+@app.post("/api/auth/verify")
+async def verify_auth(request: Request):
+    """Verify Auth0 token and establish backend session."""
+    try:
+        data = await request.json()
+        user_data = data.get('user', {})
+
+        print(f"Auth0 user data received: {user_data}")
+        
+        if user_data:
+            # Get username (email or sub) # NOTE: sub is the unique Auth0 user ID
+            username = user_data.get("email") or user_data.get("sub")
+            
+            # Check if user exists in database
+            person = get_person(username)
+            
+            if not person:
+                create_account(username = username, user_data = user_data)
+            
+            # Store username in session
+            request.session["user"] = username
+            request.session["user_info"] = user_data
+            
+            return {"success": True, "message": "Session established"}
+        
+        return {"success": False, "message": "No user data provided"}
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
 @app.get("/api/get-user-info")
 def get_user_info(request: Request, student=Depends(student_required)):
     """
@@ -187,22 +192,19 @@ def get_user_info(request: Request, student=Depends(student_required)):
 
     Returns:
         dict: {
-            "accountID": str,
-            "userRef": str,
+            "username": str,
             "treeID": str,
             "resourceLevels": dict {'water': x, 'earth': x, 'sun': x},
             "displayName": str
         }
     """
-    user_ID = get_user_ID(request) if student else None
-    user_ref = get_user_ref(request) if student else None
-    tree = get_tree(user_ref) if student else None
+    username = get_username(request) if student else None
+    tree = get_tree(username) if student else None
     tree_ID = tree['treeID'] if tree else None
     resource_levels = tree['resourceLevels'] if tree else None
 
     return {
-        "accountID": user_ID,
-        "userRef": user_ref,
+        "username": username,
         "treeID": tree_ID,
         "resourceLevels": resource_levels,
         "displayName": student.get("displayName")

@@ -1,8 +1,21 @@
 import { useAuth0 } from '@auth0/auth0-react';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
+
+interface UserInfo {
+    username: string;
+    treeID: string;
+    resourceLevels: {
+        water: number;
+        earth: number;
+        sun: number;
+    };
+    displayName: string;
+}
 
 export const Homepage = () => {
     const { user, logout, getAccessTokenSilently } = useAuth0();
+    const [userInfo, setUserInfo] = useState<UserInfo | null>(null);
+    const [showResources, setShowResources] = useState(false);
 
     useEffect(() => {
         // Establish backend session after Auth0 login
@@ -17,6 +30,13 @@ export const Homepage = () => {
                     },
                     body: JSON.stringify({ user })
                 });
+                
+                // Fetch user info including resource levels
+                const response = await fetch('/api/get-user-info');
+                if (response.ok) {
+                    const data = await response.json();
+                    setUserInfo(data);
+                }
             } catch (error) {
                 console.error('Failed to establish backend session:', error);
             }
@@ -59,6 +79,20 @@ export const Homepage = () => {
                 <button onClick={handleLogout}>
                     Logout
                 </button>
+            </div>
+
+            <div>
+                <button onClick={() => setShowResources(!showResources)}>
+                    {showResources ? 'Hide' : 'Show'} Resource Levels
+                </button>
+                {showResources && userInfo && (
+                    <div style={{ marginTop: '10px', padding: '10px', border: '1px solid #ccc' }}>
+                        <h3>Resource Levels:</h3>
+                        <p>Water: {userInfo.resourceLevels.water}</p>
+                        <p>Earth: {userInfo.resourceLevels.earth}</p>
+                        <p>Sun: {userInfo.resourceLevels.sun}</p>
+                    </div>
+                )}
             </div>
         </div>
     );

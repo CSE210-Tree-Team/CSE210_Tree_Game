@@ -42,18 +42,18 @@ class TestGameDatabaseSystem(unittest.TestCase):
         # Attempt to insert a Tree for an account that doesn't exist
         with self.assertRaises(sqlite3.IntegrityError):
             self.cursor.execute('''
-                INSERT INTO Tree (treeID, ownerAccountID, health) 
+                INSERT INTO Tree (treeID, ownerUsername, health) 
                 VALUES ('tree123', 'non_existent_user', 'Healthy')
             ''')
 
     def test_check_constraints(self):
         """Ensure CHECK constraints (enums) are working."""
         # Create a valid account first
-        self.cursor.execute("INSERT INTO Account (accountID, username, email, passwordHash) VALUES ('1', 'u', 'e', 'p')")
+        self.cursor.execute("INSERT INTO Account (username, email, passwordHash) VALUES ('u', 'e', 'p')")
         
         # Try to insert an invalid role
         with self.assertRaises(sqlite3.IntegrityError):
-            self.cursor.execute("INSERT INTO AccountRole (accountID, role) VALUES ('1', 'Admin')")
+            self.cursor.execute("INSERT INTO AccountRole (username, role) VALUES ('u', 'Admin')")
 
     ## --- Tests for generateTestData.py ---
 
@@ -68,7 +68,7 @@ class TestGameDatabaseSystem(unittest.TestCase):
         # Check if the tree was automatically created
         self.cursor.execute('''
             SELECT T.treeID FROM Tree T 
-            JOIN Account A ON T.ownerAccountID = A.accountID 
+            JOIN Account A ON T.ownerUsername = A.username 
             WHERE A.username='adrian'
         ''')
         self.assertIsNotNone(self.cursor.fetchone(), "Adrian should have a tree.")
@@ -92,7 +92,7 @@ class TestGameDatabaseSystem(unittest.TestCase):
         """Verify that create_tree sets resources to 100."""
         
         acc_id = "test_acc"
-        self.cursor.execute("INSERT INTO Account (accountID, username, email, passwordHash) VALUES (?, 't', 'e', 'p')", (acc_id,))
+        self.cursor.execute("INSERT INTO Account (username, email, passwordHash) VALUES (?, 'e', 'p')", (acc_id,))
         tree_id = generateTestData.create_tree(self.conn, self.cursor, acc_id)
         
         self.cursor.execute("SELECT water, earth, sun FROM TreeResources WHERE treeID=?", (tree_id,))

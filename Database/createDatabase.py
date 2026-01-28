@@ -2,7 +2,7 @@ import sqlite3
 import os
 from constants import (
     DB_NAME, ROLE_STUDENT, ROLE_TEACHER, HEALTH_DEAD, HEALTH_WITHERED,
-    HEALTH_UNHEALTHY, HEALTH_HEALTHY, EVENT_DECAY, EVENT_BONUS, EVENT_PENALTY,
+    HEALTH_UNHEALTHY, HEALTH_HEALTHY, EVENT_LEVEL, EVENT_BONUS, EVENT_PENALTY, EVENT_NEUTRAL,
     RESOURCE_WATER, RESOURCE_EARTH, RESOURCE_SUN, RESOURCE_NONE, RESOURCE_ALL,
     QUESTION_MCQ, QUESTION_FREE_RESPONSE, QUESTION_MULTI_SELECT,
     QUESTION_RESOURCE_WATER, QUESTION_RESOURCE_EARTH, QUESTION_RESOURCE_SUN, QUESTION_RESOURCE_GENERAL, QUESTION_RESOURCE_NONE
@@ -25,8 +25,7 @@ def create_schema(db_path=DB_PATH):
     # Account Table
     cursor.execute('''
     CREATE TABLE IF NOT EXISTS Account (
-        accountID TEXT PRIMARY KEY,
-        username TEXT UNIQUE NOT NULL,
+        username TEXT PRIMARY KEY,
         email TEXT NOT NULL,
         passwordHash TEXT NOT NULL,
         displayName TEXT,
@@ -37,14 +36,14 @@ def create_schema(db_path=DB_PATH):
     ''')
 
     # AccountRole Table
-    # Constraint: accountID is unique here, effectively making this 1:1 or 1:Many restricted by PK
+    # Constraint: username is unique here, effectively making this 1:1 or 1:Many restricted by PK
     # role can only be 'Student' or 'Teacher'
     cursor.execute(f'''
     CREATE TABLE IF NOT EXISTS AccountRole (
-        accountID TEXT NOT NULL,
+        username TEXT NOT NULL,
         role TEXT NOT NULL CHECK(role IN ('{ROLE_STUDENT}', '{ROLE_TEACHER}')),
-        PRIMARY KEY (accountID, role),
-        FOREIGN KEY (accountID) REFERENCES Account(accountID) ON DELETE CASCADE
+        PRIMARY KEY (username, role),
+        FOREIGN KEY (username) REFERENCES Account(username) ON DELETE CASCADE
     )
     ''')
 
@@ -54,11 +53,11 @@ def create_schema(db_path=DB_PATH):
     cursor.execute(f'''
     CREATE TABLE IF NOT EXISTS Tree (
         treeID TEXT PRIMARY KEY,
-        ownerAccountID TEXT NOT NULL,
+        ownerUsername TEXT NOT NULL,
         health TEXT NOT NULL CHECK(health IN ('{HEALTH_DEAD}', '{HEALTH_WITHERED}', '{HEALTH_UNHEALTHY}', '{HEALTH_HEALTHY}')),
         growthStage INTEGER DEFAULT 0,
         lastUpdated TEXT,
-        FOREIGN KEY (ownerAccountID) REFERENCES Account(accountID) ON DELETE CASCADE
+        FOREIGN KEY (ownerUsername) REFERENCES Account(username) ON DELETE CASCADE
     )
     ''')
 
@@ -85,12 +84,12 @@ def create_schema(db_path=DB_PATH):
     ''')
 
     # Event Table
-    # eventType can only be 'Decay', 'Bonus', 'Penalty'
+    # eventType can only be 'Level', 'Bonus', 'Penalty', 'Neutral'
     # resourceAffected can be 'Water', 'Earth', 'Sun', 'None', 'All'
     cursor.execute(f'''
     CREATE TABLE IF NOT EXISTS Event (
         eventID TEXT PRIMARY KEY,
-        eventType TEXT NOT NULL CHECK(eventType IN ('{EVENT_DECAY}', '{EVENT_BONUS}', '{EVENT_PENALTY}')),
+        eventType TEXT NOT NULL CHECK(eventType IN ('{EVENT_LEVEL}', '{EVENT_BONUS}', '{EVENT_PENALTY}', '{EVENT_NEUTRAL}')),
         resourceAffected TEXT CHECK(resourceAffected IN ('{RESOURCE_WATER}', '{RESOURCE_EARTH}', '{RESOURCE_SUN}', '{RESOURCE_NONE}', '{RESOURCE_ALL}')),
         description TEXT,
         percentChange INTEGER,
@@ -106,20 +105,20 @@ def create_schema(db_path=DB_PATH):
         classID TEXT PRIMARY KEY,
         className TEXT NOT NULL,
         classLevel INTEGER,
-        teacherID TEXT NOT NULL,
+        teacherUsername TEXT NOT NULL,
         active INTEGER DEFAULT 1 CHECK(active IN (0, 1)), -- Boolean (0 or 1)
         levelPolicy INTEGER DEFAULT 0 CHECK(levelPolicy IN (0, 1)), -- Boolean
-        FOREIGN KEY (teacherID) REFERENCES Account(accountID)
+        FOREIGN KEY (teacherUsername) REFERENCES Account(username)
     )
     ''')
 
     # Enrollment Table
     cursor.execute('''
     CREATE TABLE IF NOT EXISTS Enrollment (
-        accountID TEXT NOT NULL,
+        username TEXT NOT NULL,
         classID TEXT NOT NULL,
-        PRIMARY KEY (accountID, classID),
-        FOREIGN KEY (accountID) REFERENCES Account(accountID) ON DELETE CASCADE,
+        PRIMARY KEY (username, classID),
+        FOREIGN KEY (username) REFERENCES Account(username) ON DELETE CASCADE,
         FOREIGN KEY (classID) REFERENCES Class(classID) ON DELETE CASCADE
     )
     ''')
@@ -165,12 +164,12 @@ def create_schema(db_path=DB_PATH):
     cursor.execute('''
     CREATE TABLE IF NOT EXISTS QuestionAttempt (
         attemptID TEXT PRIMARY KEY,
-        accountID TEXT NOT NULL,
+        username TEXT NOT NULL,
         questionID TEXT NOT NULL,
         isCorrect INTEGER DEFAULT 0 CHECK(isCorrect IN (0, 1)), -- Boolean
         resourceAwarded TEXT CHECK(resourceAwarded IN ('Water', 'Earth', 'Sun', 'None')),
         timestamp TEXT,
-        FOREIGN KEY (accountID) REFERENCES Account(accountID) ON DELETE CASCADE,
+        FOREIGN KEY (username) REFERENCES Account(username) ON DELETE CASCADE,
         FOREIGN KEY (questionID) REFERENCES Question(questionID)
     )
     ''')
@@ -178,11 +177,11 @@ def create_schema(db_path=DB_PATH):
     # StudentDetails Table
     cursor.execute('''
     CREATE TABLE IF NOT EXISTS StudentDetails (
-        studentID TEXT PRIMARY KEY,
+        studentUsername TEXT PRIMARY KEY,
         studentLevel INTEGER,
         studentStats TEXT, -- JSON
         parentEmail TEXT,
-        FOREIGN KEY (studentID) REFERENCES Account(accountID) ON DELETE CASCADE
+        FOREIGN KEY (studentUsername) REFERENCES Account(username) ON DELETE CASCADE
     )
     ''')
 

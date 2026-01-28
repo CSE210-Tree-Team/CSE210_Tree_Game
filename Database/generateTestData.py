@@ -29,13 +29,13 @@ def get_date_str():
     return datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
 # Create a tree for a given account and return the treeID
-def create_tree(conn, cursor, owner_id):
+def create_tree(conn, cursor, username):
     tree_id = generate_uuid()
     health_status = DEFAULT_HEALTH_STATUS
     cursor.execute('''
-        INSERT INTO Tree (treeID, ownerAccountID, health, growthStage, lastUpdated) 
+        INSERT INTO Tree (treeID, ownerUsername, health, growthStage, lastUpdated) 
         VALUES (?, ?, ?, ?, ?)
-    ''', (tree_id, owner_id, health_status, DEFAULT_GROWTH_STAGE, get_date_str()))
+    ''', (tree_id, username, health_status, DEFAULT_GROWTH_STAGE, get_date_str()))
 
     cursor.execute("INSERT INTO TreeResources (treeID, water, earth, sun) VALUES (?, ?, ?, ?)",
                    (tree_id, DEFAULT_RESOURCE_LEVEL, DEFAULT_RESOURCE_LEVEL, DEFAULT_RESOURCE_LEVEL))
@@ -49,19 +49,19 @@ def add_students(conn, cursor):
         
         # Create Account
         cursor.execute('''
-            INSERT INTO Account (accountID, username, email, passwordHash, displayName, dateOfBirth, lastLogin) 
-            VALUES (?, ?, ?, ?, ?, ?, ?)
-        ''', (s_id, username, f"{username}@student.edu", "pass123", name, "2010-01-01", get_date_str()))
+            INSERT INTO Account (username, email, passwordHash, displayName, dateOfBirth, lastLogin) 
+            VALUES (?, ?, ?, ?, ?, ?)
+        ''', (username, f"{username}@student.edu", "pass123", name, "2010-01-01", get_date_str()))
         
         # Assign Role
-        cursor.execute("INSERT INTO AccountRole (accountID, role) VALUES (?, ?)", (s_id, 'Student'))
+        cursor.execute("INSERT INTO AccountRole (username, role) VALUES (?, ?)", (username, 'Student'))
 
         # Student Details
-        cursor.execute("INSERT INTO StudentDetails (studentID, studentLevel, studentStats) VALUES (?, ?, ?)",
-                       (s_id, 1, '{"xp": 0}'))
+        cursor.execute("INSERT INTO StudentDetails (studentUsername, studentLevel, studentStats) VALUES (?, ?, ?)",
+                       (username, 1, '{"xp": 0}'))
                        
         # Create a Tree for the account.
-        tree_id = create_tree(conn, cursor, s_id)
+        tree_id = create_tree(conn, cursor, username)
 
 # Create questions in the database
 def add_questions(conn, cursor):

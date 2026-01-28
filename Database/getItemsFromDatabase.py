@@ -22,18 +22,17 @@ def _query(sql, params=(), fetchone=False):
             return dict(res) if res else None
         return [dict(row) for row in cursor.fetchall()]
 
-def get_person(account_reference):
+def get_person(username):
     """
-    Retrieve user information by accountReference (user identifier).
+    Retrieve user information by username (user identifier).
     Returns a joined result of Account and AccountRole tables.
 
     Args:
-        account_reference (str): The accountReference value to look up
+        username (str): The username value to look up
 
     Returns:
         dict: Contains account info and list of roles, or None if not found
         Example: {
-            'accountID': '...',
             'username': '...',
             'email': '...',
             'displayName': '...',
@@ -45,8 +44,8 @@ def get_person(account_reference):
     """
 
     account = _query(
-        "SELECT * FROM Account WHERE accountReference = ?", 
-        (account_reference,), 
+        "SELECT * FROM Account WHERE username = ?", 
+        (username,),
         fetchone=True
     )
     
@@ -55,8 +54,8 @@ def get_person(account_reference):
 
     # Get all roles for this account
     roles_rows = _query(
-        "SELECT role FROM AccountRole WHERE accountID = ?", 
-        (account['accountID'],)
+        "SELECT role FROM AccountRole WHERE username = ?", 
+        (account['username'],)
     )
     account['roles'] = [r['role'] for r in roles_rows]
     
@@ -64,18 +63,18 @@ def get_person(account_reference):
     account.pop('passwordHash', None)
     return account
 
-def get_tree(account_reference):
+def get_tree(username):
     """
-    Retrieve tree information for a given user by accountReference.
+    Retrieve tree information for a given user by username.
 
     Args:
-        account_reference (str): The accountReference value to look up.
+        username (str): The username value to look up.
 
     Returns:
         dict: Tree information or None if not found.
         Example: {
             'treeID': '...',
-            'ownerAccountID': '...',
+            'ownerUsername': '...',
             'health': 'Healthy',   -- One of 'Dead', 'Withered', 'Unhealthy', 'Healthy'
             'growthStage': 0,      -- Integer representing growth stage. Currently unspecified meaning.
             'lastUpdated': '...'
@@ -89,8 +88,8 @@ def get_tree(account_reference):
     """
 
     account = _query(
-        "SELECT accountID FROM Account WHERE accountReference = ?", 
-        (account_reference,), 
+        "SELECT username FROM Account WHERE username = ?", 
+        (username,), 
         fetchone=True
     )
     if not account:
@@ -101,9 +100,9 @@ def get_tree(account_reference):
         SELECT t.*, r.water, r.earth, r.sun 
         FROM Tree t
         LEFT JOIN TreeResources r ON t.treeID = r.treeID
-        WHERE t.ownerAccountID = ?
+        WHERE t.ownerUsername = ?
         """,
-        (account['accountID'],),
+        (account['username'],),
         fetchone=True
     )
 

@@ -6,9 +6,10 @@ from constants import (
     HEALTH_HEALTHY, VALID_HEALTH_STATUSES,
     RESOURCE_WATER, RESOURCE_EARTH, RESOURCE_SUN,
     VALID_QUESTION_TYPES, VALID_QUESTION_RESOURCE_TYPES,
-    ATTEMPT_RESOURCE_NONE
+    ATTEMPT_RESOURCE_NONE, EVENT_LEVEL, EVENT_BONUS, EVENT_PENALTY, EVENT_NEUTRAL
 )
 import dataRecords as dataclasses
+import uuid
 
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -28,7 +29,7 @@ def _execute(sql, params=(), commit=True):
         return cursor.lastrowid
 
 
-def new_account(username: str, email: str, passwordHash: str, displayName: str, 
+def add_account(username: str, email: str, passwordHash: str, displayName: str, 
                 accountReference: str, dateOfBirth: str, role: str) -> str:
     """
     Create a new account in the database.
@@ -43,7 +44,7 @@ def new_account(username: str, email: str, passwordHash: str, displayName: str,
         role: User role ('Student' or 'Teacher')
     
     Returns:
-        str: The generated accountID
+        str: The username
     
     Raises:
         ValueError: If role is invalid or required fields are missing
@@ -55,29 +56,25 @@ def new_account(username: str, email: str, passwordHash: str, displayName: str,
     if not all([username, email, passwordHash, accountReference]):
         raise ValueError("username, email, passwordHash, and accountReference are required")
     
-    # Generate unique accountID. Keeping it readable for now; may want to switch over to UUIDs, like in generateTestData.py
-    # TODO: UUIDs
-    accountID = f"acc_{accountReference}_{datetime.now().timestamp()}"
-    
     sql = '''
-        INSERT INTO Account (accountID, username, email, passwordHash, displayName, accountReference, dateOfBirth, lastLogin)
-        VALUES (?, ?, ?, ?, ?, ?, ?, NULL)
+        INSERT INTO Account (username, email, passwordHash, displayName, accountReference, dateOfBirth, lastLogin)
+        VALUES (?, ?, ?, ?, ?, ?, NULL)
     '''
     
-    _execute(sql, (accountID, username, email, passwordHash, displayName, accountReference, dateOfBirth))
+    _execute(sql, (username, email, passwordHash, displayName, accountReference, dateOfBirth))
     
     # Add the role
-    add_role(accountID, role)
+    add_role(username, role)
     
-    return accountID
+    return username
 
 
-def add_role(account_ID: str, role: str):
+def add_role(username: str, role: str):
     """
     Add a role to an existing account. An account can have multiple roles (Student, Teacher).
     
     Args:
-        account_ID: The accountID to add the role to
+        username: The username to add the role to
         role: The role to add ('Student' or 'Teacher')
     
     Raises:
@@ -88,11 +85,11 @@ def add_role(account_ID: str, role: str):
         raise ValueError(f"Invalid role '{role}'. Must be one of {VALID_ROLES}")
     
     sql = '''
-        INSERT INTO AccountRole (accountID, role)
+        INSERT INTO AccountRole (username, role)
         VALUES (?, ?)
     '''
     
-    _execute(sql, (account_ID, role))
+    _execute(sql, (username, role))
 
 
 def add_question(question_id: str, text: str, question_type: str, difficulty: int = None, 
@@ -158,7 +155,6 @@ def do_event(tree_ID: str, event: dataclasses.Event, value: int):
     Raises:
         ValueError: If the event resource is invalid
     """
-    from constants import EVENT_DECAY, EVENT_BONUS, EVENT_PENALTY
     
     # Determine which resources to update
     if event.resourceAffected == "All":
@@ -169,9 +165,7 @@ def do_event(tree_ID: str, event: dataclasses.Event, value: int):
         resources = [event.resourceAffected]
     
     # Calculate the change amount
-    if event.eventType == EVENT_DECAY:
-        change = -(abs(value))
-    elif event.eventType == EVENT_BONUS:
+    if event.eventType == EVENT_BONUS:
         change = abs(value)
     elif event.eventType == EVENT_PENALTY:
         change = -(abs(value))
@@ -233,12 +227,12 @@ def update_health(tree_ID: str, health_status: str):
     _execute(sql, (health_status, datetime.now().isoformat(), tree_ID))
 
 
-def update_account(account_ID: str, display_name: str = None, email: str = None):
+def update_account(username: str, display_name: str = None, email: str = None):
     """
     Update account information.
     
     Args:
-        account_ID: The account to update
+        username: The account to update
         display_name: New display name (optional)
         email: New email (optional)
     """
@@ -256,39 +250,39 @@ def update_account(account_ID: str, display_name: str = None, email: str = None)
     if not updates:
         return  # Nothing to update
     
-    params.append(account_ID)
+    params.append(username)
     
     sql = f'''
         UPDATE Account
         SET {', '.join(updates)}
-        WHERE accountID = ?
+        WHERE username = ?
     '''
     
     _execute(sql, params)
 
 
-def update_last_login(account_ID: str):
+def update_last_login(username: str):
     """
     Update the last login timestamp for an account.
     
     Args:
-        account_ID: The account to update
+        username: The account to update
     """
     sql = '''
         UPDATE Account
         SET lastLogin = ?
-        WHERE accountID = ?
+        WHERE username = ?
     '''
     
-    _execute(sql, (datetime.now().isoformat(), account_ID))
+    _execute(sql, (datetime.now().isoformat(), username))
 
 
-def join_class(student_ID: str, class_code: str):
+def join_class(student_username: str, class_code: str):
     """
     Enroll a student in a class.
     
     Args:
-        student_ID: The student's accountID
+        student_username: The student's username
         class_code: The class code (will be used to look up classID)
     
     Raises:
@@ -311,8 +305,35 @@ def join_class(student_ID: str, class_code: str):
     
     # Insert enrollment
     sql = '''
-        INSERT INTO Enrollment (accountID, classID)
+        INSERT INTO Enrollment (username, classID)
         VALUES (?, ?)
     '''
     
-    _execute(sql, (student_ID, class_id))
+    _execute(sql, (student_username, class_id))
+
+def generate_tree(username: str) -> str:
+    """
+    Generate a new tree for a user with default resources and healthy status.
+    
+    Args:
+        username: The owner of the tree
+    
+    Returns:
+        str: The tree ID
+    """
+    tree_id = str(uuid.uuid4())
+    
+    sql_tree = '''
+        INSERT INTO Tree (treeID, ownerUsername, health, lastUpdated)
+        VALUES (?, ?, ?, ?)
+    '''
+    
+    sql_resources = '''
+        INSERT INTO TreeResources (treeID, water, earth, sun)
+        VALUES (?, ?, ?, ?)
+    '''
+    
+    _execute(sql_tree, (tree_id, username, HEALTH_HEALTHY, datetime.now().isoformat()))
+    _execute(sql_resources, (tree_id, 100, 100, 100))  # Default resources set to 100
+    
+    return tree_id
