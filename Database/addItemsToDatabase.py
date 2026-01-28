@@ -8,7 +8,7 @@ from constants import (
     VALID_QUESTION_TYPES, VALID_QUESTION_RESOURCE_TYPES,
     ATTEMPT_RESOURCE_NONE
 )
-import ../dataRecords as dataclasses
+import dataRecords as dataclasses
 
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))

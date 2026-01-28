@@ -1,41 +1,40 @@
+import os
 import uvicorn
 from fastapi import FastAPI, Request, Depends, HTTPException, status
+from fastapi.staticfiles import StaticFiles
+from fastapi.responses import FileResponse, RedirectResponse
 from starlette.middleware.sessions import SessionMiddleware
-from fastapi.responses import RedirectResponse
 from authlib.integrations.starlette_client import OAuth
 from dotenv import load_dotenv
-import dataRecords
-import os
-
 from Database.getItemsFromDatabase import get_person, get_tree
-
-# TODO: We should consistently be updating the 
-# last login time to ensure accuracy while student is doing stuff.
-
-##########################################
-#            Global Variables            #
-##########################################
+from Database.addItemsToDatabase import new_account
+from constants import ROLE_STUDENT
 
 load_dotenv()
+
 app = FastAPI()
+
+# --- Auth0 Config ---
 AUTH0_DOMAIN = os.getenv("VITE_AUTH0_DOMAIN")
 AUTH0_CLIENT_ID = os.getenv("VITE_AUTH0_CLIENT_ID")
-MIDDLEWARE_SECRET_KEY = "change" # os.getenv("MIDDLEWARE_SECRET_KEY") TODO: Change this to a secure random key.
+AUTH0_CLIENT_SECRET = os.getenv("AUTH0_CLIENT_SECRET")
+MIDDLEWARE_SECRET_KEY = os.getenv("MIDDLEWARE_SECRET_KEY")
 
-app.add_middleware(
-    SessionMiddleware,
-    secret_key=MIDDLEWARE_SECRET_KEY
+app.add_middleware(SessionMiddleware, secret_key=MIDDLEWARE_SECRET_KEY)
+
+oauth = OAuth()
+oauth.register(
+    "auth0",
+    client_id=AUTH0_CLIENT_ID,
+    client_secret=AUTH0_CLIENT_SECRET,
+    server_metadata_url=f"https://{AUTH0_DOMAIN}/.well-known/openid-configuration",
+    client_kwargs={"scope": "openid profile email"},
 )
 
-# TODO: Yan -- Set up oauth with Auth0.
-# oauth = OAuth()
-# oauth.register(
-#     "auth0",
-#     client_id=AUTH0_CLIENT_ID,
-#     client_secret=os.getenv("AUTH0_CLIENT_SECRET"), # You'll need this in your .env
-#     server_metadata_url=  ,
-#     client_kwargs=   ,
-# )
+# --- Static File Serving ---
+if os.path.exists("Home Page/dist"):
+    app.mount("/assets", StaticFiles(directory="Home Page/dist/assets"), name="static")
+
 
 
 
@@ -49,7 +48,7 @@ class NeedLoginException(Exception):
 
 @app.exception_handler(NeedLoginException)
 async def redirect_to_login(request: Request, exc: NeedLoginException):
-    return RedirectResponse(url="/login")
+    return RedirectResponse(url="/?autoLogin=true")
     
 def is_student(user_ref: str) -> bool:
     """Check if the user with the given accountReference is a Student."""
@@ -109,14 +108,12 @@ async def get_current_user(request: Request):
     return person
 
 # Checks if User is Student
-async def student_required(request: Request, user_ref: str = Depends(get_current_user)):
+async def student_required(request: Request, person = Depends(get_current_user)):
     """
     Checks if the authenticated user is a student.
     """
-    if user_ref is None:
-        return RedirectResponse(url="/login")
-
-    person = get_person(user_ref)
+    if person is None:
+        return RedirectResponse(url="/")
     
     if not person or 'Student' not in person.get('roles', []):
         # Logged in, but not student.
@@ -135,29 +132,85 @@ async def student_required(request: Request, user_ref: str = Depends(get_current
 
 @app.get("/")
 def default_page():
-    return {"message": "Welcome to the Tree Game API! This will be the intro page."}
+    index_path = os.path.join("Home Page", "dist", "index.html")
+    if os.path.exists(index_path):
+        return FileResponse(index_path)
 
-@app.get("/home")
-def home(student=Depends(student_required)):
-
-    # Requires student to be logged in.
-    return {"message": f"Welcome, {student['displayName']}"}
-
-@app.get("/login")
-def login():
-    # TODO: Yan - Implement Auth0 login flow here.
-    return {"message": "This will be the login page. Implement Auth0 login here."}
-
-@app.get("/callback")
+@app.get("/api/auth/callback")
 async def auth_callback(request: Request):
-    # TODO: Yan - Implement Auth0 callback handling here.
-    return {"message": "This will handle the Auth0 callback."}
-
-@app.get("/logout")
-async def logout(request: Request):
-    request.session.clear()
-    # TODO: Yan - Redirect to Auth0 logout URL if needed.
+    """Handle Auth0 callback and store user info in session."""
+    token = await oauth.auth0.authorize_access_token(request)
+    user_info = token.get('userinfo')
+    
+    if user_info:
+        # Store user reference (email or sub) in session
+        request.session["user"] = user_info.get("email") or user_info.get("sub")
+        request.session["user_info"] = dict(user_info)
+    
     return RedirectResponse(url="/")
+
+@app.post("/api/auth/verify")
+async def verify_auth(request: Request):
+    """Verify Auth0 token and establish backend session."""
+    try:
+        data = await request.json()
+        user_data = data.get('user', {})
+        
+        if user_data:
+            # Get user reference (email or sub)
+            user_ref = user_data.get("email") or user_data.get("sub")
+            
+            # Check if user exists in database
+            person = get_person(user_ref)
+            
+            if not person:
+                # Create new student account
+                try:
+                    new_account(
+                        username=user_data.get("nickname", user_data.get("email", "user")),
+                        email=user_data.get("email", ""),
+                        passwordHash="auth0",  # Not used for Auth0 users
+                        displayName=user_data.get("name", user_data.get("nickname", "Student")),
+                        accountReference=user_ref,
+                        dateOfBirth="2000-01-01",  # Default date
+                        role=ROLE_STUDENT
+                    )
+                except Exception as e:
+                    print(f"Error creating account: {e}")
+                    raise HTTPException(status_code=500, detail="Failed to create account")
+            
+            # Store user reference in session
+            request.session["user"] = user_ref
+            request.session["user_info"] = user_data
+            
+            return {"success": True, "message": "Session established"}
+        
+        return {"success": False, "message": "No user data provided"}
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+@app.get("/api/auth/login")
+async def login(request: Request):
+    """Initiate Auth0 login."""
+    redirect_uri = request.url_for('auth_callback')
+    return await oauth.auth0.authorize_redirect(request, redirect_uri)
+
+@app.get("/api/auth/logout")
+async def logout(request: Request):
+    """Clear session and logout."""
+    request.session.clear()
+    return RedirectResponse(url="/")
+
+@app.get("/api/auth/session")
+async def get_session(request: Request):
+    """Check if user is authenticated and return session info."""
+    user_ref = request.session.get("user")
+    if user_ref:
+        return {
+            "authenticated": True,
+            "user": request.session.get("user_info", {})
+        }
+    return {"authenticated": False}
 
 @app.get("/manageAccount")
 def manage_account(account=Depends(get_current_user)):
@@ -230,4 +283,4 @@ def api_add_question(request: Request, student=Depends(student_required)):
 ############################################
 
 if __name__ == "__main__":
-    uvicorn.run(app, host="127.0.0.1", port=8000)
+    uvicorn.run(app, host="localhost", port=5173)

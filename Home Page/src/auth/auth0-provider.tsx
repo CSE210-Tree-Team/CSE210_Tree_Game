@@ -18,8 +18,11 @@ export const Auth0ProviderWithConfig = ({ children }: Auth0ProviderWithConfigPro
             domain={domain}
             clientId={clientId}
             authorizationParams={{
-                redirect_uri: window.location.origin
+                redirect_uri: window.location.origin,
+                audience: `https://${domain}/api/v2/`
             }}
+            useRefreshTokens={true}
+            cacheLocation="localstorage"
         >
             {children}
         </Auth0Provider>
