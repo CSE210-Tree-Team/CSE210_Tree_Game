@@ -4,7 +4,6 @@ from fastapi import FastAPI, Request, Depends, HTTPException, status
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse, RedirectResponse
 from starlette.middleware.sessions import SessionMiddleware
-from authlib.integrations.starlette_client import OAuth
 from dotenv import load_dotenv
 from Database.getItemsFromDatabase import get_person, get_tree
 from Database.addItemsToDatabase import new_account
@@ -14,22 +13,9 @@ load_dotenv()
 
 app = FastAPI()
 
-# --- Auth0 Config ---
-AUTH0_DOMAIN = os.getenv("VITE_AUTH0_DOMAIN")
-AUTH0_CLIENT_ID = os.getenv("VITE_AUTH0_CLIENT_ID")
-AUTH0_CLIENT_SECRET = os.getenv("AUTH0_CLIENT_SECRET")
 MIDDLEWARE_SECRET_KEY = os.getenv("MIDDLEWARE_SECRET_KEY")
 
 app.add_middleware(SessionMiddleware, secret_key=MIDDLEWARE_SECRET_KEY)
-
-oauth = OAuth()
-oauth.register(
-    "auth0",
-    client_id=AUTH0_CLIENT_ID,
-    client_secret=AUTH0_CLIENT_SECRET,
-    server_metadata_url=f"https://{AUTH0_DOMAIN}/.well-known/openid-configuration",
-    client_kwargs={"scope": "openid profile email"},
-)
 
 # --- Static File Serving ---
 if os.path.exists("Home Page/dist"):
@@ -136,19 +122,6 @@ def default_page():
     if os.path.exists(index_path):
         return FileResponse(index_path)
 
-# @app.get("/api/auth/callback")
-# async def auth_callback(request: Request):
-#     """Handle Auth0 callback and store user info in session."""
-#     token = await oauth.auth0.authorize_access_token(request)
-#     user_info = token.get('userinfo')
-    
-#     if user_info:
-#         # Store user reference (email or sub) in session
-#         request.session["user"] = user_info.get("email") or user_info.get("sub")
-#         request.session["user_info"] = dict(user_info)
-    
-#     return RedirectResponse(url="/")
-
 @app.post("/api/auth/verify")
 async def verify_auth(request: Request):
     """Verify Auth0 token and establish backend session."""
@@ -188,29 +161,6 @@ async def verify_auth(request: Request):
         return {"success": False, "message": "No user data provided"}
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
-
-# @app.get("/api/auth/login")
-# async def login(request: Request):
-#     """Initiate Auth0 login."""
-#     redirect_uri = request.url_for('auth_callback')
-#     return await oauth.auth0.authorize_redirect(request, redirect_uri)
-
-# @app.get("/api/auth/logout")
-# async def logout(request: Request):
-#     """Clear session and logout."""
-#     request.session.clear()
-#     return RedirectResponse(url="/")
-
-# @app.get("/api/auth/session")
-# async def get_session(request: Request):
-#     """Check if user is authenticated and return session info."""
-#     user_ref = request.session.get("user")
-#     if user_ref:
-#         return {
-#             "authenticated": True,
-#             "user": request.session.get("user_info", {})
-#         }
-#     return {"authenticated": False}
 
 @app.get("/manageAccount")
 def manage_account(account=Depends(get_current_user)):

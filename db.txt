@@ -11,6 +11,7 @@ COLUMNS: ['accountID', 'username', 'email', 'passwordHash', 'displayName', 'acco
    ('dd99a1cb-a431-4919-8f42-d0b11d5b2470', 'stanley', 'stanley@student.edu', 'pass123', 'Stanley', None, '2010-01-01', '2026-01-27 15:17:49')
    ('acc_adrian.s.rosing@gmail.com_1769575488.625339', 'adrian.s.rosing', 'adrian.s.rosing@gmail.com', 'auth0', 'Adrian Rosing', 'adrian.s.rosing@gmail.com', '2000-01-01', None)
    ('acc_adrianjeremyschool123@gmail.com_1769575574.151999', 'adrianjeremyschool123', 'adrianjeremyschool123@gmail.com', 'auth0', 'Adrian Jeremy', 'adrianjeremyschool123@gmail.com', '2000-01-01', None)
+   ('acc_testing@gmail.com_1769577420.628445', 'testing', 'testing@gmail.com', 'auth0', 'testing@gmail.com', 'testing@gmail.com', '2000-01-01', None)
 
 
 ==================== TABLE: AccountRole ====================
@@ -24,6 +25,7 @@ COLUMNS: ['accountID', 'role']
    ('dd99a1cb-a431-4919-8f42-d0b11d5b2470', 'Student')
    ('acc_adrian.s.rosing@gmail.com_1769575488.625339', 'Student')
    ('acc_adrianjeremyschool123@gmail.com_1769575574.151999', 'Student')
+   ('acc_testing@gmail.com_1769577420.628445', 'Student')
 
 
 ==================== TABLE: Tree ====================
@@ -178,6 +180,12 @@ User: Adrian Rosing (adrian.s.rosing) [ID: acc_adri]
 
 User: Adrian Jeremy (adrianjeremyschool123) [ID: acc_adri]
   Email: adrianjeremyschool123@gmail.com
+  Roles: Student
+  Status: No status info
+  Tree: None assigned
+
+User: testing@gmail.com (testing) [ID: acc_test]
+  Email: testing@gmail.com
   Roles: Student
   Status: No status info
   Tree: None assigned
