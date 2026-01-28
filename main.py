@@ -211,11 +211,11 @@ def get_user_info(request: Request, student=Depends(student_required)):
     }
 
 @app.post("/api/update-stat/{stat_name}")
-def update_stat(stat_name: str, value: int, request: Request, student=Depends(student_required)):
+def update_stat(stat_name: str, percent: int, request: Request, student=Depends(student_required)):
     """
     Updates a specific stat for the student's tree. Treats this update as an event.
     stat_name: Name of the stat to update (e.g., "water", "earth", "sun").
-    value: New value for the stat.
+    percent: Percent increase to the stat.
     """
     # TODO: Implement stat update logic here.
     return None
@@ -228,7 +228,23 @@ def api_add_question(request: Request, student=Depends(student_required)):
     # TODO: Implement question addition logic here.
     return None
 
+# Get question:
+@app.get("/api/get-question/{question_id}")
+def api_get_question(question_id: str, request: Request, student=Depends(student_required)):
+    """
+    API endpoint to retrieve a question from the database.
+    """
+    # TODO: Implement question retrieval logic here.
+    return None
 
+# Get questions:
+@app.get("/api/get-questions")
+def api_get_questions(numQuestions: int, resourceType: str, questionType: str, questionClass: str, request: Request, student=Depends(student_required)):
+    """
+    API endpoint to retrieve multiple questions from the database.
+    """
+    # TODO: Implement multiple question retrieval logic here.
+    return None
 
 ############################################
 #                  Server                  #
