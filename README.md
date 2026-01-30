@@ -23,7 +23,9 @@ For getting organized dictionaries from the database, please reference `Database
 To test the database, as per the GitHub Actions, run both: `python -m Database.databaseInteractUnitTests` and `python -m Database.databaseUnitTests`.
 
 ## Home Page:
-This needs to be statically compiled with `npm run build` while in the `Home Page` directory
+1. First, cd to Home page. And then, run `npm install`. (you should configure npm if u don't have it installed yet lol)
+2. Then, run `npm run build` to start the server. 
+3. This needs to be statically compiled with `npm run build` while in the `Home Page` directory
 
 
 ## Account Info:
