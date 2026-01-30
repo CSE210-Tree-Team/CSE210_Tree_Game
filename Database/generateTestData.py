@@ -1,8 +1,34 @@
+"""
+Test Data Generation Module
+
+This module generates sample/test data for development and testing purposes. It populates
+the database with test accounts, students, questions, and trees.
+
+Functions:
+    generate_uuid(): Generate a unique identifier.
+    get_date_str(): Get current date and time as formatted string.
+    create_tree(conn, cursor, username)
+    add_students(conn, cursor)
+    add_questions(conn, cursor)
+    generate_data(db_path): Main function to generate all test data from constants.
+
+Sample Data Includes:
+    - Student and teacher accounts
+    - Quiz questions (MCQ, FreeResponse, MultiSelect)
+    - Trees with initial resources
+    - Class enrollment data
+"""
+
 import sqlite3
 import uuid
 import random
 import datetime
-from createDatabase import create_schema, DB_NAME
+import os
+from Database import createDatabase
+from constants import DB_NAME
+
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+DB_PATH = os.path.join(BASE_DIR, DB_NAME)
 
 ### SAMPLE INPUT TEST DATA FOR GENERATION ###
 STUDENT_NAMES = ["Adrian", "Dhaivat", "Cash", "Kathy", "Alex", "Stanley"]
@@ -24,13 +50,13 @@ def get_date_str():
     return datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
 # Create a tree for a given account and return the treeID
-def create_tree(conn, cursor, owner_id):
+def create_tree(conn, cursor, username):
     tree_id = generate_uuid()
     health_status = DEFAULT_HEALTH_STATUS
     cursor.execute('''
-        INSERT INTO Tree (treeID, ownerAccountID, health, growthStage, lastUpdated) 
+        INSERT INTO Tree (treeID, ownerUsername, health, growthStage, lastUpdated) 
         VALUES (?, ?, ?, ?, ?)
-    ''', (tree_id, owner_id, health_status, DEFAULT_GROWTH_STAGE, get_date_str()))
+    ''', (tree_id, username, health_status, DEFAULT_GROWTH_STAGE, get_date_str()))
 
     cursor.execute("INSERT INTO TreeResources (treeID, water, earth, sun) VALUES (?, ?, ?, ?)",
                    (tree_id, DEFAULT_RESOURCE_LEVEL, DEFAULT_RESOURCE_LEVEL, DEFAULT_RESOURCE_LEVEL))
@@ -44,19 +70,19 @@ def add_students(conn, cursor):
         
         # Create Account
         cursor.execute('''
-            INSERT INTO Account (accountID, username, email, passwordHash, displayName, dateOfBirth, lastLogin) 
-            VALUES (?, ?, ?, ?, ?, ?, ?)
-        ''', (s_id, username, f"{username}@student.edu", "pass123", name, "2010-01-01", get_date_str()))
+            INSERT INTO Account (username, email, passwordHash, displayName, dateOfBirth, lastLogin) 
+            VALUES (?, ?, ?, ?, ?, ?)
+        ''', (username, f"{username}@student.edu", "pass123", name, "2010-01-01", get_date_str()))
         
         # Assign Role
-        cursor.execute("INSERT INTO AccountRole (accountID, role) VALUES (?, ?)", (s_id, 'Student'))
+        cursor.execute("INSERT INTO AccountRole (username, role) VALUES (?, ?)", (username, 'Student'))
 
         # Student Details
-        cursor.execute("INSERT INTO StudentDetails (studentID, studentLevel, studentStats) VALUES (?, ?, ?)",
-                       (s_id, 1, '{"xp": 0}'))
+        cursor.execute("INSERT INTO StudentDetails (studentUsername, studentLevel, studentStats) VALUES (?, ?, ?)",
+                       (username, 1, '{"xp": 0}'))
                        
         # Create a Tree for the account.
-        tree_id = create_tree(conn, cursor, s_id)
+        tree_id = create_tree(conn, cursor, username)
 
 # Create questions in the database
 def add_questions(conn, cursor):
@@ -83,11 +109,11 @@ def add_questions(conn, cursor):
                 cursor.execute("INSERT INTO QuestionChoice (choiceID, questionID, text, isCorrect) VALUES (?, ?, ?, ?)",
                                (generate_uuid(), q_id, choice_text, is_correct))
 
-def generate_data():
+def generate_data(db_path=DB_PATH):
     # Ensure schema exists first
-    create_schema()
+    createDatabase.create_schema(db_path=db_path)
     
-    conn = sqlite3.connect(DB_NAME)
+    conn = sqlite3.connect(db_path)
     cursor = conn.cursor()
     cursor.execute("PRAGMA foreign_keys = ON;")
 
@@ -102,4 +128,4 @@ def generate_data():
     print("Data generation complete.")
 
 if __name__ == "__main__":
-    generate_data()
+    generate_data(db_path=DB_PATH)

@@ -1,0 +1,106 @@
+Successfully connected to /home/adria/CSE210_Tree_Game/Database/game_database.db
+
+==================== TABLE: Account ====================
+COLUMNS: ['username', 'email', 'passwordHash', 'displayName', 'accountReference', 'dateOfBirth', 'lastLogin']
+--------------------------------------------------------------------------------------------------------------
+   ('adrian.s.rosing@gmail.com', 'adrian.s.rosing@gmail.com', 'auth0', 'Adrian Rosing', 'adrian.s.rosing', '2000-01-01', None)
+   ('fakeaccount@gmail.com', 'fakeaccount@gmail.com', 'auth0', 'fakeaccount@gmail.com', 'fakeaccount', '2000-01-01', None)
+
+
+==================== TABLE: AccountRole ====================
+COLUMNS: ['username', 'role']
+------------------------------
+   ('adrian.s.rosing@gmail.com', 'Student')
+   ('fakeaccount@gmail.com', 'Student')
+
+
+==================== TABLE: Tree ====================
+COLUMNS: ['treeID', 'ownerUsername', 'health', 'growthStage', 'lastUpdated']
+-----------------------------------------------------------------------------
+   ('235de0fc-6f6a-46c9-8f9a-7ef159cbf3bc', 'adrian.s.rosing@gmail.com', 'Healthy', 0, '2026-01-28T04:08:31.939944')
+   ('73b67d41-1788-4488-bb0c-133d8cfcd779', 'fakeaccount@gmail.com', 'Healthy', 0, '2026-01-28T17:06:50.467802')
+
+
+==================== TABLE: TreeResources ====================
+COLUMNS: ['treeID', 'water', 'earth', 'sun']
+---------------------------------------------
+   ('235de0fc-6f6a-46c9-8f9a-7ef159cbf3bc', 100, 100, 100)
+   ('73b67d41-1788-4488-bb0c-133d8cfcd779', 100, 100, 100)
+
+
+==================== TABLE: TreeDecoration ====================
+COLUMNS: ['decorationID', 'treeID', 'appearanceID']
+----------------------------------------------------
+   [EMPTY TABLE] - No data rows found.
+
+
+==================== TABLE: Event ====================
+COLUMNS: ['eventID', 'eventType', 'resourceAffected', 'description', 'percentChange', 'conditions']
+----------------------------------------------------------------------------------------------------
+   [EMPTY TABLE] - No data rows found.
+
+
+==================== TABLE: Class ====================
+COLUMNS: ['classID', 'className', 'classLevel', 'teacherUsername', 'active', 'levelPolicy']
+--------------------------------------------------------------------------------------------
+   [EMPTY TABLE] - No data rows found.
+
+
+==================== TABLE: Enrollment ====================
+COLUMNS: ['username', 'classID']
+---------------------------------
+   [EMPTY TABLE] - No data rows found.
+
+
+==================== TABLE: Question ====================
+COLUMNS: ['questionID', 'text', 'type', 'difficulty', 'resourceType']
+----------------------------------------------------------------------
+   [EMPTY TABLE] - No data rows found.
+
+
+==================== TABLE: QuestionChoice ====================
+COLUMNS: ['choiceID', 'questionID', 'text', 'isCorrect']
+---------------------------------------------------------
+   [EMPTY TABLE] - No data rows found.
+
+
+==================== TABLE: QuestionClass ====================
+COLUMNS: ['questionID', 'classID']
+-----------------------------------
+   [EMPTY TABLE] - No data rows found.
+
+
+==================== TABLE: QuestionAttempt ====================
+COLUMNS: ['attemptID', 'username', 'questionID', 'isCorrect', 'resourceAwarded', 'timestamp']
+----------------------------------------------------------------------------------------------
+   [EMPTY TABLE] - No data rows found.
+
+
+==================== TABLE: StudentDetails ====================
+COLUMNS: ['studentUsername', 'studentLevel', 'studentStats', 'parentEmail']
+----------------------------------------------------------------------------
+   [EMPTY TABLE] - No data rows found.
+
+
+End of Database Dump.
+
+
+=================== End of Database Contents ====================
+
+
+
+=================== User Overview ===================
+
+User: Adrian Rosing (adrian.s.rosing@gmail.com) [ID: adrian.s]
+  Email: adrian.s.rosing@gmail.com
+  Roles: Student
+  Status: No status info
+  Tree 235de0fc | Health: Healthy | Growth: 0 | Updated: 2026-01-28T04:08:31.939944
+    Resources -> Water: 100, Earth: 100, Sun: 100
+
+User: fakeaccount@gmail.com (fakeaccount@gmail.com) [ID: fakeacco]
+  Email: fakeaccount@gmail.com
+  Roles: Student
+  Status: No status info
+  Tree 73b67d41 | Health: Healthy | Growth: 0 | Updated: 2026-01-28T17:06:50.467802
+    Resources -> Water: 100, Earth: 100, Sun: 100

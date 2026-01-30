@@ -1,24 +1,39 @@
+"""
+Database Schema Unit Tests
+
+Unit tests for database schema creation and integrity. Tests verify that the database
+schema is properly created with correct tables, constraints, and relationships.
+
+Tests are specifically focused on the files: createDatabase.py and generateTestData.py.
+
+Test Classes:
+    TestGameDatabaseSystem: Tests for database schema creation and validation.
+
+Test Coverage:
+    - Database schema creation
+    - Table creation and structure
+    - Constraint enforcement
+    - Foreign key relationships
+"""
+
 import unittest
 import sqlite3
 import os
-import createDatabase
-import generateTestData
+from Database import createDatabase
+from Database import generateTestData
+from constants import DB_NAME
 
 class TestGameDatabaseSystem(unittest.TestCase):
     TEST_DB = "test_game_database.db"
 
     def setUp(self):
         """Set up a fresh database before each test."""
-        # Override DB_NAME to point to our test file
-        createDatabase.DB_NAME = self.TEST_DB
-        generateTestData.DB_NAME = self.TEST_DB
-        
         # Ensure we start with a clean slate
         if os.path.exists(self.TEST_DB):
             os.remove(self.TEST_DB)
             
         # Create the schema
-        createDatabase.create_schema()
+        createDatabase.create_schema(db_path=self.TEST_DB)
         
         # Connect for verification
         self.conn = sqlite3.connect(self.TEST_DB)
@@ -45,18 +60,18 @@ class TestGameDatabaseSystem(unittest.TestCase):
         # Attempt to insert a Tree for an account that doesn't exist
         with self.assertRaises(sqlite3.IntegrityError):
             self.cursor.execute('''
-                INSERT INTO Tree (treeID, ownerAccountID, health) 
+                INSERT INTO Tree (treeID, ownerUsername, health) 
                 VALUES ('tree123', 'non_existent_user', 'Healthy')
             ''')
 
     def test_check_constraints(self):
         """Ensure CHECK constraints (enums) are working."""
         # Create a valid account first
-        self.cursor.execute("INSERT INTO Account (accountID, username, email, passwordHash) VALUES ('1', 'u', 'e', 'p')")
+        self.cursor.execute("INSERT INTO Account (username, email, passwordHash) VALUES ('u', 'e', 'p')")
         
         # Try to insert an invalid role
         with self.assertRaises(sqlite3.IntegrityError):
-            self.cursor.execute("INSERT INTO AccountRole (accountID, role) VALUES ('1', 'Admin')")
+            self.cursor.execute("INSERT INTO AccountRole (username, role) VALUES ('u', 'Admin')")
 
     ## --- Tests for generateTestData.py ---
 
@@ -71,7 +86,7 @@ class TestGameDatabaseSystem(unittest.TestCase):
         # Check if the tree was automatically created
         self.cursor.execute('''
             SELECT T.treeID FROM Tree T 
-            JOIN Account A ON T.ownerAccountID = A.accountID 
+            JOIN Account A ON T.ownerUsername = A.username 
             WHERE A.username='adrian'
         ''')
         self.assertIsNotNone(self.cursor.fetchone(), "Adrian should have a tree.")
@@ -95,7 +110,7 @@ class TestGameDatabaseSystem(unittest.TestCase):
         """Verify that create_tree sets resources to 100."""
         
         acc_id = "test_acc"
-        self.cursor.execute("INSERT INTO Account (accountID, username, email, passwordHash) VALUES (?, 't', 'e', 'p')", (acc_id,))
+        self.cursor.execute("INSERT INTO Account (username, email, passwordHash) VALUES (?, 'e', 'p')", (acc_id,))
         tree_id = generateTestData.create_tree(self.conn, self.cursor, acc_id)
         
         self.cursor.execute("SELECT water, earth, sun FROM TreeResources WHERE treeID=?", (tree_id,))

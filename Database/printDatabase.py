@@ -1,20 +1,39 @@
+"""
+Database Content Display Module
+
+This module provides utilities to print and display the complete contents of the game database
+in a human-readable format. Useful for debugging and verifying database state.
+
+Functions:
+    print_database_contents(db_path): Print all tables and their records from the database.
+
+Usage:
+    python Database.printDatabase.py > db_dump.txt
+    python Database.printDatabase.py
+
+Note: Created this file was created with assistance from Gemini
+"""
+
 import sqlite3
 import os
+from constants import DB_NAME
+
+
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+DB_PATH = os.path.join(BASE_DIR, DB_NAME)
 
 # Credit to Gemini for generating this script.
 # I would suggest running this with redirection to a file for easier viewing:
 # python Database/print_database.py > db_dump.txt
 
-DB_NAME = "game_database.db"
-
-def print_database_contents():
+def print_database_contents(db_path=DB_PATH):
     # Check if DB exists
-    if not os.path.exists(DB_NAME):
-        print(f"Error: Database '{DB_NAME}' not found.")
+    if not os.path.exists(db_path):
+        print(f"Error: Database '{db_path}' not found.")
         print("Please run your generation script first.")
         return
 
-    conn = sqlite3.connect(DB_NAME)
+    conn = sqlite3.connect(db_path)
     cursor = conn.cursor()
 
     # 1. Get a list of all tables in the database dynamically
@@ -26,7 +45,7 @@ def print_database_contents():
         print("Connected to database, but no tables found.")
         return
 
-    print(f"Successfully connected to {DB_NAME}\n")
+    print(f"Successfully connected to {db_path}\n")
 
     # 2. Iterate through every table and print contents
     for table_name_tuple in tables:
@@ -62,17 +81,17 @@ def print_database_contents():
     conn.close()
     print("End of Database Dump.")
 
-def print_condensed_user_info():
-    if not os.path.exists(DB_NAME):
-        print(f"Error: Database '{DB_NAME}' not found.")
+def print_condensed_user_info(db_path=DB_PATH):
+    if not os.path.exists(db_path):
+        print(f"Error: Database '{db_path}' not found.")
         print("Please run your generation script first.")
         return
 
-    conn = sqlite3.connect(DB_NAME)
+    conn = sqlite3.connect(db_path)
     cursor = conn.cursor()
 
     try:
-        cursor.execute("SELECT accountID, username, displayName, email, lastLogin FROM Account")
+        cursor.execute("SELECT username, displayName, email, lastLogin FROM Account")
         accounts = cursor.fetchall()
     except sqlite3.OperationalError as e:
         print(f"Unable to read Account table: {e}")
@@ -84,19 +103,18 @@ def print_condensed_user_info():
         conn.close()
         return
 
-    cursor.execute("SELECT accountID, role FROM AccountRole")
+    cursor.execute("SELECT username, role FROM AccountRole")
     roles = cursor.fetchall()
     role_map = {}
-    for account_id, role in roles:
-        role_map.setdefault(account_id, []).append(role)
-
-    cursor.execute("SELECT studentID, studentLevel, studentStats FROM StudentDetails")
+    for username, role in roles:
+        role_map.setdefault(username, []).append(role)
+    cursor.execute("SELECT studentUsername, studentLevel, studentStats FROM StudentDetails")
     student_rows = cursor.fetchall()
-    student_map = {student_id: (level, stats) for student_id, level, stats in student_rows}
+    student_map = {student_username: (level, stats) for student_username, level, stats in student_rows}
 
     cursor.execute(
         """
-        SELECT t.ownerAccountID, t.treeID, t.health, t.growthStage, t.lastUpdated,
+        SELECT t.ownerUsername, t.treeID, t.health, t.growthStage, t.lastUpdated,
                COALESCE(r.water, 0), COALESCE(r.earth, 0), COALESCE(r.sun, 0)
         FROM Tree t
         LEFT JOIN TreeResources r ON t.treeID = r.treeID
@@ -104,8 +122,8 @@ def print_condensed_user_info():
     )
     tree_rows = cursor.fetchall()
     tree_map = {}
-    for owner_id, tree_id, health, growth, updated, water, earth, sun in tree_rows:
-        tree_map.setdefault(owner_id, []).append({
+    for owner_username, tree_id, health, growth, updated, water, earth, sun in tree_rows:
+        tree_map.setdefault(owner_username, []).append({
             "tree_id": tree_id,
             "health": health,
             "growth": growth,
@@ -116,13 +134,13 @@ def print_condensed_user_info():
         })
 
     print("\n=================== User Overview ===================")
-    for account_id, username, display_name, email, last_login in accounts:
-        friendly_id = account_id[:8]
+    for username, display_name, email, last_login in accounts:
+        friendly_id = username[:8]
         name = display_name or "(no display name)"
-        user_roles = ", ".join(role_map.get(account_id, ["(no role)"]))
+        user_roles = ", ".join(role_map.get(username, ["(no role)"]))
         status_parts = []
-        if account_id in student_map:
-            level, stats = student_map[account_id]
+        if username in student_map:
+            level, stats = student_map[username]
             status_parts.append(f"Level {level}")
             if stats:
                 status_parts.append(f"Stats: {stats}")
@@ -135,7 +153,7 @@ def print_condensed_user_info():
         print(f"  Roles: {user_roles}")
         print(f"  Status: {status}")
 
-        trees = tree_map.get(account_id, [])
+        trees = tree_map.get(username, [])
         if not trees:
             print("  Tree: None assigned")
         else:
@@ -151,8 +169,8 @@ def print_condensed_user_info():
     conn.close()
 
 if __name__ == "__main__":
-    print_database_contents()
+    print_database_contents(db_path=DB_PATH)
 
     print("\n\n=================== End of Database Contents ====================\n\n")
 
-    print_condensed_user_info()
+    print_condensed_user_info(db_path=DB_PATH)
