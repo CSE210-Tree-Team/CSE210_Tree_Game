@@ -19,12 +19,11 @@ Test Classes:
     TestStudentDetails: Student-specific details.
     TestIntegration: Full workflow integration tests.
 
-Total Tests: 31
+Total Unit Tests: 30
 Coverage: Accounts, roles, questions, trees, resources, events, updates, and data retrieval.
 
-Run Tests:
-    From parent directory: python3 -m Database.databaseInteractUnitTests
-    From Database directory: python3 -m unittest databaseInteractUnitTests
+Total Integration Tests: 1 
+Coverage: End-to-end account creation, tree generation, event application, and data verification.
 
 Note: 
     Created this file with the help of Gemini to ensure comprehensive test coverage. Reviewed and edited by Adrian.
