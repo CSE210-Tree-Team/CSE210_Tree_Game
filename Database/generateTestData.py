@@ -1,3 +1,24 @@
+"""
+Test Data Generation Module
+
+This module generates sample/test data for development and testing purposes. It populates
+the database with test accounts, students, questions, and trees.
+
+Functions:
+    generate_uuid(): Generate a unique identifier.
+    get_date_str(): Get current date and time as formatted string.
+    create_tree(conn, cursor, username)
+    add_students(conn, cursor)
+    add_questions(conn, cursor)
+    generate_data(db_path): Main function to generate all test data from constants.
+
+Sample Data Includes:
+    - Student and teacher accounts
+    - Quiz questions (MCQ, FreeResponse, MultiSelect)
+    - Trees with initial resources
+    - Class enrollment data
+"""
+
 import sqlite3
 import uuid
 import random

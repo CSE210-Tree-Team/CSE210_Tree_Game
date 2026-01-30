@@ -1,3 +1,21 @@
+"""
+Database Schema Unit Tests
+
+Unit tests for database schema creation and integrity. Tests verify that the database
+schema is properly created with correct tables, constraints, and relationships.
+
+Tests are specifically focused on the files: createDatabase.py and generateTestData.py.
+
+Test Classes:
+    TestGameDatabaseSystem: Tests for database schema creation and validation.
+
+Test Coverage:
+    - Database schema creation
+    - Table creation and structure
+    - Constraint enforcement
+    - Foreign key relationships
+"""
+
 import unittest
 import sqlite3
 import os

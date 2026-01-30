@@ -1,12 +1,41 @@
+"""
+Database Item Addition and Update Module
+
+This module provides functions to add and update data in the game database. It handles
+account creation, role management, question setup, tree generation, resource updates,
+event processing, and student enrollment.
+
+Functions - Account Management:
+    add_account(username, email, passwordHash, displayName, accountReference, dateOfBirth, role)
+    add_role(username, role)
+    update_account(username, display_name, email)
+    update_last_login(username)
+    add_student_details(student_username, student_level, student_stats, parent_email)
+
+Functions - Question Management:
+    add_question(question_id, text, question_type, difficulty, resource_type)
+    add_question_choice(choice_id, question_id, text, is_correct)
+
+Functions - Tree & Resource Management:
+    generate_tree(username)
+    update_stat(tree_ID, stat_name, value)
+    update_health(tree_ID, health_status)  # Updates the overall health status of the tree (healthy, unhealthy, etc.)
+    do_event(tree_ID, event, value)
+
+Functions - Class Management:
+    join_class(student_username, class_code)
+"""
+
 import sqlite3
 import os
 from datetime import datetime
 from constants import (
     DB_NAME, ROLE_STUDENT, ROLE_TEACHER, VALID_ROLES,
     HEALTH_HEALTHY, VALID_HEALTH_STATUSES,
-    RESOURCE_WATER, RESOURCE_EARTH, RESOURCE_SUN,
+    RESOURCE_WATER, RESOURCE_EARTH, RESOURCE_SUN, RESOURCE_ALL, RESOURCE_NONE,
     VALID_QUESTION_TYPES, VALID_QUESTION_RESOURCE_TYPES,
-    ATTEMPT_RESOURCE_NONE, EVENT_LEVEL, EVENT_BONUS, EVENT_PENALTY, EVENT_NEUTRAL
+    ATTEMPT_RESOURCE_NONE, EVENT_LEVEL, EVENT_BONUS, EVENT_PENALTY, EVENT_NEUTRAL,
+    RESOURCE_MAX_LEVEL, RESOURCE_MIN_LEVEL
 )
 import dataRecords as dataclasses
 import uuid
@@ -142,7 +171,6 @@ def add_question_choice(choice_id: str, question_id: str, text: str, is_correct:
     
     _execute(sql, (choice_id, question_id, text, 1 if is_correct else 0))
 
-
 def do_event(tree_ID: str, event: dataclasses.Event, value: int):
     """
     Handle an event for a tree, updating its resources based on the event type.
@@ -157,9 +185,9 @@ def do_event(tree_ID: str, event: dataclasses.Event, value: int):
     """
     
     # Determine which resources to update
-    if event.resourceAffected == "All":
+    if event.resourceAffected == RESOURCE_ALL:
         resources = [RESOURCE_WATER, RESOURCE_EARTH, RESOURCE_SUN]
-    elif event.resourceAffected == "None":
+    elif event.resourceAffected == RESOURCE_NONE:
         return  # No resources affected
     else:
         resources = [event.resourceAffected]
@@ -197,11 +225,15 @@ def update_stat(tree_ID: str, stat_name: str, value: int):
     
     sql = f'''
         UPDATE TreeResources
-        SET {stat_name_lower} = MAX(0, {stat_name_lower} + ?)
+        SET {stat_name_lower} = CASE 
+            WHEN {stat_name_lower} + ? < {RESOURCE_MIN_LEVEL} THEN {RESOURCE_MIN_LEVEL}
+            WHEN {stat_name_lower} + ? > {RESOURCE_MAX_LEVEL} THEN {RESOURCE_MAX_LEVEL}
+            ELSE {stat_name_lower} + ?
+        END
         WHERE treeID = ?
     '''
     
-    _execute(sql, (value, tree_ID))
+    _execute(sql, (value, value, value, tree_ID))
 
 
 def update_health(tree_ID: str, health_status: str):
@@ -282,7 +314,7 @@ def join_class(student_username: str, class_code: str):
     Enroll a student in a class.
     
     Args:
-        student_username: The student's username
+        studentUsername: The student's username
         class_code: The class code (will be used to look up classID)
     
     Raises:
@@ -310,6 +342,23 @@ def join_class(student_username: str, class_code: str):
     '''
     
     _execute(sql, (student_username, class_id))
+
+def add_student_details(student_username: str, student_level: int = 1, student_stats: str = None, parent_email: str = None):
+    """
+    Add student-specific details to an account.
+    
+    Args:
+        studentUsername: The student's username
+        studentLevel: The student's level (default: 1)
+        studentStats: JSON string of student stats
+        parentEmail: Parent's email (optional)
+    """
+    sql = '''
+        INSERT INTO StudentDetails (studentUsername, studentLevel, studentStats, parentEmail)
+        VALUES (?, ?, ?, ?)
+    '''
+    
+    _execute(sql, (student_username, student_level, student_stats, parent_email))
 
 def generate_tree(username: str) -> str:
     """

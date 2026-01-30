@@ -1,3 +1,19 @@
+"""
+Database Content Display Module
+
+This module provides utilities to print and display the complete contents of the game database
+in a human-readable format. Useful for debugging and verifying database state.
+
+Functions:
+    print_database_contents(db_path): Print all tables and their records from the database.
+
+Usage:
+    python Database.printDatabase.py > db_dump.txt
+    python Database.printDatabase.py
+
+Note: Created this file was created with assistance from Gemini
+"""
+
 import sqlite3
 import os
 from constants import DB_NAME

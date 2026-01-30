@@ -154,7 +154,7 @@ def tree_game(student=Depends(student_required)):
 
 ############################################
 #               API Endpoints              #
-#############################################
+############################################
 
 @app.post("/api/auth/verify")
 async def verify_auth(request: Request):
@@ -219,6 +219,15 @@ def update_stat(stat_name: str, percent: int, request: Request, student=Depends(
     """
     # TODO: Implement stat update logic here.
     return None
+
+@app.post("/api/update-user")
+def update_user(displayName: str = None, dateOfBirth: str = None, request: Request = None):
+    """
+    API endpoint to update user information.
+    """
+    # TODO: Implement user update logic here.
+    return None
+
 
 @app.post("/api/add-question")
 def api_add_question(request: Request, student=Depends(student_required)):

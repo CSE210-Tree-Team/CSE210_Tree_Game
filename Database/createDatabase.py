@@ -1,3 +1,27 @@
+"""
+Database Schema Creation Module
+
+This module handles the initial creation of the game database schema and all required tables.
+
+Functions:
+    create_schema(db_path): Creates all database tables with proper constraints and relationships.
+
+Tables Created:
+    - Account: User account information
+    - AccountRole: User roles (Student/Teacher)
+    - Tree: Tree data for each user
+    - TreeResources: Resource levels (water, earth, sun) for each tree
+    - TreeDecoration: Decorations applied to trees
+    - Event: Game events that affect resources
+    - Class: Classes created by teachers
+    - Enrollment: Student enrollment in classes
+    - Question: Quiz questions
+    - QuestionChoice: Multiple choice options for questions
+    - QuestionClass: Association between questions and classes
+    - QuestionAttempt: Logging of student question attempts
+    - StudentDetails: Student-specific information and stats
+"""
+
 import sqlite3
 import os
 from constants import (

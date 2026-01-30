@@ -1,3 +1,17 @@
+"""
+Database Item Retrieval Module
+
+This module provides functions to query and retrieve data from the game database. It handles
+retrieving account information, tree data, and related resources.
+
+Functions:
+    get_person(username): Retrieve account information including roles and sensitive data removed.
+    get_tree(username): Retrieve complete tree data including resources and decorations for a user.
+
+Returns:
+    Dictionaries with structured data from the database, or None if not found.
+"""
+
 import sqlite3
 import os
 from constants import DB_NAME
@@ -117,9 +131,9 @@ def get_tree(username):
     return {
         **tree_data,
         'resourceLevels': {
-            'water': tree_data.pop('water') or 0,
-            'earth': tree_data.pop('earth') or 0,
-            'sun': tree_data.pop('sun') or 0
+            'water': (tree_data.pop('water') or 0) if tree_data.get('water') is not None else 0,
+            'earth': (tree_data.pop('earth') or 0) if tree_data.get('earth') is not None else 0,
+            'sun': (tree_data.pop('sun') or 0) if tree_data.get('sun') is not None else 0
         },
         'treeDecorations': decorations
     }

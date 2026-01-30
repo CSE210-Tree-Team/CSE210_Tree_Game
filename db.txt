@@ -4,24 +4,28 @@ Successfully connected to /home/adria/CSE210_Tree_Game/Database/game_database.db
 COLUMNS: ['username', 'email', 'passwordHash', 'displayName', 'accountReference', 'dateOfBirth', 'lastLogin']
 --------------------------------------------------------------------------------------------------------------
    ('adrian.s.rosing@gmail.com', 'adrian.s.rosing@gmail.com', 'auth0', 'Adrian Rosing', 'adrian.s.rosing', '2000-01-01', None)
+   ('fakeaccount@gmail.com', 'fakeaccount@gmail.com', 'auth0', 'fakeaccount@gmail.com', 'fakeaccount', '2000-01-01', None)
 
 
 ==================== TABLE: AccountRole ====================
 COLUMNS: ['username', 'role']
 ------------------------------
    ('adrian.s.rosing@gmail.com', 'Student')
+   ('fakeaccount@gmail.com', 'Student')
 
 
 ==================== TABLE: Tree ====================
 COLUMNS: ['treeID', 'ownerUsername', 'health', 'growthStage', 'lastUpdated']
 -----------------------------------------------------------------------------
-   [EMPTY TABLE] - No data rows found.
+   ('235de0fc-6f6a-46c9-8f9a-7ef159cbf3bc', 'adrian.s.rosing@gmail.com', 'Healthy', 0, '2026-01-28T04:08:31.939944')
+   ('73b67d41-1788-4488-bb0c-133d8cfcd779', 'fakeaccount@gmail.com', 'Healthy', 0, '2026-01-28T17:06:50.467802')
 
 
 ==================== TABLE: TreeResources ====================
 COLUMNS: ['treeID', 'water', 'earth', 'sun']
 ---------------------------------------------
-   [EMPTY TABLE] - No data rows found.
+   ('235de0fc-6f6a-46c9-8f9a-7ef159cbf3bc', 100, 100, 100)
+   ('73b67d41-1788-4488-bb0c-133d8cfcd779', 100, 100, 100)
 
 
 ==================== TABLE: TreeDecoration ====================
@@ -91,4 +95,12 @@ User: Adrian Rosing (adrian.s.rosing@gmail.com) [ID: adrian.s]
   Email: adrian.s.rosing@gmail.com
   Roles: Student
   Status: No status info
-  Tree: None assigned
+  Tree 235de0fc | Health: Healthy | Growth: 0 | Updated: 2026-01-28T04:08:31.939944
+    Resources -> Water: 100, Earth: 100, Sun: 100
+
+User: fakeaccount@gmail.com (fakeaccount@gmail.com) [ID: fakeacco]
+  Email: fakeaccount@gmail.com
+  Roles: Student
+  Status: No status info
+  Tree 73b67d41 | Health: Healthy | Growth: 0 | Updated: 2026-01-28T17:06:50.467802
+    Resources -> Water: 100, Earth: 100, Sun: 100
