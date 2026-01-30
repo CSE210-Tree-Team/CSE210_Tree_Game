@@ -21,8 +21,8 @@ MIDDLEWARE_SECRET_KEY = os.getenv("MIDDLEWARE_SECRET_KEY")
 app.add_middleware(SessionMiddleware, secret_key=MIDDLEWARE_SECRET_KEY)
 
 # --- Static File Serving ---
-if os.path.exists("Home Page/dist"):
-    app.mount("/assets", StaticFiles(directory="Home Page/dist/assets"), name="static")
+if os.path.exists("Home_Page/dist"):
+    app.mount("/assets", StaticFiles(directory="Home_Page/dist/assets"), name="static")
 
 # TODO: Need to fix log out process so that session is properly cleared.
 
@@ -134,7 +134,7 @@ async def student_required(request: Request, person = Depends(get_current_user))
 
 @app.get("/")
 def default_page():
-    index_path = os.path.join("Home Page", "dist", "index.html")
+    index_path = os.path.join("Home_Page", "dist", "index.html")
     if os.path.exists(index_path):
         return FileResponse(index_path)
 
