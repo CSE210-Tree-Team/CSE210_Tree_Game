@@ -2,6 +2,7 @@
 
 ## To Run Locally:
 ```
+# Note, you may need Python 3.12.3; without it, consider setting up through Conda
 cd CSE210_Tree_Game
 
 python3 -m venv .venv
