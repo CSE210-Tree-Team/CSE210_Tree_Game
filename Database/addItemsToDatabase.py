@@ -97,29 +97,83 @@ def add_account(username: str, email: str, passwordHash: str, displayName: str,
     
     return username
 
-def add_question(text: str, question_type: str, resource_type: str, choices: list, correct_choices: list):
-
+def add_question(text: str, question_type: str, resource_type: str, choices: list, correct_choices: list, check_duplicates: bool = True) -> str:
+    """
+    Add a new question with choices to the database.
+    
+    Args:
+        text: The question text
+        question_type: Type of question ('MCQ', 'FreeResponse', or 'MultiSelect')
+        resource_type: Resource type ('Water', 'Earth', 'Sun', 'General', or 'None')
+        choices: List of choice texts
+        correct_choices: List of indices indicating which choices are correct
+        check_duplicates: Whether to check for duplicate questions (default: True)
+    
+    Returns:
+        str: The question ID
+    
+    Raises:
+        ValueError: If question_type or resource_type is invalid, or if duplicate exists
+    """
     if question_type not in VALID_QUESTION_TYPES:
         raise ValueError(f"Invalid question type '{question_type}'. Must be one of {VALID_QUESTION_TYPES}")
     
     if resource_type and resource_type not in VALID_QUESTION_RESOURCE_TYPES:
         raise ValueError(f"Invalid resource type '{resource_type}'. Must be one of {VALID_QUESTION_RESOURCE_TYPES}")
     
-    q_id = str(uuid.uuid4())
-
-    # Insert Question
-    cursor.execute("INSERT INTO Question (questionID, text, type, difficulty, resourceType) VALUES (?, ?, ?, ?, ?)",
-                   (q_id, text, question_type, 1, resource_type))
-        
-    # Insert Choices (if any)
-    if choices:
-        for idx, choice_text in enumerate(choices):
-            is_correct = 0
-            if idx in correct_choices:
-                is_correct = 1
+    if not os.path.exists(DB_PATH):
+        raise FileNotFoundError(f"Database {DB_PATH} does not exist. Please create it first.")
+    
+    # Check for duplicates if requested
+    if check_duplicates:
+        with sqlite3.connect(DB_PATH) as conn:
+            cursor = conn.cursor()
             
-            cursor.execute("INSERT INTO QuestionChoice (choiceID, questionID, text, isCorrect) VALUES (?, ?, ?, ?)",
-                        (str(uuid.uuid4()), q_id, choice_text, is_correct))
+            # Find questions with the same text
+            cursor.execute("SELECT questionID FROM Question WHERE text = ?", (text,))
+            potential_duplicates = cursor.fetchall()
+            
+            if potential_duplicates and choices:
+                # Check if any have the same choices
+                for (question_id,) in potential_duplicates:
+                    cursor.execute(
+                        "SELECT text, isCorrect FROM QuestionChoice WHERE questionID = ? ORDER BY text",
+                        (question_id,)
+                    )
+                    existing_choices = cursor.fetchall()
+                    
+                    # Prepare current choices for comparison
+                    current_choices = sorted([
+                        (choice_text, 1 if idx in correct_choices else 0)
+                        for idx, choice_text in enumerate(choices)
+                    ], key=lambda x: x[0])
+                    
+                    if existing_choices == current_choices:
+                        raise ValueError(f"Duplicate question detected with questionID: {question_id}")
+    
+    q_id = str(uuid.uuid4())
+    
+    with sqlite3.connect(DB_PATH) as conn:
+        cursor = conn.cursor()
+        
+        # Insert Question
+        cursor.execute(
+            "INSERT INTO Question (questionID, text, type, difficulty, resourceType) VALUES (?, ?, ?, ?, ?)",
+            (q_id, text, question_type, 1, resource_type)
+        )
+        
+        # Insert Choices (if any)
+        if choices:
+            for idx, choice_text in enumerate(choices):
+                is_correct = 1 if idx in correct_choices else 0
+                cursor.execute(
+                    "INSERT INTO QuestionChoice (choiceID, questionID, text, isCorrect) VALUES (?, ?, ?, ?)",
+                    (str(uuid.uuid4()), q_id, choice_text, is_correct)
+                )
+        
+        conn.commit()
+    
+    return q_id
 
 def add_role(username: str, role: str):
     """

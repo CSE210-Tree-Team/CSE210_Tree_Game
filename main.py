@@ -230,7 +230,7 @@ def update_user(displayName: str = None, dateOfBirth: str = None, request: Reque
 
 
 @app.post("/api/add-question")
-def api_add_question(request: Request, student=Depends(student_required)):
+async def api_add_question(request: Request, student=Depends(student_required)):
     """
     API endpoint to add a question to the database. Takes in a JSON body with the following fields:
     {
@@ -243,15 +243,29 @@ def api_add_question(request: Request, student=Depends(student_required)):
 
     Note that correct_choices is a list of indices in the choices array, so multiple correct answers are possible.
     """
-    data = await request.json()
+    try:
+        data = await request.json()
+    except Exception as e:
+        raise HTTPException(status_code=400, detail="Invalid JSON in request body")
+    
     text = data.get("text")
     question_type = data.get("question_type")
     resource_type = data.get("resource_type")
     choices = data.get("choices", [])
     correct_choices = data.get("correct_choices", [])
-
-    add_question(text, question_type, resource_type, choices, correct_choices)
-    return {"success": True, "message": "Question added successfully"}
+    check_duplicates = data.get("check_duplicates", True)
+    
+    if not text:
+        raise HTTPException(status_code=400, detail="Question text is required")
+    
+    try:
+        question_id = add_question(text, question_type, resource_type, choices, correct_choices, check_duplicates)
+        return {"success": True, "message": "Question added successfully", "questionID": question_id}
+    # TODO: May want to be careful of these exceptions crashing stuff.
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to add question: {str(e)}")
 
 # Get question:
 @app.get("/api/get-question/{question_id}")
