@@ -58,7 +58,7 @@ from constants import (
     QUESTION_RESOURCE_WATER, QUESTION_RESOURCE_GENERAL,
     RESOURCE_MAX_LEVEL, RESOURCE_MIN_LEVEL, EVENT_BONUS, EVENT_PENALTY, EVENT_LEVEL, EVENT_NEUTRAL
 )
-import dataRecords as dataclasses
+import utils.dataRecords as dataclasses
 
 
 class DatabaseInteractTestCase(unittest.TestCase):

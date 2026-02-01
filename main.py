@@ -8,7 +8,7 @@ from dotenv import load_dotenv
 from Database.getItemsFromDatabase import get_person, get_tree
 from Database.addItemsToDatabase import add_account, generate_tree, add_question
 from constants import ROLE_STUDENT
-from dataRecords import Tree, Event
+from utils.dataRecords import Tree, Event
 
 
 ############################################

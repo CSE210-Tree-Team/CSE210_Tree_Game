@@ -28,6 +28,24 @@ To test the database, as per the GitHub Actions, run both: `python -m Database.d
 2. Then, run `npm run build` to start the server. 
 3. This needs to be statically compiled with `npm run build` while in the `Home Page` directory
 
+## Questions:
+To add questions, populate `utils/questions.json`. Then, run `python -m utils.addDefaultQuestions` to add all of the questions to the Database. Alternatively, when the app is running, verified posts to `/api/add-question` will also add non-duplicate questions. The format of a question is as follows. Note that `correct_choices` may contain several indices of correct choices:
+
+```
+{
+"text": "What color is our sun?",
+"question_type": "MCQ",
+"resource_type": "Sun",
+"choices": ["Yellow", "Green", "Blue"],
+"correct_choices": [0]
+}
+```
+
+## Routes:
+Route tests can be run with `python -m unittest apiRoutesTests -v`
+
+- `/api/add-question`
+- `/api/get-user-info`
 
 ## Account Info:
 Currently, an email may only be associated to one account. Upon account creation, a tree will also be created.
@@ -35,7 +53,7 @@ Currently, an email may only be associated to one account. Upon account creation
 ### LLM Credits:
 - Gemini was used to generate printDatabase.py
 - Gamini was used to help with some of the addItemsToDatabase.py and getItemsFromDatabase.py
-- Gemini was used to help create the databaseInteractUnitTests.
+- Gemini was used to help create the databaseInteractUnitTests and the apiRoutesTests.
 - Gemini was used to help with authentication and combining FastAPI with React Home Page
 - Gemini was used to help create the .github workflow to automatically run tests.
 - Gemini was used to help create a summary docstring for each file in the Database module.
