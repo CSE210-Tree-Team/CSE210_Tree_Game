@@ -6,7 +6,7 @@ from fastapi.responses import FileResponse, RedirectResponse
 from starlette.middleware.sessions import SessionMiddleware
 from dotenv import load_dotenv
 from Database.getItemsFromDatabase import get_person, get_tree
-from Database.addItemsToDatabase import add_account, generate_tree
+from Database.addItemsToDatabase import add_account, generate_tree, add_question
 from constants import ROLE_STUDENT
 from dataRecords import Tree, Event
 
@@ -232,10 +232,26 @@ def update_user(displayName: str = None, dateOfBirth: str = None, request: Reque
 @app.post("/api/add-question")
 def api_add_question(request: Request, student=Depends(student_required)):
     """
-    API endpoint to add a question to the database.
+    API endpoint to add a question to the database. Takes in a JSON body with the following fields:
+    {
+        "text": "What color is the sun?",
+        "question_type": "MCQ",
+        "resource_type": "Sun",
+        "choices": ["Yellow", "Green", "Blue"],
+        "correct_choices": [0]
+    }
+
+    Note that correct_choices is a list of indices in the choices array, so multiple correct answers are possible.
     """
-    # TODO: Implement question addition logic here.
-    return None
+    data = await request.json()
+    text = data.get("text")
+    question_type = data.get("question_type")
+    resource_type = data.get("resource_type")
+    choices = data.get("choices", [])
+    correct_choices = data.get("correct_choices", [])
+
+    add_question(text, question_type, resource_type, choices, correct_choices)
+    return {"success": True, "message": "Question added successfully"}
 
 # Get question:
 @app.get("/api/get-question/{question_id}")

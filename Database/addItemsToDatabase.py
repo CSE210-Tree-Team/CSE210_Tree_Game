@@ -13,7 +13,7 @@ Functions - Account Management:
     add_student_details(student_username, student_level, student_stats, parent_email)
 
 Functions - Question Management:
-    add_question(question_id, text, question_type, difficulty, resource_type)
+    add_question_alone(question_id, text, question_type, difficulty, resource_type)
     add_question_choice(choice_id, question_id, text, is_correct)
 
 Functions - Tree & Resource Management:
@@ -97,6 +97,29 @@ def add_account(username: str, email: str, passwordHash: str, displayName: str,
     
     return username
 
+def add_question(text: str, question_type: str, resource_type: str, choices: list, correct_choices: list):
+
+    if question_type not in VALID_QUESTION_TYPES:
+        raise ValueError(f"Invalid question type '{question_type}'. Must be one of {VALID_QUESTION_TYPES}")
+    
+    if resource_type and resource_type not in VALID_QUESTION_RESOURCE_TYPES:
+        raise ValueError(f"Invalid resource type '{resource_type}'. Must be one of {VALID_QUESTION_RESOURCE_TYPES}")
+    
+    q_id = str(uuid.uuid4())
+
+    # Insert Question
+    cursor.execute("INSERT INTO Question (questionID, text, type, difficulty, resourceType) VALUES (?, ?, ?, ?, ?)",
+                   (q_id, text, question_type, 1, resource_type))
+        
+    # Insert Choices (if any)
+    if choices:
+        for idx, choice_text in enumerate(choices):
+            is_correct = 0
+            if idx in correct_choices:
+                is_correct = 1
+            
+            cursor.execute("INSERT INTO QuestionChoice (choiceID, questionID, text, isCorrect) VALUES (?, ?, ?, ?)",
+                        (str(uuid.uuid4()), q_id, choice_text, is_correct))
 
 def add_role(username: str, role: str):
     """
@@ -121,7 +144,7 @@ def add_role(username: str, role: str):
     _execute(sql, (username, role))
 
 
-def add_question(question_id: str, text: str, question_type: str, difficulty: int = None, 
+def add_question_alone(question_id: str, text: str, question_type: str, difficulty: int = None, 
                  resource_type: str = None) -> str:
     """
     Add a new question to the database.
