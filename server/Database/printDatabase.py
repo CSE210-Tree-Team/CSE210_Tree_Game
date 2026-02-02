@@ -168,9 +168,74 @@ def print_condensed_user_info(db_path=DB_PATH):
 
     conn.close()
 
+def print_questions_overview(db_path=DB_PATH):
+    """
+    Print all questions with their choices in a readable format.
+    """
+    if not os.path.exists(db_path):
+        print(f"Error: Database '{db_path}' not found.")
+        return
+
+    conn = sqlite3.connect(db_path)
+    cursor = conn.cursor()
+
+    try:
+        cursor.execute("""
+            SELECT questionID, text, type, difficulty, resourceType 
+            FROM Question 
+            ORDER BY resourceType, type, text
+        """)
+        questions = cursor.fetchall()
+    except sqlite3.OperationalError as e:
+        print(f"Unable to read Question table: {e}")
+        conn.close()
+        return
+
+    if not questions:
+        print("No questions found in the database.")
+        conn.close()
+        return
+
+    print("\n=================== Questions Overview ===================")
+    print(f"Total Questions: {len(questions)}\n")
+
+    for question_id, text, q_type, difficulty, resource_type in questions:
+        # Print question header
+        print(f"{'='*70}")
+        print(f"Question ID: {question_id}")
+        print(f"Type: {q_type} | Resource: {resource_type} | Difficulty: {difficulty or 'N/A'}")
+        print(f"{'='*70}")
+        print(f"Q: {text}")
+        print()
+
+        # Get choices for this question
+        cursor.execute("""
+            SELECT choiceID, text, isCorrect 
+            FROM QuestionChoice 
+            WHERE questionID = ? 
+            ORDER BY choiceID
+        """, (question_id,))
+        choices = cursor.fetchall()
+
+        if choices:
+            print("Choices:")
+            for idx, (choice_id, choice_text, is_correct) in enumerate(choices, 1):
+                correct_marker = "✓" if is_correct else " "
+                print(f"  [{correct_marker}] {idx}. {choice_text}")
+        else:
+            print("  (Free Response - No predefined choices)")
+        
+        print()  # Add spacing between questions
+
+    conn.close()
+
 if __name__ == "__main__":
     print_database_contents(db_path=DB_PATH)
 
     print("\n\n=================== End of Database Contents ====================\n\n")
 
     print_condensed_user_info(db_path=DB_PATH)
+    
+    print("\n\n")
+    
+    print_questions_overview(db_path=DB_PATH)

@@ -137,3 +137,125 @@ def get_tree(username):
         },
         'treeDecorations': decorations
     }
+
+def get_question(questionID):
+    """
+    Retrieve question information by questionID.
+
+    Args:
+        questionID (str): The questionID value to look up.
+
+    Returns:
+        dict: Question information with choices or None if not found.
+        Example: {
+            'questionID': '...',
+            'text': '...',
+            'type': 'MCQ',
+            'difficulty': 1,
+            'resourceType': 'Water',
+            'choices': [
+                {'text': 'choice1', 'isCorrect': True},
+                {'text': 'choice2', 'isCorrect': False}
+            ]
+        }
+    """
+
+    question = _query(
+        "SELECT questionID, text, type, difficulty, resourceType FROM Question WHERE questionID = ?", 
+        (questionID,), 
+        fetchone=True
+    )
+    
+    if not question:
+        return None
+
+    choices = _query(
+        "SELECT text, isCorrect FROM QuestionChoice WHERE questionID = ?", 
+        (questionID,)
+    )
+
+    return {
+        'questionID': question['questionID'],
+        'text': question['text'],
+        'type': question['type'],
+        'difficulty': question['difficulty'],
+        'resourceType': question['resourceType'],
+        'choices': [{'text': c['text'], 'isCorrect': bool(c['isCorrect'])} for c in choices]
+    }
+
+def get_questions(num_questions=None, resource_type=None, question_type=None, difficulty=None):
+    """
+    Retrieve multiple questions from the database with optional filters.
+    Returns random questions matching the criteria.
+
+    Args:
+        num_questions (int, optional): Maximum number of questions to return. If None, returns all matching questions.
+        resource_type (str, optional): Filter by resource type ('Water', 'Earth', 'Sun', 'General')
+        question_type (str, optional): Filter by question type ('MCQ', 'FreeResponse', 'MultiSelect')
+        difficulty (int, optional): Filter by difficulty level
+
+    Returns:
+        list: List of question dictionaries, each containing:
+            {
+                'questionID': '...',
+                'text': '...',
+                'type': 'MCQ',
+                'difficulty': 1,
+                'resourceType': 'Water',
+                'choices': [{'text': '...', 'isCorrect': True/False}, ...]
+            }
+    """
+    # Build the WHERE clause based on provided filters
+    where_clauses = []
+    params = []
+    
+    if resource_type:
+        where_clauses.append("resourceType = ?")
+        params.append(resource_type)
+    
+    if question_type:
+        where_clauses.append("type = ?")
+        params.append(question_type)
+    
+    if difficulty is not None:
+        where_clauses.append("difficulty = ?")
+        params.append(difficulty)
+    
+    # Construct the SQL query
+    where_sql = " WHERE " + " AND ".join(where_clauses) if where_clauses else ""
+    
+    # Get questions with random ordering
+    sql = f"""
+        SELECT questionID, text, type, difficulty, resourceType 
+        FROM Question
+        {where_sql}
+        ORDER BY RANDOM()
+    """
+    
+    # Add limit if num_questions is specified
+    if num_questions is not None:
+        sql += f" LIMIT {int(num_questions)}"
+    
+    questions = _query(sql, tuple(params))
+    
+    if not questions:
+        return []
+    
+    # For each question, get its choices
+    result = []
+    for question in questions:
+        choices = _query(
+            "SELECT text, isCorrect FROM QuestionChoice WHERE questionID = ? ORDER BY choiceID",
+            (question['questionID'],)
+        )
+        
+        result.append({
+            'questionID': question['questionID'],
+            'text': question['text'],
+            'type': question['type'],
+            'difficulty': question['difficulty'],
+            'resourceType': question['resourceType'],
+            'choices': [{'text': c['text'], 'isCorrect': bool(c['isCorrect'])} for c in choices]
+        })
+    
+    return result
