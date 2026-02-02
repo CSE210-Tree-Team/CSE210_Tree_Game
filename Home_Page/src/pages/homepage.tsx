@@ -2,14 +2,23 @@ import { useAuth0 } from '@auth0/auth0-react';
 import { useEffect, useState } from 'react';
 
 interface UserInfo {
-    username: string;
-    treeID: string;
-    resourceLevels: {
-        water: number;
-        earth: number;
-        sun: number;
+    success: boolean;
+    user: {
+        username: string;
+        displayName: string;
+        email: string;
+        roles: string[];
     };
-    displayName: string;
+    tree: {
+        treeID: string;
+        health: string;
+        growthStage: number;
+        resourceLevels: {
+            water: number;
+            earth: number;
+            sun: number;
+        };
+    };
 }
 
 export const Homepage = () => {
@@ -88,9 +97,9 @@ export const Homepage = () => {
                 {showResources && userInfo && (
                     <div style={{ marginTop: '10px', padding: '10px', border: '1px solid #ccc' }}>
                         <h3>Resource Levels:</h3>
-                        <p>Water: {userInfo.resourceLevels.water}</p>
-                        <p>Earth: {userInfo.resourceLevels.earth}</p>
-                        <p>Sun: {userInfo.resourceLevels.sun}</p>
+                        <p>Water: {userInfo.tree.resourceLevels.water}</p>
+                        <p>Earth: {userInfo.tree.resourceLevels.earth}</p>
+                        <p>Sun: {userInfo.tree.resourceLevels.sun}</p>
                     </div>
                 )}
             </div>

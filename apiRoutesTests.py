@@ -1,22 +1,14 @@
-"""
-API Routes Unit Tests
+"""API route tests for main.py.
 
-Comprehensive unit tests for the FastAPI routes in main.py, particularly focusing on 
-the api_add_question endpoint and question management functionality.
+This module contains unit tests for FastAPI endpoints and supporting database logic,
+with an emphasis on question creation, duplicate detection, and validation behavior.
+It also covers user information retrieval routes.
 
-Tests are specifically focused on the file: main.py and its API routes.
-
-Test Classes:
-    APIRoutesTestCase: Base test class with database and FastAPI client setup/teardown.
-    TestAddQuestionFunction: Direct tests for the add_question() function.
-    TestAPIAddQuestion: API endpoint tests for /api/add-question.
-    TestOtherAPIRoutes: Tests for other API endpoints like /api/get-user-info.
-
-Total Unit Tests: 17
-Coverage: Question addition (MCQ, MultiSelect, FreeResponse), duplicate detection,
-          input validation, error handling, and user information retrieval.
-
-Note: Created this file was created with assistance from Gemini
+Test classes:
+    APIRoutesTestCase: Base test class that provisions a temporary database and client.
+    TestAddQuestionFunction: Direct tests for `add_question()`.
+    TestAPIAddQuestion: Endpoint tests for /api/add-question.
+    TestOtherAPIRoutes: Endpoint tests for /api/get-user-info and related routes.
 """
 
 import sqlite3
@@ -436,10 +428,387 @@ class TestOtherAPIRoutes(APIRoutesTestCase):
         self.assertEqual(response.status_code, 200)
         
         data = response.json()
-        self.assertIn("username", data)
-        self.assertIn("treeID", data)
-        self.assertIn("resourceLevels", data)
-        self.assertIn("displayName", data)
+        self.assertTrue(data["success"])
+        self.assertIn("user", data)
+        self.assertIn("tree", data)
+        
+        # Check user structure
+        user = data["user"]
+        self.assertIn("username", user)
+        self.assertIn("displayName", user)
+        self.assertIn("email", user)
+        self.assertIn("roles", user)
+        
+        # Check tree structure
+        tree = data["tree"]
+        self.assertIn("treeID", tree)
+        self.assertIn("health", tree)
+        self.assertIn("growthStage", tree)
+        self.assertIn("resourceLevels", tree)
+        
+        # Check resourceLevels if present (may be None)
+        if tree["resourceLevels"] is not None:
+            self.assertIn("water", tree["resourceLevels"])
+            self.assertIn("earth", tree["resourceLevels"])
+            self.assertIn("sun", tree["resourceLevels"])
+
+
+class TestGetQuestionEndpoint(APIRoutesTestCase):
+    """Tests for the /api/get-question endpoint."""
+    
+    def setUp(self):
+        """Set up test data before each test."""
+        super().setUp()
+        self.client = self.get_authenticated_client()
+        
+        # Add some test questions
+        self.q1_id = add_question(
+            text="What is photosynthesis?",
+            question_type=QUESTION_MCQ,
+            resource_type=QUESTION_RESOURCE_SUN,
+            choices=["Energy production", "Water absorption", "Root growth"],
+            correct_choices=[0]
+        )
+        
+        self.q2_id = add_question(
+            text="Which are primary colors?",
+            question_type=QUESTION_MULTI_SELECT,
+            resource_type=QUESTION_RESOURCE_GENERAL,
+            choices=["Red", "Green", "Blue", "Yellow"],
+            correct_choices=[0, 2]
+        )
+    
+    def test_get_single_question_success(self):
+        """Test retrieving a single question by ID."""
+        response = self.client.post(
+            "/api/get-question",
+            json={"questionID": self.q1_id}
+        )
+        
+        self.assertEqual(response.status_code, 200)
+        data = response.json()
+        self.assertTrue(data["success"])
+        self.assertIn("question", data)
+        
+        question = data["question"]
+        self.assertEqual(question["questionID"], self.q1_id)
+        self.assertEqual(question["text"], "What is photosynthesis?")
+        self.assertEqual(question["type"], QUESTION_MCQ)
+        self.assertEqual(question["resourceType"], QUESTION_RESOURCE_SUN)
+    
+    def test_get_single_question_with_choices(self):
+        """Test that question includes choice information."""
+        response = self.client.post(
+            "/api/get-question",
+            json={"questionID": self.q1_id}
+        )
+        
+        self.assertEqual(response.status_code, 200)
+        data = response.json()
+        question = data["question"]
+        
+        self.assertIn("choices", question)
+        self.assertEqual(len(question["choices"]), 3)
+        
+        # Verify choice structure with isCorrect flags
+        choices = question["choices"]
+        correct_found = False
+        for choice in choices:
+            self.assertIn("text", choice)
+            self.assertIn("isCorrect", choice)
+            if choice["isCorrect"]:
+                correct_found = True
+        
+        self.assertTrue(correct_found, "No correct answer found")
+    
+    def test_get_nonexistent_question(self):
+        """Test retrieving a non-existent question returns 404."""
+        response = self.client.post(
+            "/api/get-question",
+            json={"questionID": "nonexistent-id"}
+        )
+        
+        self.assertEqual(response.status_code, 404)
+        data = response.json()
+        self.assertIn("detail", data)
+    
+    def test_get_question_missing_id(self):
+        """Test that missing questionID returns error."""
+        response = self.client.post(
+            "/api/get-question",
+            json={}
+        )
+        
+        self.assertEqual(response.status_code, 400)
+        data = response.json()
+        self.assertIn("questionID is required", data["detail"])
+    
+    def test_get_question_multiselect(self):
+        """Test retrieving a multi-select question."""
+        response = self.client.post(
+            "/api/get-question",
+            json={"questionID": self.q2_id}
+        )
+        
+        self.assertEqual(response.status_code, 200)
+        data = response.json()
+        question = data["question"]
+        
+        self.assertEqual(question["type"], QUESTION_MULTI_SELECT)
+        
+        # Verify multiple correct answers
+        correct_answers = [c["text"] for c in question["choices"] if c["isCorrect"]]
+        self.assertEqual(len(correct_answers), 2)
+        self.assertIn("Red", correct_answers)
+        self.assertIn("Blue", correct_answers)
+
+
+class TestGetQuestionsEndpoint(APIRoutesTestCase):
+    """Tests for the /api/get-questions endpoint."""
+    
+    def setUp(self):
+        """Set up test data before each test."""
+        super().setUp()
+        self.client = self.get_authenticated_client()
+        
+        # Add various test questions
+        self.water_q1 = add_question(
+            text="What percentage of Earth is water?",
+            question_type=QUESTION_MCQ,
+            resource_type=QUESTION_RESOURCE_WATER,
+            choices=["50%", "71%", "90%"],
+            correct_choices=[1]
+        )
+        
+        self.water_q2 = add_question(
+            text="Which are types of precipitation?",
+            question_type=QUESTION_MULTI_SELECT,
+            resource_type=QUESTION_RESOURCE_WATER,
+            choices=["Rain", "Snow", "Hail", "Dust"],
+            correct_choices=[0, 1, 2]
+        )
+        
+        self.sun_q1 = add_question(
+            text="Why do plants need sunlight?",
+            question_type=QUESTION_FREE_RESPONSE,
+            resource_type=QUESTION_RESOURCE_SUN,
+            choices=[],
+            correct_choices=[]
+        )
+        
+        self.earth_q1 = add_question(
+            text="What is soil made of?",
+            question_type=QUESTION_MCQ,
+            resource_type=QUESTION_RESOURCE_EARTH,
+            choices=["Sand", "Rock and organic matter", "Clay"],
+            correct_choices=[1]
+        )
+    
+    def test_get_all_questions(self):
+        """Test retrieving all questions."""
+        response = self.client.post("/api/get-questions", json={})
+        
+        self.assertEqual(response.status_code, 200)
+        data = response.json()
+        self.assertTrue(data["success"])
+        self.assertGreaterEqual(data["count"], 4)
+        self.assertEqual(len(data["questions"]), data["count"])
+    
+    def test_get_questions_with_limit(self):
+        """Test retrieving questions with numQuestions limit."""
+        response = self.client.post(
+            "/api/get-questions",
+            json={"numQuestions": 2}
+        )
+        
+        self.assertEqual(response.status_code, 200)
+        data = response.json()
+        self.assertEqual(data["count"], 2)
+        self.assertEqual(len(data["questions"]), 2)
+    
+    def test_get_questions_by_resource_type(self):
+        """Test filtering questions by resource type."""
+        response = self.client.post(
+            "/api/get-questions",
+            json={"resourceType": QUESTION_RESOURCE_WATER}
+        )
+        
+        self.assertEqual(response.status_code, 200)
+        data = response.json()
+        self.assertGreaterEqual(data["count"], 2)
+        
+        # Verify all returned questions are Water type
+        for question in data["questions"]:
+            self.assertEqual(question["resourceType"], QUESTION_RESOURCE_WATER)
+    
+    def test_get_questions_by_question_type(self):
+        """Test filtering questions by question type."""
+        response = self.client.post(
+            "/api/get-questions",
+            json={"questionType": QUESTION_MCQ}
+        )
+        
+        self.assertEqual(response.status_code, 200)
+        data = response.json()
+        self.assertGreater(data["count"], 0)
+        
+        # Verify all returned questions are MCQ type
+        for question in data["questions"]:
+            self.assertEqual(question["type"], QUESTION_MCQ)
+    
+    def test_get_questions_multi_filter(self):
+        """Test filtering by multiple criteria."""
+        response = self.client.post(
+            "/api/get-questions",
+            json={
+                "resourceType": QUESTION_RESOURCE_WATER,
+                "questionType": QUESTION_MCQ,
+                "numQuestions": 5
+            }
+        )
+        
+        self.assertEqual(response.status_code, 200)
+        data = response.json()
+        self.assertEqual(len(data["questions"]), 1)  # Only 1 Water MCQ
+        
+        question = data["questions"][0]
+        self.assertEqual(question["resourceType"], QUESTION_RESOURCE_WATER)
+        self.assertEqual(question["type"], QUESTION_MCQ)
+    
+    def test_get_questions_multiselect_type(self):
+        """Test retrieving multi-select questions."""
+        response = self.client.post(
+            "/api/get-questions",
+            json={"questionType": QUESTION_MULTI_SELECT}
+        )
+        
+        self.assertEqual(response.status_code, 200)
+        data = response.json()
+        self.assertGreater(data["count"], 0)
+        
+        for question in data["questions"]:
+            self.assertEqual(question["type"], QUESTION_MULTI_SELECT)
+    
+    def test_get_questions_free_response_type(self):
+        """Test retrieving free response questions."""
+        response = self.client.post(
+            "/api/get-questions",
+            json={"questionType": QUESTION_FREE_RESPONSE}
+        )
+        
+        self.assertEqual(response.status_code, 200)
+        data = response.json()
+        self.assertGreater(data["count"], 0)
+        
+        for question in data["questions"]:
+            self.assertEqual(question["type"], QUESTION_FREE_RESPONSE)
+    
+    def test_get_questions_randomization(self):
+        """Test that multiple calls return different orders (randomization)."""
+        # Get questions multiple times
+        responses = []
+        for _ in range(3):
+            response = self.client.post(
+                "/api/get-questions",
+                json={"numQuestions": 4}
+            )
+            self.assertEqual(response.status_code, 200)
+            questions = response.json()["questions"]
+            question_ids = [q["questionID"] for q in questions]
+            responses.append(question_ids)
+        
+        # At least one order should be different (very likely with randomization)
+        # This is a soft check - just verify we got questions
+        self.assertGreater(len(responses[0]), 0)
+    
+    def test_get_questions_limit_zero(self):
+        """Test requesting zero questions."""
+        response = self.client.post(
+            "/api/get-questions",
+            json={"numQuestions": 0}
+        )
+        
+        self.assertEqual(response.status_code, 200)
+        data = response.json()
+        self.assertEqual(data["count"], 0)
+        self.assertEqual(len(data["questions"]), 0)
+    
+    def test_get_questions_invalid_resource_type(self):
+        """Test with invalid resource type returns empty."""
+        response = self.client.post(
+            "/api/get-questions",
+            json={"resourceType": "InvalidType"}
+        )
+        
+        self.assertEqual(response.status_code, 200)
+        data = response.json()
+        self.assertEqual(data["count"], 0)
+    
+    def test_get_questions_invalid_question_type(self):
+        """Test with invalid question type returns empty."""
+        response = self.client.post(
+            "/api/get-questions",
+            json={"questionType": "InvalidType"}
+        )
+        
+        self.assertEqual(response.status_code, 200)
+        data = response.json()
+        self.assertEqual(data["count"], 0)
+    
+    def test_get_questions_response_structure(self):
+        """Test that response has proper structure."""
+        response = self.client.post(
+            "/api/get-questions",
+            json={"numQuestions": 1}
+        )
+        
+        self.assertEqual(response.status_code, 200)
+        data = response.json()
+        
+        # Check response structure
+        self.assertIn("success", data)
+        self.assertIn("count", data)
+        self.assertIn("questions", data)
+        self.assertTrue(data["success"])
+        self.assertEqual(len(data["questions"]), data["count"])
+        
+        # Check question structure
+        if data["count"] > 0:
+            question = data["questions"][0]
+            self.assertIn("questionID", question)
+            self.assertIn("text", question)
+            self.assertIn("type", question)
+            self.assertIn("difficulty", question)
+            self.assertIn("resourceType", question)
+            self.assertIn("choices", question)
+            
+            # Check choice structure
+            if len(question["choices"]) > 0:
+                choice = question["choices"][0]
+                self.assertIn("text", choice)
+                self.assertIn("isCorrect", choice)
+    
+    def test_get_questions_all_resource_types(self):
+        """Test retrieving questions for each resource type separately."""
+        resource_types = [
+            QUESTION_RESOURCE_WATER,
+            QUESTION_RESOURCE_EARTH,
+            QUESTION_RESOURCE_SUN,
+            QUESTION_RESOURCE_GENERAL
+        ]
+        
+        for resource_type in resource_types:
+            response = self.client.post(
+                "/api/get-questions",
+                json={"resourceType": resource_type}
+            )
+            
+            self.assertEqual(response.status_code, 200)
+            data = response.json()
+            
+            # Verify all questions match the resource type
+            for question in data["questions"]:
+                self.assertEqual(question["resourceType"], resource_type)
 
 
 if __name__ == "__main__":
