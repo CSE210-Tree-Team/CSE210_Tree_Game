@@ -1,4 +1,5 @@
 import { useAuth0 } from '@auth0/auth0-react';
+import { useNavigate } from 'react-router-dom'; 
 import { useEffect, useState } from 'react';
 
 interface UserInfo {
@@ -16,6 +17,8 @@ export const Homepage = () => {
     const { user, logout, getAccessTokenSilently } = useAuth0();
     const [userInfo, setUserInfo] = useState<UserInfo | null>(null);
     const [showResources, setShowResources] = useState(false);
+    const navigate = useNavigate();
+
 
     useEffect(() => {
         // Establish backend session after Auth0 login
@@ -51,11 +54,11 @@ export const Homepage = () => {
         logout({ logoutParams: { returnTo: window.location.origin } });
 
     const handleSoilGame = () => {
-        window.location.href = '/soilGame';
+        navigate('/soil');
     };
 
     const handleWaterGame = () => {
-        window.location.href = '/rainGame';
+        navigate('/water');
     };
 
     return (
