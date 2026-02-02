@@ -9,6 +9,10 @@ jobs:
   test:
     runs-on: ubuntu-latest
 
+    defaults:
+      run:
+        working-directory: server
+
     steps:
       - uses: actions/checkout@v4
 
@@ -28,4 +32,4 @@ jobs:
 
       - name: Run Database Interaction Unit Tests
         run: |
-          python -m Database.databaseInteractUnitTests -v
+          python -m unittest Database.databaseInteractUnitTests -v

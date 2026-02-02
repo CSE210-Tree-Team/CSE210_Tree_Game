@@ -1,11 +1,17 @@
 # CSE210_Tree_Game
 
-## To Run Locally:
-```
-# Note, you may need Python 3.12.3; without it, consider setting up through Conda
-cd CSE210_Tree_Game
 
-python3 -m venv .venv
+## To start the frontend:
+```
+cd client
+npm install # if u haven't already
+npm run dev
+```
+
+## To start the backend:
+```
+cd server
+python -m venv .venv
 source .venv/bin/activate
 
 pip install --upgrade pip
@@ -13,6 +19,9 @@ pip install -r requirements.txt
 
 python main.py
 ```
+
+
+
 
 ## Database:
 To create the database, run `python -m Database.createDatabase`  
