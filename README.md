@@ -1,12 +1,15 @@
 # CSE210_Tree_Game
 
-## about .env file
-NOTE: Make sure to add the .env to the client folder.
-```
-VITE_AUTH0_DOMAIN=urkey
-VITE_AUTH0_CLIENT_ID=urkey
-```
-
+## Initial Setup:
+1) Clone the Repository
+2) Set up the .env file and put it in the client folder. Note: it is on discord for members of our group.
+    * VITE_AUTH0_DOMAIN = 
+    * VITE_AUTH0_CLIENT_ID = 
+    * AUTH0_CLIENT_SECRET = 
+    * MIDDLEWARE_SECRET_KEY = 
+3) Create the database: `python -m Database.createDatabase`
+4) Now set up the frontend and backend (instructions below).
+5) Once completed, you can acess the webpage at: http://localhost:5173/.
 
 ## To start the frontend:
 ```
@@ -39,9 +42,8 @@ For getting organized dictionaries from the database, please reference `Database
 
 To test the database, as per the GitHub Actions, run both: `python -m Database.databaseInteractUnitTests` and `python -m Database.databaseUnitTests`.
 
-
 ## Questions:
-To add questions, populate `utils/questions.json`. Then, run `python -m utils.addDefaultQuestions` to add all of the questions to the Database. Alternatively, when the app is running, verified posts to `/api/add-question` will also add non-duplicate questions. The format of a question is as follows. Note that `correct_choices` may contain several indices of correct choices:
+To add questions, populate `utils/questions.json`. Then, run `python -m utils.addDefaultQuestions` from the parent directory to add all of the questions to the Database. Alternatively, when the app is running, verified posts to `/api/add-question` will also add non-duplicate questions. The format of a question is as follows. Note that `correct_choices` may contain several indices of correct choices:
 
 ```
 {
@@ -53,10 +55,12 @@ To add questions, populate `utils/questions.json`. Then, run `python -m utils.ad
 }
 ```
 
-## Routes:
-Route tests can be run with `python -m unittest apiRoutesTests -v`
+## API Calls:
+API tests can be run with `python -m unittest apiRoutesTests -v`
 
 - `/api/add-question`
+- `/api/add-questions`
+- `/api/get-question`
 - `/api/get-user-info`
 
 ## Account Info:
