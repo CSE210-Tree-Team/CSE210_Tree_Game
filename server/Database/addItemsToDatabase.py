@@ -37,7 +37,7 @@ from constants import (
     ATTEMPT_RESOURCE_NONE, EVENT_LEVEL, EVENT_BONUS, EVENT_PENALTY, EVENT_NEUTRAL,
     RESOURCE_MAX_LEVEL, RESOURCE_MIN_LEVEL
 )
-import utils.dataRecords as dataclasses
+import dataRecords as dataclasses
 import uuid
 
 

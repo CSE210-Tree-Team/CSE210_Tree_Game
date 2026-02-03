@@ -1,11 +1,27 @@
 # CSE210_Tree_Game
 
-## To Run Locally:
-```
-# Note, you may need Python 3.12.3; without it, consider setting up through Conda
-cd CSE210_Tree_Game
+## Initial Setup:
+1) Clone the Repository
+2) Set up the .env file and put it in the client folder. Note: it is on discord for members of our group.
+    * VITE_AUTH0_DOMAIN = 
+    * VITE_AUTH0_CLIENT_ID = 
+    * AUTH0_CLIENT_SECRET = 
+    * MIDDLEWARE_SECRET_KEY = 
+3) Create the database: `python -m Database.createDatabase`
+4) Now set up the frontend and backend (instructions below).
+5) Once completed, you can acess the webpage at: http://localhost:5173/.
 
-python3 -m venv .venv
+## To start the frontend:
+```
+cd client
+npm install # if u haven't already
+npm run dev
+```
+
+## To start the backend:
+```
+cd server
+python -m venv .venv
 source .venv/bin/activate
 
 pip install --upgrade pip
@@ -13,6 +29,9 @@ pip install -r requirements.txt
 
 python main.py
 ```
+
+
+
 
 ## Database:
 To create the database, run `python -m Database.createDatabase`  
@@ -23,13 +42,8 @@ For getting organized dictionaries from the database, please reference `Database
 
 To test the database, as per the GitHub Actions, run both: `python -m Database.databaseInteractUnitTests` and `python -m Database.databaseUnitTests`.
 
-## Home Page:
-1. First, cd to Home page. And then, run `npm install`. (you should configure npm if u don't have it installed yet lol)
-2. Then, run `npm run build` to start the server. 
-3. This needs to be statically compiled with `npm run build` while in the `Home Page` directory
-
 ## Questions:
-To add questions, populate `utils/questions.json`. Then, run `python -m utils.addDefaultQuestions` to add all of the questions to the Database. Alternatively, when the app is running, verified posts to `/api/add-question` will also add non-duplicate questions. The format of a question is as follows. Note that `correct_choices` may contain several indices of correct choices:
+To add questions, populate `utils/questions.json`. Then, run `python -m utils.addDefaultQuestions` from the parent directory to add all of the questions to the Database. Alternatively, when the app is running, verified posts to `/api/add-question` will also add non-duplicate questions. The format of a question is as follows. Note that `correct_choices` may contain several indices of correct choices:
 
 ```
 {
@@ -41,10 +55,12 @@ To add questions, populate `utils/questions.json`. Then, run `python -m utils.ad
 }
 ```
 
-## Routes:
-Route tests can be run with `python -m unittest apiRoutesTests -v`
+## API Calls:
+API tests can be run with `python -m unittest apiRoutesTests -v`
 
 - `/api/add-question`
+- `/api/add-questions`
+- `/api/get-question`
 - `/api/get-user-info`
 
 ## Account Info:

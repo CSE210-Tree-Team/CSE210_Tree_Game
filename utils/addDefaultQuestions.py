@@ -9,7 +9,7 @@ to avoid adding the same question multiple times.
 import json
 import os
 import sys
-from Database.addItemsToDatabase import add_question
+from server.Database.addItemsToDatabase import add_question
 
 QUESTIONS_FILE = os.path.join(os.path.dirname(__file__), "questions.json")
 

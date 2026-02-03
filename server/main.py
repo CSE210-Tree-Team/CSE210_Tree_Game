@@ -8,7 +8,7 @@ from dotenv import load_dotenv
 from Database.getItemsFromDatabase import get_person, get_tree, get_question, get_questions
 from Database.addItemsToDatabase import add_account, generate_tree, add_question
 from constants import ROLE_STUDENT
-from utils.dataRecords import Tree, Event
+from dataRecords import Tree, Event
 
 
 ############################################
@@ -21,9 +21,9 @@ MIDDLEWARE_SECRET_KEY = os.getenv("MIDDLEWARE_SECRET_KEY")
 app.add_middleware(SessionMiddleware, secret_key=MIDDLEWARE_SECRET_KEY)
 
 # --- Static File Serving ---
-if os.path.exists("Home_Page/dist"):
-    app.mount("/assets", StaticFiles(directory="Home_Page/dist/assets"), name="static")
-
+frontend_path = os.path.join("..", "client", "dist")
+if os.path.exists(frontend_path):
+    app.mount("/assets", StaticFiles(directory=os.path.join(frontend_path, "assets")), name="static")
 # TODO: Need to fix log out process so that session is properly cleared.
 
 
@@ -134,7 +134,7 @@ async def student_required(request: Request, person = Depends(get_current_user))
 
 @app.get("/")
 def default_page():
-    index_path = os.path.join("Home_Page", "dist", "index.html")
+    index_path = os.path.join("..", "client", "dist", "index.html")
     if os.path.exists(index_path):
         return FileResponse(index_path)
 
@@ -142,13 +142,13 @@ def default_page():
 def manage_account(account=Depends(get_current_user)):
     return {"message": f"Manage account page for {account['displayName']}"}
 
-@app.get("/soilGame")
-def soil_game(student=Depends(student_required)):
-    return {"message": f"Soil Game page for {student['displayName']}"}
+# @app.get("/soilGame")
+# def soil_game(student=Depends(student_required)):
+#     return {"message": f"Soil Game page for {student['displayName']}"}
 
-@app.get("/rainGame")
-def tree_game(student=Depends(student_required)):
-    return {"message": f"Rain Game page for {student['displayName']}"}
+# @app.get("/rainGame")
+# def tree_game(student=Depends(student_required)):
+#     return {"message": f"Rain Game page for {student['displayName']}"}
 
 
 
@@ -423,4 +423,4 @@ async def api_get_questions(request: Request, student=Depends(student_required))
 ############################################
 
 if __name__ == "__main__":
-    uvicorn.run(app, host="localhost", port=5173)
+    uvicorn.run(app, host="localhost", port=8000)
