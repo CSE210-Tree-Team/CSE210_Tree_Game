@@ -1,5 +1,12 @@
 # CSE210_Tree_Game
 
+## about .env file
+NOTE: Make sure to add the .env to the client folder.
+```
+VITE_AUTH0_DOMAIN=urkey
+VITE_AUTH0_CLIENT_ID=urkey
+```
+
 
 ## To start the frontend:
 ```
@@ -32,10 +39,6 @@ For getting organized dictionaries from the database, please reference `Database
 
 To test the database, as per the GitHub Actions, run both: `python -m Database.databaseInteractUnitTests` and `python -m Database.databaseUnitTests`.
 
-## Home Page:
-1. First, cd to Home page. And then, run `npm install`. (you should configure npm if u don't have it installed yet lol)
-2. Then, run `npm run build` to start the server. 
-3. This needs to be statically compiled with `npm run build` while in the `Home Page` directory
 
 ## Questions:
 To add questions, populate `utils/questions.json`. Then, run `python -m utils.addDefaultQuestions` to add all of the questions to the Database. Alternatively, when the app is running, verified posts to `/api/add-question` will also add non-duplicate questions. The format of a question is as follows. Note that `correct_choices` may contain several indices of correct choices:
