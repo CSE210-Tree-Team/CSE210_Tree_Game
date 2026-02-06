@@ -23,12 +23,12 @@ interface UserInfo {
 export const Homepage = () => {
     const { user, logout, getAccessTokenSilently } = useAuth0();
     const [userInfo, setUserInfo] = useState<UserInfo | null>(null);
-    const [showResources, setShowResources] = useState(false);
+    //const [showResources, setShowResources] = useState(false);
     const navigate = useNavigate();
 
     const resources: Resources = {
-        water: 100,
-        earth: 60,
+        water: 40,
+        earth: 20,
         sun: 20,
     };
     const userInfoMock: UserInfo = { username: "AAA", treeID: "id", resourceLevels: resources, displayName: "AAA" };
@@ -80,7 +80,7 @@ export const Homepage = () => {
     return (
         <div className={styles.homepageWrapper}>
             <div className={styles.gameConatiner}>
-                <h1>Hello, {userInfo?.displayName || 'User'}</h1>
+                <h1 className={styles.helloTitle}>Hello, {userInfo?.displayName || 'User'}</h1>
                 <ResourceBoard resources={userInfo?.resourceLevels || userInfoMock.resourceLevels} />
 
                 <div className={styles.treeEarthContainer}>
@@ -89,9 +89,11 @@ export const Homepage = () => {
                     <WateringCan onClick={handleWaterGame} />
                 </div>
 
+                <button className={styles.buttonLogout} onClick={handleLogout}>
+                    Logout
+                </button>
 
-
-                <div>
+                {/*<div>
                     <button onClick={handleSoilGame}>
                         Play Soil Game
                     </button>
@@ -103,11 +105,11 @@ export const Homepage = () => {
                     </button>
                 </div>
 
-                {/*<p>User: {user?.email}</p>
-            <h2>Profile</h2>
-            <pre>
+                <p>User: {user?.email}</p>
+                <h2>Profile</h2>
+                <pre>
                 {JSON.stringify(user, null, 2)}
-            </pre>*/}
+                </pre>
 
                 <div>
                     <button onClick={() => setShowResources(!showResources)}>
@@ -121,7 +123,7 @@ export const Homepage = () => {
                             <p>Sun: {userInfo.resourceLevels.sun}</p>
                         </div>
                     )}
-                </div>
+                </div>*/}
             </div>
         </div>
     );

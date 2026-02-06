@@ -19,8 +19,10 @@
     justify-content: center;
     padding: clamp(10px, 2vw, 30px);
     max-width: 1200px;
+    min-height:100vh;
     margin: 0 auto;
     position: relative;
+
 }
 
 .treeEarthContainer {
@@ -30,14 +32,14 @@
     display: flex;
     align-items: flex-end;
     justify-content: center;
-    margin-bottom: 2vw;
+    margin-bottom: -3vw;
     margin-top: -5vw;
     margin-left:15vw;
 }
 /* Tree */
 .treeContainer {
     position: absolute;
-    bottom: 8%;
+    bottom: 10%;
     left: 70%;
     transform: translateX(-50%);
     width: 150%;
@@ -56,7 +58,6 @@
 /* Earth */
 .earthContainer {
     position: absolute;
-    bottom: clamp(-40px, -2vh, -20px);
     left: 50%;
     transform: translateX(-50%);
     width: 100%; 
@@ -87,13 +88,14 @@
     position: absolute;
     right: -13%; 
     bottom: 32%; 
-    width: clamp(80px, 12vw, 150px);
     height: auto;
+    min-width:100px;
+    max-width:180px;
     z-index: 4;
 }
 
 .wateringCanImage {
-    width: 130%;
+    width: 100%;
     height: auto;
     object-fit: contain;
     cursor: pointer;
@@ -179,7 +181,7 @@
     width: 100%;
     height: 100%;
     /*up right down left*/
-    padding: clamp(25px, 5vw, 35px) clamp(20px, 4vw, 35px) clamp(20px, 4vw, 35px) clamp(20px, 4vw, 25px);
+    padding: 12% 16% 10% 9%;
     display: flex;
     flex-direction: column;
     justify-content: center;
@@ -200,12 +202,12 @@
 .resourceItem {
     display: flex;
     align-items: flex-start;
-    gap: clamp(10px, 1.5vw, 16px);
+    gap: clamp(6px, 1vw, 12px);
     margin-bottom: clamp(5px, 1vw, 10px);
 }
 .resourceIcon {
-    width: clamp(20px, 6vw, 40px);
-    height: clamp(20px, 6vw, 40px);
+    width: clamp(20px, 4vw, 32px);
+    height: clamp(20px, 4vw, 32px);
     object-fit: contain;
     flex-shrink: 0;
     margin-top: clamp(2px, 0.5vw, 5px);
@@ -219,6 +221,7 @@
     flex-direction: column;
     gap: clamp(0px, 0.2vw, 3px);
     justify-content: center;
+    min-width:0;
 }
 
 
@@ -230,14 +233,15 @@
     align-items: baseline;
     gap: clamp(6px, 1vw, 10px);
 }
+
 /* resource name */
 .resourceLabel {
     font-weight: 600;
     color: #713E00;
-    min-width: clamp(60px, 8vw, 80px);
     font-size: clamp(11px, 1.3vw, 14px);
     line-height: 1.2;
     text-shadow: 0.5px 0.5px 1px rgba(255, 255, 255, 0.5);
+    white-space:nowrap;
 }
 
 /* percentage */
@@ -289,15 +293,136 @@
     background: linear-gradient(90deg, #FFD700, #FFA500);
 }
 
+.helloTitle {
+    font-size: clamp(25px, 4vw, 35px);
+    font-weight: 700;
+    user-select: none;
+    margin-left: 2vw;
+    padding-bottom: clamp(20px, 4vw, 40px);
+}
+
 
 .gameTitle {
-    font-family: 'Baloo 2', 'Comic Sans MS', cursive;
-    font-size: 90px;
-    font-weight: 800;
-    color: #BEE751;
-    text-shadow: -4px -4px 0 #2F7B16, 4px -4px 0 #2F7B16, -4px 4px 0 #2F7B16, 4px 4px 0 #2F7B16, -4px 0 0 #2F7B16, 4px 0 0 #2F7B16, 0 -4px 0 #2F7B16, 0 4px 0 #2F7B16, 0px 10px 0 #3a3a3a, 0px 18px 20px rgba(0, 0, 0, 0.4);
+    font-size: clamp(50px, 8vw, 70px);
+    font-weight: 700;
     letter-spacing: 4px;
     user-select: none;
+    padding-top: clamp(10px, 2vw, 20px);
+    padding-bottom: clamp(20px, 4vw, 40px);
+    margin: auto;
+    text-align: center;
+}
+.gameIntro {
+    font-size: clamp(16px, 2.5vw, 20px);
+    font-weight: 400;
+    letter-spacing: 0px;
+    user-select: none;
+    margin-left: 5vw;
+    line-height: 1.6;
+    max-width: clamp(80vw, 70vw, 90vw);
+    margin:auto;
+}
+.buttonContainer {
+    display: flex;
+    gap: 40px;
+    flex-wrap: wrap;
+    margin: auto;
+    justify-content: center;
+    padding-top: clamp(20px, 4vw, 40px);
+}
+
+.buttonSingle {
+    padding: 15px 40px;
+    background: white;
+    border-radius: 30px;
+}
+.buttonSingle:hover {
+    background: #f0f0f0;
+}
+
+.buttonLogout {
+    padding: 15px 40px;
+    background: white;
+    border-radius: 30px;
+    position: absolute;
+    bottom: clamp(20px, 4vw, 40px);
+    right: clamp(20px, 4vw, 40px);
+}
+
+    .buttonLogout:hover {
+        background: #f0f0f0;
+    }
+
+
+@media (max-width: 1200px) {
+    .treeEarthContainer {
+        margin-left: 5vw;
+    }
+}
+
+@media (max-width: 768px) {
+    .homepageWrapper {
+        overflow-y: auto;
+    }
+
+    .gameContainer {
+        padding: 10px;
+    }
+
+    .treeEarthContainer {
+        width: 80vw;
+        max-width: 400px;
+        height: 80vw;
+        max-height: 450px;
+        margin-left: 0;
+        margin-top: 0;
+    }
+
+    .treeContainer {
+        bottom: 12%;
+        width: 100%;
+        left: 50%;
+    }
+
+    .wateringCanContainer {
+        width: 20%;
+        min-width: 60px;
+        right: -10%;
+        bottom: 28%;
+    }
+
+    .resourceBoardContainer {
+        position: relative;
+        top: auto;
+        right: auto;
+        width: 90vw;
+        max-width: 350px;
+        margin: 20px auto;
+    }
+
+    .resourceBoardContent {
+        padding: 15% 12% 12% 12%;
+    }
+
+    .helloTitle {
+        text-align: center;
+        margin-left: 0;
+    }
+}
+
+@media (min-width: 1920px) {
+    .gameContainer {
+        max-width: 1400px;
+    }
+
+    .treeEarthContainer {
+        width: 600px;
+        height: 700px;
+    }
+
+    .resourceBoardContainer {
+        width: 320px;
+    }
 }
 
 
