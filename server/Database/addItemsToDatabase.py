@@ -35,7 +35,7 @@ from constants import (
     RESOURCE_WATER, RESOURCE_EARTH, RESOURCE_SUN, RESOURCE_ALL, RESOURCE_NONE,
     VALID_QUESTION_TYPES, VALID_QUESTION_RESOURCE_TYPES,
     ATTEMPT_RESOURCE_NONE, EVENT_LEVEL, EVENT_BONUS, EVENT_PENALTY, EVENT_NEUTRAL,
-    RESOURCE_MAX_LEVEL, RESOURCE_MIN_LEVEL
+    RESOURCE_MAX_LEVEL, RESOURCE_MIN_LEVEL, PASSIVE_DECAY_RATE
 )
 import dataRecords as dataclasses
 import uuid
@@ -247,6 +247,78 @@ def add_question_choice(choice_id: str, question_id: str, text: str, is_correct:
     '''
     
     _execute(sql, (choice_id, question_id, text, 1 if is_correct else 0))
+
+def apply_passive_decay(tree_ID: str):
+    """
+    Apply passive decay to a tree's resources if enough time has passed since lastUpdated.
+    
+    The decay is calculated based on PASSIVE_DECAY_RATE (in minutes). One level decays
+    every PASSIVE_DECAY_RATE minutes. The lastUpdated field is only updated if any
+    resource values actually changed.
+    
+    Args:
+        tree_ID: The tree to apply passive decay to
+    
+    Returns:
+        bool: True if any resources were decayed, False otherwise
+    """
+    from Database.getItemsFromDatabase import _query
+    
+    # Fetch the tree data
+    tree = _query(
+        """SELECT t.*, r.water, r.earth, r.sun 
+           FROM Tree t
+           LEFT JOIN TreeResources r ON t.treeID = r.treeID
+           WHERE t.treeID = ?""",
+        (tree_ID,),
+        fetchone=True
+    )
+    
+    if not tree:
+        return False
+    
+    # Calculate time elapsed since last update in minutes
+    last_updated = datetime.fromisoformat(tree['lastUpdated'])
+    current_time = datetime.now()
+    elapsed_minutes = (current_time - last_updated).total_seconds() / 60
+    
+    # Calculate how many levels to decay (truncate to integer)
+    decay_amount = int(elapsed_minutes // PASSIVE_DECAY_RATE)
+    
+    if decay_amount <= 0:
+        return False  # Not enough time has passed
+    
+    # Store original values to check if anything changed
+    original_water = tree.get('water') or 0
+    original_earth = tree.get('earth') or 0
+    original_sun = tree.get('sun') or 0
+    
+    # Apply decay to each resource
+    update_stat(tree_ID, 'water', -decay_amount)
+    update_stat(tree_ID, 'earth', -decay_amount)
+    update_stat(tree_ID, 'sun', -decay_amount)
+    
+    # Fetch updated values to check if they actually changed
+    updated_tree = _query(
+        """SELECT r.water, r.earth, r.sun 
+           FROM TreeResources r
+           WHERE r.treeID = ?""",
+        (tree_ID,),
+        fetchone=True
+    )
+    
+    new_water = updated_tree.get('water') or 0
+    new_earth = updated_tree.get('earth') or 0
+    new_sun = updated_tree.get('sun') or 0
+    
+    # Only update lastUpdated if resources actually changed
+    if new_water != original_water or new_earth != original_earth or new_sun != original_sun:
+        sql = '''UPDATE Tree SET lastUpdated = ? WHERE treeID = ?'''
+        _execute(sql, (datetime.now().isoformat(), tree_ID))
+        return True
+    
+    return False
+
 
 def do_event(tree_ID: str, event: dataclasses.Event, value: int):
     """
