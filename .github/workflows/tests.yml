@@ -33,3 +33,7 @@ jobs:
       - name: Run Database Interaction Unit Tests
         run: |
           python -m unittest Database.databaseInteractUnitTests -v
+
+      - name: Run Update Tree Stat Tests
+        run: |
+          python -m unittest tests.testUpdateStats -v

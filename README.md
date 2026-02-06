@@ -55,6 +55,9 @@ To add questions, populate `utils/questions.json`. Then, run `python -m utils.ad
 }
 ```
 
+## Tree:
+python3 -m unittest tests.testUpdateStats -v
+
 ## API Calls:
 API tests can be run with `python -m unittest apiRoutesTests -v`
 
