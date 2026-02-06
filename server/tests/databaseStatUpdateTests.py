@@ -3,7 +3,7 @@
 This module contains unit tests for updating tree resources and the passive decay system.
 
 Test classes:
-    TestUpdateStat: Tests for the update_stat() function.
+    databaseStatUpdateTests: Tests for the update_stat() function.
     TestPassiveDecay: Tests for the apply_passive_decay() function.
 """
 
@@ -69,7 +69,7 @@ class UpdateStatsTestCase(unittest.TestCase):
         return tree_id, username
 
 
-class TestUpdateStat(UpdateStatsTestCase):
+class DatabaseStatUpdateTests(UpdateStatsTestCase):
     """Tests for the update_stat function."""
     
     def test_update_water_positive(self):

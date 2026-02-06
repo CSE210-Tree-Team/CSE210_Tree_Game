@@ -368,9 +368,9 @@ def update_stat(tree_ID: str, stat_name: str, value: int):
     """
 
     print("Testing")
-    
+
     stat_name_lower = stat_name.lower()
-    valid_stats = ['water', 'earth', 'sun']
+    valid_stats = ['water', 'earth', 'sun']  # TODO: Consider converting this to be: VALID_RESOURCES
     
     if stat_name_lower not in valid_stats:
         raise ValueError(f"Invalid stat name '{stat_name}'. Must be one of {valid_stats}")

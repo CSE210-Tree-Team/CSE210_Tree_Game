@@ -36,4 +36,4 @@ jobs:
 
       - name: Run Update Tree Stat Tests
         run: |
-          python -m unittest tests.testUpdateStats -v
+          python -m unittest tests.databaseStatUpdateTests -v
