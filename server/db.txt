@@ -1,0 +1,213 @@
+Successfully connected to /home/adria/CSE210_Tree_Game/server/Database/game_database.db
+
+==================== TABLE: Account ====================
+COLUMNS: ['username', 'email', 'passwordHash', 'displayName', 'accountReference', 'dateOfBirth', 'lastLogin']
+--------------------------------------------------------------------------------------------------------------
+   ('adrian.s.rosing@gmail.com', 'adrian.s.rosing@gmail.com', 'auth0', 'Adrian Rosing', 'adrian.s.rosing', '2000-01-01', '2026-02-05T19:29:22.751881')
+   ('arosing@ucsd.edu', 'arosing@ucsd.edu', 'auth0', 'Adrian Rosing', 'arosing', '2000-01-01', '2026-02-05T19:28:55.035383')
+
+
+==================== TABLE: AccountRole ====================
+COLUMNS: ['username', 'role']
+------------------------------
+   ('adrian.s.rosing@gmail.com', 'Student')
+   ('arosing@ucsd.edu', 'Student')
+
+
+==================== TABLE: Tree ====================
+COLUMNS: ['treeID', 'ownerUsername', 'health', 'growthStage', 'lastUpdated']
+-----------------------------------------------------------------------------
+   ('9fea6ad5-db45-44a1-add6-e7a30700a6fd', 'adrian.s.rosing@gmail.com', 'Healthy', 0, '2026-02-02T17:33:58.938415')
+   ('e15a247b-d618-403e-af52-86a57061308a', 'arosing@ucsd.edu', 'Healthy', 0, '2026-02-05T19:28:55.006245')
+
+
+==================== TABLE: TreeResources ====================
+COLUMNS: ['treeID', 'water', 'earth', 'sun']
+---------------------------------------------
+   ('9fea6ad5-db45-44a1-add6-e7a30700a6fd', 100, 100, 100)
+   ('e15a247b-d618-403e-af52-86a57061308a', 100, 100, 100)
+
+
+==================== TABLE: TreeDecoration ====================
+COLUMNS: ['decorationID', 'treeID', 'appearanceID']
+----------------------------------------------------
+   [EMPTY TABLE] - No data rows found.
+
+
+==================== TABLE: Event ====================
+COLUMNS: ['eventID', 'eventType', 'resourceAffected', 'description', 'percentChange', 'conditions']
+----------------------------------------------------------------------------------------------------
+   [EMPTY TABLE] - No data rows found.
+
+
+==================== TABLE: Class ====================
+COLUMNS: ['classID', 'className', 'classLevel', 'teacherUsername', 'active', 'levelPolicy']
+--------------------------------------------------------------------------------------------
+   [EMPTY TABLE] - No data rows found.
+
+
+==================== TABLE: Enrollment ====================
+COLUMNS: ['username', 'classID']
+---------------------------------
+   [EMPTY TABLE] - No data rows found.
+
+
+==================== TABLE: Question ====================
+COLUMNS: ['questionID', 'text', 'type', 'difficulty', 'resourceType']
+----------------------------------------------------------------------
+   ('085c3769-565d-479f-9be8-63c64637c9ff', 'What is the powerhouse of the cell?', 'MCQ', 1, 'Sun')
+   ('668b330f-1937-4c54-98cf-28eb5d675764', 'Which process do plants use to make food?', 'MCQ', 1, 'Sun')
+   ('29d21e89-f42c-4fe9-af41-30d59f71fcb2', 'What is H2O?', 'MCQ', 1, 'Water')
+   ('c67d2e7a-de85-496d-997a-469cb20537a1', 'Which of these are renewable energy sources?', 'MultiSelect', 1, 'Sun')
+   ('80fb1079-abb4-4a70-921b-f7d45a33a784', 'What are the main components of soil?', 'MultiSelect', 1, 'Earth')
+   ('55301725-425d-4b46-bcb7-beca03f0159a', 'Which of the following elements appears in water?', 'MultiSelect', 1, 'Water')
+
+
+==================== TABLE: QuestionChoice ====================
+COLUMNS: ['choiceID', 'questionID', 'text', 'isCorrect']
+---------------------------------------------------------
+   ('200a0bfd-0946-4da9-af24-b412ddf5c79b', '085c3769-565d-479f-9be8-63c64637c9ff', 'The mitochondria', 1)
+   ('625c4781-0b81-48e4-80d5-fc03185280d2', '085c3769-565d-479f-9be8-63c64637c9ff', 'The nucleus', 0)
+   ('d6a12fd4-5c23-4cb1-9dfa-edf47b0596bc', '085c3769-565d-479f-9be8-63c64637c9ff', 'The ribosome', 0)
+   ('879e7a0a-8c40-4c14-a491-0fd7ac270d7c', '085c3769-565d-479f-9be8-63c64637c9ff', 'The endoplasmic reticulum', 0)
+   ('090e5f9f-1422-4bea-877e-5c49e9288024', '668b330f-1937-4c54-98cf-28eb5d675764', 'Respiration', 0)
+   ('34ad3fe2-a046-4289-9606-af51aa112439', '668b330f-1937-4c54-98cf-28eb5d675764', 'Photosynthesis', 1)
+   ('7bf252a1-c96e-4372-a7a2-b362331ad6a8', '668b330f-1937-4c54-98cf-28eb5d675764', 'Digestion', 0)
+   ('413a4b05-f0b0-4959-a7da-8516df2a3180', '668b330f-1937-4c54-98cf-28eb5d675764', 'Fermentation', 0)
+   ('7c2b8c36-ed08-4243-b87f-ed8167a3a0d3', '29d21e89-f42c-4fe9-af41-30d59f71fcb2', 'Hydrogen Peroxide', 0)
+   ('430cc270-8085-446c-99db-579262938368', '29d21e89-f42c-4fe9-af41-30d59f71fcb2', 'Water', 1)
+   ('dd1d54ac-8633-412b-b328-be399b918869', '29d21e89-f42c-4fe9-af41-30d59f71fcb2', 'Hydrochloric Acid', 0)
+   ('ea78ac25-9525-4e3a-b040-dedd3e0bec84', '29d21e89-f42c-4fe9-af41-30d59f71fcb2', 'Heavy Water', 0)
+   ('1ec6f2c8-0414-4c38-97bf-53f9f0a18a4a', 'c67d2e7a-de85-496d-997a-469cb20537a1', 'Solar', 1)
+   ('2af4f7d6-340c-4150-83e0-2fdd6a4f7b8f', 'c67d2e7a-de85-496d-997a-469cb20537a1', 'Coal', 0)
+   ('64213a01-4906-4cd2-9e8b-e1fbcb6de98d', 'c67d2e7a-de85-496d-997a-469cb20537a1', 'Wind', 1)
+   ('baab32d1-49d3-42f0-a389-3b3489bc8733', 'c67d2e7a-de85-496d-997a-469cb20537a1', 'Natural Gas', 0)
+   ('b54b2261-159c-4f27-b765-9da74d89f1da', '80fb1079-abb4-4a70-921b-f7d45a33a784', 'Minerals', 1)
+   ('4a8729b6-f049-41d2-bc98-e9ee8c8ee103', '80fb1079-abb4-4a70-921b-f7d45a33a784', 'Organic matter', 1)
+   ('6285c1b5-72ab-415e-9f4e-b046da2553cc', '80fb1079-abb4-4a70-921b-f7d45a33a784', 'Water', 1)
+   ('da7a0206-be83-473d-860d-26885c25777e', '80fb1079-abb4-4a70-921b-f7d45a33a784', 'Air', 1)
+   ('a7eaad14-5926-453a-89d5-8e6d33511633', '55301725-425d-4b46-bcb7-beca03f0159a', 'Hydrogen', 1)
+   ('fa539a62-9783-497b-bfdb-d848dd1ea8c1', '55301725-425d-4b46-bcb7-beca03f0159a', 'Oxygen', 1)
+   ('ca8fe162-ae32-45c7-8584-1d2c0f9082a2', '55301725-425d-4b46-bcb7-beca03f0159a', 'Carbon', 0)
+   ('24d823fd-869b-4aef-bd24-be72c5a8149f', '55301725-425d-4b46-bcb7-beca03f0159a', 'Nitrogen', 0)
+
+
+==================== TABLE: QuestionClass ====================
+COLUMNS: ['questionID', 'classID']
+-----------------------------------
+   [EMPTY TABLE] - No data rows found.
+
+
+==================== TABLE: QuestionAttempt ====================
+COLUMNS: ['attemptID', 'username', 'questionID', 'isCorrect', 'resourceAwarded', 'timestamp']
+----------------------------------------------------------------------------------------------
+   [EMPTY TABLE] - No data rows found.
+
+
+==================== TABLE: StudentDetails ====================
+COLUMNS: ['studentUsername', 'studentLevel', 'studentStats', 'parentEmail']
+----------------------------------------------------------------------------
+   [EMPTY TABLE] - No data rows found.
+
+
+End of Database Dump.
+
+
+=================== End of Database Contents ====================
+
+
+
+=================== User Overview ===================
+
+User: Adrian Rosing (adrian.s.rosing@gmail.com) [ID: adrian.s]
+  Email: adrian.s.rosing@gmail.com
+  Roles: Student
+  Status: Last login: 2026-02-05T19:29:22.751881
+  Tree 9fea6ad5 | Health: Healthy | Growth: 0 | Updated: 2026-02-02T17:33:58.938415
+    Resources -> Water: 100, Earth: 100, Sun: 100
+
+User: Adrian Rosing (arosing@ucsd.edu) [ID: arosing@]
+  Email: arosing@ucsd.edu
+  Roles: Student
+  Status: Last login: 2026-02-05T19:28:55.035383
+  Tree e15a247b | Health: Healthy | Growth: 0 | Updated: 2026-02-05T19:28:55.006245
+    Resources -> Water: 100, Earth: 100, Sun: 100
+
+
+
+
+=================== Questions Overview ===================
+Total Questions: 6
+
+======================================================================
+Question ID: 80fb1079-abb4-4a70-921b-f7d45a33a784
+Type: MultiSelect | Resource: Earth | Difficulty: 1
+======================================================================
+Q: What are the main components of soil?
+
+Choices:
+  [✓] 1. Organic matter
+  [✓] 2. Water
+  [✓] 3. Minerals
+  [✓] 4. Air
+
+======================================================================
+Question ID: 085c3769-565d-479f-9be8-63c64637c9ff
+Type: MCQ | Resource: Sun | Difficulty: 1
+======================================================================
+Q: What is the powerhouse of the cell?
+
+Choices:
+  [✓] 1. The mitochondria
+  [ ] 2. The nucleus
+  [ ] 3. The endoplasmic reticulum
+  [ ] 4. The ribosome
+
+======================================================================
+Question ID: 668b330f-1937-4c54-98cf-28eb5d675764
+Type: MCQ | Resource: Sun | Difficulty: 1
+======================================================================
+Q: Which process do plants use to make food?
+
+Choices:
+  [ ] 1. Respiration
+  [✓] 2. Photosynthesis
+  [ ] 3. Fermentation
+  [ ] 4. Digestion
+
+======================================================================
+Question ID: c67d2e7a-de85-496d-997a-469cb20537a1
+Type: MultiSelect | Resource: Sun | Difficulty: 1
+======================================================================
+Q: Which of these are renewable energy sources?
+
+Choices:
+  [✓] 1. Solar
+  [ ] 2. Coal
+  [✓] 3. Wind
+  [ ] 4. Natural Gas
+
+======================================================================
+Question ID: 29d21e89-f42c-4fe9-af41-30d59f71fcb2
+Type: MCQ | Resource: Water | Difficulty: 1
+======================================================================
+Q: What is H2O?
+
+Choices:
+  [✓] 1. Water
+  [ ] 2. Hydrogen Peroxide
+  [ ] 3. Hydrochloric Acid
+  [ ] 4. Heavy Water
+
+======================================================================
+Question ID: 55301725-425d-4b46-bcb7-beca03f0159a
+Type: MultiSelect | Resource: Water | Difficulty: 1
+======================================================================
+Q: Which of the following elements appears in water?
+
+Choices:
+  [ ] 1. Nitrogen
+  [✓] 2. Hydrogen
+  [ ] 3. Carbon
+  [✓] 4. Oxygen
+
