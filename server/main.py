@@ -7,7 +7,7 @@ from fastapi.responses import FileResponse, RedirectResponse
 from starlette.middleware.sessions import SessionMiddleware
 from dotenv import load_dotenv
 from Database.getItemsFromDatabase import get_person, get_tree, get_question, get_questions, get_all_trees
-from Database.addItemsToDatabase import add_account, generate_tree, add_question, update_last_login, apply_passive_decay
+from Database.addItemsToDatabase import add_account, generate_tree, add_question, update_last_login, apply_passive_decay, update_stat
 from constants import ROLE_STUDENT, PASSIVE_DECAY_RATE
 from dataRecords import Tree, Event
 
@@ -268,7 +268,7 @@ def get_user_info(request: Request, student=Depends(student_required)):
     }
 
 @app.post("/api/update-stat")
-async def update_stat(request: Request, student=Depends(student_required)):
+async def api_update_stat(request: Request, student=Depends(student_required)):
     """
     Updates a specific stat for the student's tree. Treats this update as an event.
     
@@ -285,14 +285,22 @@ async def update_stat(request: Request, student=Depends(student_required)):
     
     stat_name = data.get("stat_name")
     value = data.get("value")
+    tree_id = get_tree_ID(request)
     
     if not stat_name:
         raise HTTPException(status_code=400, detail="stat_name is required")
     if value is None:
         raise HTTPException(status_code=400, detail="value is required")
     
-    # TODO: Implement stat update logic here.
-    return None
+    # TODO: Refactor into events potentially.
+    try:
+        print(f"Received update-stat request: stat_name={stat_name}, value={value} for user {student['username']} and tree {tree_id}")
+        update_stat(tree_id, stat_name, value)
+        return {"success": True, "message": f"{stat_name} updated by {value}"}
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to update stat: {str(e)}")
 
 @app.post("/api/update-user")
 async def update_user(request: Request, account=Depends(get_current_user)):

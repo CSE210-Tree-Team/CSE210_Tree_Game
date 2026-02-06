@@ -366,12 +366,17 @@ def update_stat(tree_ID: str, stat_name: str, value: int):
     Raises:
         ValueError: If stat_name is invalid
     """
+
+    print("Testing")
+    
     stat_name_lower = stat_name.lower()
     valid_stats = ['water', 'earth', 'sun']
     
     if stat_name_lower not in valid_stats:
         raise ValueError(f"Invalid stat name '{stat_name}'. Must be one of {valid_stats}")
     
+    print(f"Updating stat '{stat_name_lower}' for tree '{tree_ID}' by {value}")
+
     sql = f'''
         UPDATE TreeResources
         SET {stat_name_lower} = CASE 
@@ -381,8 +386,16 @@ def update_stat(tree_ID: str, stat_name: str, value: int):
         END
         WHERE treeID = ?
     '''
+
+    # Update Tree's lastUpdated timestamp as well
+    last_updated_sql = '''
+        UPDATE Tree
+        SET lastUpdated = ?
+        WHERE treeID = ?
+    '''
     
     _execute(sql, (value, value, value, tree_ID))
+    _execute(last_updated_sql, (datetime.now().isoformat(), tree_ID))
 
 
 def update_health(tree_ID: str, health_status: str):
