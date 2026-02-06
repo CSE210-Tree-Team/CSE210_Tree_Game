@@ -112,31 +112,6 @@
         transform: scale(0.95);
     }
 
-@media (max-width: 768px) {
-    .treeEarthContainer {
-        width: clamp(250px, 60vw, 400px);
-        height: clamp(300px, 65vw, 500px);
-    }
-
-    .treeContainer {
-        bottom: 18%;
-        width: 75%;
-    }
-
-    .wateringCanContainer {
-        width: clamp(70px, 15vw, 120px);
-    }
-}
-@media (min-width: 1920px) {
-    .gameContainer {
-        max-width: 1400px;
-    }
-
-    .treeEarthContainer {
-        width: 700px;
-        height: 800px;
-    }
-}
 
 /* For test*/
 .treeEarthContainer {
@@ -353,12 +328,6 @@
         background: #f0f0f0;
     }
 
-
-@media (max-width: 1200px) {
-    .treeEarthContainer {
-        margin-left: 5vw;
-    }
-}
 
 @media (max-width: 768px) {
     .homepageWrapper {
