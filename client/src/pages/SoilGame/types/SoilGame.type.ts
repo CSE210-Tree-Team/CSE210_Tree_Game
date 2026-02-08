@@ -1,0 +1,78 @@
+// Definition of elements the player can collect
+export type ElementType = 'Nitrogen' | 'Hydrogen' | 'Carbon' | 'Oxygen';
+
+// Ordered finite states the game can take
+export type GamePhase = 'loading' | 'title' | 'tutorial' | 'playing' | 'complete';
+
+// A room on the N x N Map
+export interface Node {
+  x: number;
+  y: number;
+
+  // CHANGED
+  resources: Record<ElementType, number> | null;
+  collected: boolean;
+}
+
+/**
+ * @interface 
+ * id: Unique identifier for each quest
+ * moleculeName: Full name of the molecule to construct
+ * moleculeFormula: The chemical formula of the molecule to construct
+ * required: Element-Value pairs representing the required amount of each element
+ * submitted: The number of each element the player has submitted so far
+ */
+export interface Quest {
+  id: number;
+  moleculeName: string;
+  moleculeFormula: string;
+
+  /** TODO: Consider changing to ElementType, either should work */
+  required: Record<string, number>; // e.g. { Nitrogen: 1, Hydrogen: 3 }
+  submitted: Record<string, number>; // elements submitted so far
+  completed: boolean;
+}
+
+// Literally just a tuple representing a position on the map lmao 
+export interface Position {
+  x: number;
+  y: number;
+}
+
+// Inventory is a count of each element
+export type Inventory = Record<ElementType, number>;
+
+/**
+ * @interface
+ * phase: Current state of the game
+ * map: (N x N) array housing the Map backend
+ * mapSize: Size of the map (N x N)
+ * quests: List of quests the player must complete
+ * playerPosition: Tuple position of player in Map
+ * inventory: <ElementType, number> dictionary
+ * terminalLog: List of strings representing the terminal log
+ * questsCompleted: Number of quests completed so far
+ */
+export interface GameState {
+  phase: GamePhase;
+  map: Node[][];
+  mapSize: number; // N
+  quests: Quest[];
+  playerPosition: Position;
+  inventory: Inventory;
+  terminalLog: string[];
+  questsCompleted: number;
+}
+
+/** */
+export interface StartGameResponse {
+  map: Array<Array<{ x: number; y: number; resource: ElementType | null }>>;
+  quests: Array<{
+    id: number;
+    name: string;
+    formula: string;
+    required: Record<string, number>;
+  }>;
+}
+
+

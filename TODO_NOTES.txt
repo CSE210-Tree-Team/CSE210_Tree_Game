@@ -1,0 +1,16 @@
+useSoilGame.ts
+1. Refactor file name
+2. refactor position/spawn location logic to use simple Math.random(range) logic
+3. 
+
+soilGame.types.ts
+1. Refactor file name
+2. (Consider) refactor resources to be a dictionary or list (
+    idea being we can have many elements in one room)
+3. Refactor Position interface: it is not just the player's position
+
+gameHelpers.ts
+1. Refactor file name
+2. Refactor function names to accurately represent functionality
+3. Refactor function and variable names w/ snake case
+4. Refactor isValidCommand to reference a abstract correct input list.
