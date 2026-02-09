@@ -64,15 +64,52 @@ export interface GameState {
   questsCompleted: number;
 }
 
-/** */
-export interface StartGameResponse {
-  map: Array<Array<{ x: number; y: number; resource: ElementType | null }>>;
-  quests: Array<{
-    id: number;
-    name: string;
-    formula: string;
-    required: Record<string, number>;
-  }>;
+/** TODO: Delete this function
+ * This is not used in the current implementation.
+ */
+// export interface StartGameResponse {
+//   map: Array<Array<{ x: number; y: number; resource: ElementType | null }>>;
+//   quests: Array<{
+//     id: number;
+//     name: string;
+//     formula: string;
+//     required: Record<string, number>;
+//   }>;
+// }
+
+export interface CompleteGameRequest {
+  quests_completed: number;
+}
+
+export interface CompleteGameResponse {
+  success: boolean;
+  progress_added: number;
+  new_soil_level: number;
 }
 
 
+/** TODO: Delete the following types and direction layout. 
+ *        We want to have directions tied to arrow keys
+ */
+
+/** Direction commands */
+export type Direction = 'w' | 'a' | 's' | 'd';
+
+/** All valid player inputs */
+export type PlayerCommand = Direction | 'collect' | 'c' | '1' | '2' | '3' | '4';
+
+/** Movement deltas for each direction */
+export const DIRECTION_DELTAS: Record<Direction, { dx: number; dy: number }> = {
+  w: { dx: 0, dy: -1 },  // up
+  a: { dx: -1, dy: 0 },  // left
+  s: { dx: 0, dy: 1 },   // down
+  d: { dx: 1, dy: 0 },   // right
+};
+
+/** Direction labels for display */
+export const DIRECTION_LABELS: Record<Direction, string> = {
+  w: 'Up',
+  a: 'Left',
+  s: 'Down',
+  d: 'Right',
+};
