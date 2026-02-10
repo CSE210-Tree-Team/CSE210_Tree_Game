@@ -1,4 +1,6 @@
 // Definition of elements the player can collect
+
+// TODO: EXTEND THIS FOR ELEMENTS IN THE PERIODIC TABLE
 export type ElementType = 'Nitrogen' | 'Hydrogen' | 'Carbon' | 'Oxygen';
 
 // Ordered finite states the game can take

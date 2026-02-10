@@ -1,0 +1,12 @@
+[
+    {
+        "ID": "12345",
+        "resource_type": "Soil",
+        "molecule_name": "Water",
+        "molecule_formula": "H2O",
+        "required": {
+            "H": 2,
+            "O": 1
+        }
+    }
+]
