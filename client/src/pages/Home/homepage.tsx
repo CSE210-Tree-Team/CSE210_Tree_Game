@@ -87,8 +87,8 @@ export const Homepage = () => {
                 <ResourceBoard resources={userInfo?.resourceLevels ?? userInfoMock.resourceLevels} />
 
                 <div className={styles.treeEarthContainer}>
-                    <Tree water={userInfo?.resourceLevels.water ?? userInfoMock.resourceLevels.water} />
-                    <Earth earth={userInfo?.resourceLevels.earth ?? userInfoMock.resourceLevels.earth} onClick={handleSoilGame} />
+                    <Tree water={userInfo?.resourceLevels?.water ?? userInfoMock.resourceLevels.water} />
+                    <Earth earth={userInfo?.resourceLevels?.earth ?? userInfoMock.resourceLevels.earth} onClick={handleSoilGame} />
                     <WateringCan onClick={handleWaterGame} />
                 </div>
 
