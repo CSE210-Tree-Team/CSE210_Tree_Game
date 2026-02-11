@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { Popup } from "../../components/Popup";
 import styles from "./WaterGame.module.css";
 
@@ -7,40 +8,60 @@ export const WaterGame = () => {
   const [showTutorial, setShowTutorial] = useState(false);
   const [showGame, setShowGame] = useState(false);
   const [showEnd, setShowEnd] = useState(false);
+  const navigate = useNavigate();
 
   return (
     <div className={styles.gameContainer}>
       {showStart && (
-        <Popup
-          variant="water"
-          screen="start"
-          header="Welcome To"
-          buttonText="Play"
-          title="RAINDROP RUSH"
-          onClick={() => {
-            setShowStart(false);
-            setShowTutorial(true);
-          }}
-        />
+        <>
+          <img
+            src="/leftArrow.svg"
+            alt="Back Arrow"
+            className={styles.arrow}
+            onClick={() => navigate("/")}
+          />
+          <Popup
+            variant="water"
+            screen="start"
+            header="Welcome To"
+            buttonText="Play"
+            title="RAINDROP RUSH"
+            onClick={() => {
+              setShowStart(false);
+              setShowTutorial(true);
+            }}
+          />
+        </>
       )}
       {showTutorial && (
-        <Popup
-          variant="water"
-          screen="tutorial"
-          header="How To Play"
-          buttonText="I'm Ready"
-          onClick={() => {
-            setShowTutorial(false);
-            setShowGame(true);
-          }}
-          textList={[
-            "A question will appear at the top of the screen",
-            "Raindrops will fall, each with a possible answer",
-            "Catch the correct answer to earn a point",
-            "Move the bucket left and right using the arrow keys on your keyboard",
-            "Goal: Collect as many raindrops as you can to gather water for your tree!",
-          ]}
-        />
+        <>
+          <img
+            src="/leftArrow.svg"
+            alt="Back Arrow"
+            className={styles.arrow}
+            onClick={() => {
+              setShowTutorial(false);
+              setShowStart(true);
+            }}
+          />
+          <Popup
+            variant="water"
+            screen="tutorial"
+            header="How To Play"
+            buttonText="I'm Ready"
+            onClick={() => {
+              setShowTutorial(false);
+              setShowGame(true);
+            }}
+            textList={[
+              "A question will appear at the top of the screen",
+              "Raindrops will fall, each with a possible answer",
+              "Catch the correct answer to earn a point",
+              "Move the bucket left and right using the arrow keys on your keyboard",
+              "Goal: Collect as many raindrops as you can to gather water for your tree!",
+            ]}
+          />
+        </>
       )}
       {showGame && (
         <div className={styles.gameScreen}>
