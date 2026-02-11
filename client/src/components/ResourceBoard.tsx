@@ -9,7 +9,7 @@ export const ResourceBoard = ({ resources }: ResourceBoardProps) => {
     return (
         <div className={ styles.resourceBoardContainer}>
             <img
-                src="assets/board2.png"
+                src="/assets/board2.png"
                 alt="Resource Board Background"
                 className={ styles.resourceBoardBg}
             />
