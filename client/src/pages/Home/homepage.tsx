@@ -76,6 +76,9 @@ export const Homepage = () => {
         navigate('/water');
     };
 
+    const handleAccountSettings = () => {
+        navigate('/account');
+    };
 
     return (
         <div className={styles.homepageWrapper}>
@@ -91,6 +94,9 @@ export const Homepage = () => {
 
                 <button className={styles.buttonLogout} onClick={handleLogout}>
                     Logout
+                </button>
+                <button className={styles.buttonSettings} onClick={handleAccountSettings}>
+                    Account Settings
                 </button>
 
                 {/*<div>
