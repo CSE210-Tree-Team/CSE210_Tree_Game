@@ -51,6 +51,7 @@ def _execute(sql, params=(), commit=True):
         raise FileNotFoundError(f"Database {DB_PATH} does not exist. Please create it first.")
     
     with sqlite3.connect(DB_PATH) as conn:
+        conn.execute("PRAGMA foreign_keys = ON;")
         cursor = conn.cursor()
         cursor.execute(sql, params)
         if commit:
@@ -325,6 +326,7 @@ def join_class(student_username: str, class_code: str):
     lookup_sql = "SELECT classID FROM Class WHERE classID = ? OR className = ?"
     
     with sqlite3.connect(DB_PATH) as conn:
+        conn.execute("PRAGMA foreign_keys = ON;")
         conn.row_factory = sqlite3.Row
         cursor = conn.cursor()
         cursor.execute(lookup_sql, (class_code, class_code))

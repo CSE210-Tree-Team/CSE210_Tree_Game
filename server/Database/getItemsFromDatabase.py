@@ -28,6 +28,7 @@ def _query(sql, params=(), fetchone=False):
         return None
     
     with sqlite3.connect(DB_PATH) as conn:
+        conn.execute("PRAGMA foreign_keys = ON;")
         conn.row_factory = sqlite3.Row
         cursor = conn.cursor()
         cursor.execute(sql, params)
