@@ -1,5 +1,6 @@
 import os
 import uvicorn
+import logging
 from fastapi import FastAPI, Request, Depends, HTTPException, status
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse, RedirectResponse
@@ -7,6 +8,8 @@ from starlette.middleware.sessions import SessionMiddleware
 from dotenv import load_dotenv
 from jose import jwt, JWTError
 import httpx
+from functools import lru_cache
+from time import time
 from Database.getItemsFromDatabase import get_person, get_tree
 from Database.addItemsToDatabase import add_account, generate_tree
 from constants import ROLE_STUDENT
@@ -17,6 +20,10 @@ from dataRecords import Tree, Event
 #               App Setup                  #
 ############################################
 
+# Configure logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
+
 load_dotenv()
 app = FastAPI()
 MIDDLEWARE_SECRET_KEY = os.getenv("MIDDLEWARE_SECRET_KEY")
@@ -26,6 +33,11 @@ app.add_middleware(SessionMiddleware, secret_key=MIDDLEWARE_SECRET_KEY)
 AUTH0_DOMAIN = os.getenv("AUTH0_DOMAIN")
 AUTH0_AUDIENCE = os.getenv("AUTH0_AUDIENCE")
 AUTH0_ALGORITHMS = ["RS256"]
+
+# JWKS cache with 1 hour TTL
+_jwks_cache = None
+_jwks_cache_time = 0
+JWKS_CACHE_TTL = 3600  # 1 hour in seconds
 
 # --- Static File Serving ---
 frontend_path = os.path.join("..", "client", "dist")
@@ -46,6 +58,32 @@ class NeedLoginException(Exception):
 async def redirect_to_login(request: Request, exc: NeedLoginException):
     return RedirectResponse(url="/?autoLogin=true")
 
+async def get_jwks() -> dict:
+    """
+    Fetch JWKS from Auth0 with caching.
+    Cache is valid for 1 hour to avoid unnecessary network calls.
+    """
+    global _jwks_cache, _jwks_cache_time
+    
+    current_time = time()
+    
+    # Return cached JWKS if still valid
+    if _jwks_cache and (current_time - _jwks_cache_time) < JWKS_CACHE_TTL:
+        return _jwks_cache
+    
+    # Fetch new JWKS
+    jwks_url = f"https://{AUTH0_DOMAIN}/.well-known/jwks.json"
+    async with httpx.AsyncClient() as client:
+        jwks_response = await client.get(jwks_url)
+        jwks_response.raise_for_status()
+        jwks = jwks_response.json()
+    
+    # Update cache
+    _jwks_cache = jwks
+    _jwks_cache_time = current_time
+    
+    return jwks
+
 async def verify_jwt_token(token: str) -> dict:
     """
     Verify Auth0 JWT token and return decoded claims.
@@ -62,16 +100,12 @@ async def verify_jwt_token(token: str) -> dict:
     if not AUTH0_DOMAIN or not AUTH0_AUDIENCE:
         raise HTTPException(
             status_code=500,
-            detail="Auth0 configuration missing (AUTH0_DOMAIN or AUTH0_AUDIENCE)"
+            detail="Authentication service configuration error"
         )
     
     try:
-        # Get JWKS (JSON Web Key Set) from Auth0
-        jwks_url = f"https://{AUTH0_DOMAIN}/.well-known/jwks.json"
-        async with httpx.AsyncClient() as client:
-            jwks_response = await client.get(jwks_url)
-            jwks_response.raise_for_status()
-            jwks = jwks_response.json()
+        # Get JWKS (JSON Web Key Set) from Auth0 with caching
+        jwks = await get_jwks()
         
         # Decode and validate the token
         # This will verify signature, expiration, audience, and issuer
@@ -108,12 +142,12 @@ async def verify_jwt_token(token: str) -> dict:
     except JWTError as e:
         raise HTTPException(
             status_code=401,
-            detail=f"Invalid token: {str(e)}"
+            detail="Invalid or expired token"
         )
     except Exception as e:
         raise HTTPException(
             status_code=401,
-            detail=f"Token verification failed: {str(e)}"
+            detail="Authentication failed"
         )
     
 def is_student(username: str) -> bool:
@@ -261,7 +295,7 @@ async def verify_auth(request: Request):
                 detail="Unable to extract user identity from token"
             )
         
-        print(f"Verified user from JWT: {username}")
+        logger.info(f"Verified user from JWT: {username}")
         
         # Check if user exists in database
         person = get_person(username)
@@ -294,7 +328,7 @@ async def verify_auth(request: Request):
         raise
     except Exception as e:
         # Log unexpected errors but don't expose internal details
-        print(f"Unexpected error in verify_auth: {str(e)}")
+        logger.error(f"Unexpected error in verify_auth: {str(e)}")
         raise HTTPException(status_code=500, detail="Internal server error")
 
 @app.get("/api/get-user-info")
