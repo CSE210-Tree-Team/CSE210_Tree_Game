@@ -5,6 +5,8 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse, RedirectResponse
 from starlette.middleware.sessions import SessionMiddleware
 from dotenv import load_dotenv
+from jose import jwt, JWTError
+import httpx
 from Database.getItemsFromDatabase import get_person, get_tree
 from Database.addItemsToDatabase import add_account, generate_tree
 from constants import ROLE_STUDENT
@@ -19,6 +21,11 @@ load_dotenv()
 app = FastAPI()
 MIDDLEWARE_SECRET_KEY = os.getenv("MIDDLEWARE_SECRET_KEY")
 app.add_middleware(SessionMiddleware, secret_key=MIDDLEWARE_SECRET_KEY)
+
+# Auth0 Configuration
+AUTH0_DOMAIN = os.getenv("AUTH0_DOMAIN")
+AUTH0_AUDIENCE = os.getenv("AUTH0_AUDIENCE")
+AUTH0_ALGORITHMS = ["RS256"]
 
 # --- Static File Serving ---
 frontend_path = os.path.join("..", "client", "dist")
@@ -38,6 +45,76 @@ class NeedLoginException(Exception):
 @app.exception_handler(NeedLoginException)
 async def redirect_to_login(request: Request, exc: NeedLoginException):
     return RedirectResponse(url="/?autoLogin=true")
+
+async def verify_jwt_token(token: str) -> dict:
+    """
+    Verify Auth0 JWT token and return decoded claims.
+    
+    Args:
+        token: The JWT access token from Authorization header
+        
+    Returns:
+        dict: Decoded JWT claims containing user information
+        
+    Raises:
+        HTTPException: If token validation fails
+    """
+    if not AUTH0_DOMAIN or not AUTH0_AUDIENCE:
+        raise HTTPException(
+            status_code=500,
+            detail="Auth0 configuration missing (AUTH0_DOMAIN or AUTH0_AUDIENCE)"
+        )
+    
+    try:
+        # Get JWKS (JSON Web Key Set) from Auth0
+        jwks_url = f"https://{AUTH0_DOMAIN}/.well-known/jwks.json"
+        async with httpx.AsyncClient() as client:
+            jwks_response = await client.get(jwks_url)
+            jwks_response.raise_for_status()
+            jwks = jwks_response.json()
+        
+        # Decode and validate the token
+        # This will verify signature, expiration, audience, and issuer
+        unverified_header = jwt.get_unverified_header(token)
+        rsa_key = {}
+        
+        for key in jwks["keys"]:
+            if key["kid"] == unverified_header["kid"]:
+                rsa_key = {
+                    "kty": key["kty"],
+                    "kid": key["kid"],
+                    "use": key["use"],
+                    "n": key["n"],
+                    "e": key["e"]
+                }
+                break
+        
+        if not rsa_key:
+            raise HTTPException(
+                status_code=401,
+                detail="Unable to find appropriate key"
+            )
+        
+        payload = jwt.decode(
+            token,
+            rsa_key,
+            algorithms=AUTH0_ALGORITHMS,
+            audience=AUTH0_AUDIENCE,
+            issuer=f"https://{AUTH0_DOMAIN}/"
+        )
+        
+        return payload
+        
+    except JWTError as e:
+        raise HTTPException(
+            status_code=401,
+            detail=f"Invalid token: {str(e)}"
+        )
+    except Exception as e:
+        raise HTTPException(
+            status_code=401,
+            detail=f"Token verification failed: {str(e)}"
+        )
     
 def is_student(username: str) -> bool:
     """Check if the user with the given username is a Student."""
@@ -160,30 +237,65 @@ def manage_account(account=Depends(get_current_user)):
 async def verify_auth(request: Request):
     """Verify Auth0 token and establish backend session."""
     try:
-        data = await request.json()
-        user_data = data.get('user', {})
-
-        print(f"Auth0 user data received: {user_data}")
+        # Extract the Bearer token from Authorization header
+        auth_header = request.headers.get("Authorization")
+        if not auth_header or not auth_header.startswith("Bearer "):
+            raise HTTPException(
+                status_code=401,
+                detail="Missing or invalid Authorization header"
+            )
         
-        if user_data:
-            # Get username (email or sub) # NOTE: sub is the unique Auth0 user ID
-            username = user_data.get("email") or user_data.get("sub")
-            
-            # Check if user exists in database
-            person = get_person(username)
-            
-            if not person:
-                create_account(username = username, user_data = user_data)
-            
-            # Store username in session
-            request.session["user"] = username
-            request.session["user_info"] = user_data
-            
-            return {"success": True, "message": "Session established"}
+        token = auth_header.split(" ")[1]
         
-        return {"success": False, "message": "No user data provided"}
+        # Verify the JWT token and get claims
+        payload = await verify_jwt_token(token)
+        
+        # Extract user information from verified token claims
+        # Auth0 tokens contain 'sub' (subject) which is the unique user ID
+        # They may also contain email and other claims
+        username = payload.get("email") or payload.get("sub")
+        
+        if not username:
+            raise HTTPException(
+                status_code=401,
+                detail="Unable to extract user identity from token"
+            )
+        
+        print(f"Verified user from JWT: {username}")
+        
+        # Check if user exists in database
+        person = get_person(username)
+        
+        if not person:
+            # Create account with verified user data from token
+            user_data = {
+                "sub": payload.get("sub"),
+                "email": payload.get("email"),
+                "name": payload.get("name"),
+                "nickname": payload.get("nickname"),
+                "picture": payload.get("picture")
+            }
+            create_account(username=username, user_data=user_data)
+        
+        # Store username in session
+        request.session["user"] = username
+        request.session["user_info"] = {
+            "sub": payload.get("sub"),
+            "email": payload.get("email"),
+            "name": payload.get("name"),
+            "nickname": payload.get("nickname"),
+            "picture": payload.get("picture")
+        }
+        
+        return {"success": True, "message": "Session established"}
+        
+    except HTTPException:
+        # Re-raise HTTP exceptions as-is
+        raise
     except Exception as e:
-        raise HTTPException(status_code=400, detail=str(e))
+        # Log unexpected errors but don't expose internal details
+        print(f"Unexpected error in verify_auth: {str(e)}")
+        raise HTTPException(status_code=500, detail="Internal server error")
 
 @app.get("/api/get-user-info")
 def get_user_info(request: Request, student=Depends(student_required)):
