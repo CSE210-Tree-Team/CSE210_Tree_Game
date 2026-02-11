@@ -5,7 +5,9 @@ This module contains unit tests for the Popup component, which is a reusable
 component used throughout the client-side application.
 
 The tests verify that the Popup renders correctly with different props, 
-that the onClick handler is called when the button is clicked, and that the instructions list renders correctly based on the screen type.
+that the correct content is displayed based on the screen prop, 
+and that the button and instructions list are rendered when the 
+corresponding props are provided.
 */
 
 import { test, expect } from "vitest";
