@@ -22,7 +22,7 @@ export const WaterGame = () => {
   return (
     <div className={styles.gameContainer}>
       {screen === "start" && (
-        <div data-testid="water-start">
+        <div data-testid="water-start" className={styles.gameScreen}>
           <img
             src="/leftArrow.svg"
             alt="Back Arrow"
@@ -42,7 +42,7 @@ export const WaterGame = () => {
         </div>
       )}
       {screen === "tutorial" && (
-        <div data-testid="water-tutorial">
+        <div data-testid="water-tutorial" className={styles.gameScreen}>
           <img
             src="/leftArrow.svg"
             alt="Back Arrow"
@@ -86,7 +86,7 @@ export const WaterGame = () => {
         </div>
       )}
       {screen === "end" && (
-        <div data-testid="water-end">
+        <div data-testid="water-end" className={styles.gameScreen}>
           <Popup
             variant="water"
             screen="end"
