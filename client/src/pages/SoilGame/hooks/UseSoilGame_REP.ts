@@ -8,9 +8,11 @@ import type {
   Position,
   Inventory,
   ElementType,
-  Direction,
-  StartGameResponse,
-} from '../types/soilGame.types';
+  Direction
+  // StartGameResponse,
+} from '../types/SoilGame.type';
+
+import {SYMBOL_TO_ELEMENT} from '../types/SoilGame.type';
 
 import {
   getNextPosition,
@@ -38,28 +40,28 @@ const SPAWN_PROBABILITY = 0.2; // 20% chance to spawn a resource in each cell
  * TODO: Abstract the QUEST_DEFINITIONS to a separate file and import it here. 
  */
 
-const QUEST_DEFINITIONS: Array<{
-  id: number;
-  name: string;
-  formula: string;
-  required: Record<string, number>;
-}> = [
+// const QUEST_DEFINITIONS: Array<{
+//   id: number;
+//   name: string;
+//   formula: string;
+//   required: Record<string, number>;
+// }> = [
 
-  // TODO: Decide how to represent subscripts (we don't know if they'll be supported).
-  { id: 1, name: 'ammonia', formula: 'NH₃', required: { Nitrogen: 1, Hydrogen: 3 } },
-  { id: 2, name: 'water', formula: 'H₂O', required: { Hydrogen: 2, Oxygen: 1 } },
-  { id: 3, name: 'carbon dioxide', formula: 'CO₂', required: { Carbon: 1, Oxygen: 2 } },
-  { id: 4, name: 'methane', formula: 'CH₄', required: { Carbon: 1, Hydrogen: 4 } },
-];
+//   // TODO: Decide how to represent subscripts (we don't know if they'll be supported).
+//   { id: 1, name: 'ammonia', formula: 'NH₃', required: { Nitrogen: 1, Hydrogen: 3 } },
+//   { id: 2, name: 'water', formula: 'H₂O', required: { Hydrogen: 2, Oxygen: 1 } },
+//   { id: 3, name: 'carbon dioxide', formula: 'CO₂', required: { Carbon: 1, Oxygen: 2 } },
+//   { id: 4, name: 'methane', formula: 'CH₄', required: { Carbon: 1, Hydrogen: 4 } },
+// ];
 
 // Server-provided questions (fetched at mount)
-
+ 
+// TODO
 const [serverQuests, setServerQuests] = useState<Quest[]>([]);
 
 useEffect(() => {
   let mounted = true;
-  fetchQuestions()
-    .then((qs) => {
+  fetchQuestions().then((qs) => {
       if (mounted) setServerQuests(qs);
     })
     .catch((err) => {
@@ -93,24 +95,86 @@ async function startGame() {
 // ========================
 
 // Generates a empty map
-function generateMap(): Node[][] {
+
+// NOTE: Added "quests" inputa
+function generateMap(quests: Quest[]): Node[][] {
   const map: Node[][] = [];
 
   // Initialize empty grid
   for (let y = 0; y < MAP_SIZE; y++) {
     const row: Node[] = [];
     for (let x = 0; x < MAP_SIZE; x++) {
-      row.push({ x, y, resource: null, collected: false });
+      row.push({ x, y, resources: null, collected: false });
     }
     map.push(row);
   }
 
   const requiredElements: ElementType[] = []
 
-  for (let i = requiredElements.length - 1; i >= 0; i--) {
-    // TODO: we have to make changes as resource is a dictionary of element counts, not a single element
-    map[randomInt(0, MAP_SIZE-1)][randomInt(0, MAP_SIZE-1)].resource = requiredElements[i];
+  // Uses input list of elements to propagate requiredElements
+  for (const quest of quests) {
+    for (const [symbol, count] of Object.entries(quest.required)) {
+      const element = SYMBOL_TO_ELEMENT[symbol];
+      if (!element) {
+        throw new Error(`Unknown element symbol "${symbol}" in quest ${quest.moleculeName}`);
+      }
+      for (let i = 0; i < count; i++) {
+        requiredElements.push(element as ElementType);
+      }
+    }
   }
-  // TODO:
+
+  // const requiredElements: ElementType[] = quests.flatMap((quest) =>
+  //   Object.entries(quest.required).flatMap(([symbol, count]) => {
+  //     const element = SYMBOL_TO_ELEMENT[symbol];
+  //     if (!element) {
+  //       throw new Error(`Unknown element symbol "${symbol}" in quest ${quest.moleculeName}`);
+  //     }
+  //     return Array(count).fill(element);
+  //   })
+  // );
+
+  // Initialize random Nodes with the resources needed to complete the game
+  for (let i = requiredElements.length - 1; i >= 0; i--) {
+    const currNode = map[randomInt(0, MAP_SIZE-1)][randomInt(0, MAP_SIZE-1)]
+    if (currNode.resources === null) {
+      currNode.resources = {[requiredElements[i]]: 1} as Record<ElementType, number>;
+    } else {
+      currNode.resources[requiredElements[i]] = (currNode.resources[requiredElements[i]] ?? 0) + 1;;
+    }
+  }
+
+  // TODO Add addional resources with probabilty
+
+
   return map;
 }
+
+// function initializeQuests(): Quest[] {
+//   return QUEST_DEFINITIONS.map((def) => ({
+//     ...def,
+//     submitted: Object.fromEntries(Object.keys(def.required).map((k) => [k, 0])),
+//     completed: false,
+//   }));
+// }
+
+// ========================
+// Initial State
+// ========================
+
+function createInitialState(): GameState {
+  return {
+    phase: 'title',
+    map: [],
+    mapSize: MAP_SIZE,
+    quests: [],
+    playerPosition: { x: 0, y: 0 },
+    inventory: createEmptyInventory(),
+    terminalLog: [],
+    questsCompleted: 0,
+  };
+}
+
+// ========================
+// Hook
+// ========================

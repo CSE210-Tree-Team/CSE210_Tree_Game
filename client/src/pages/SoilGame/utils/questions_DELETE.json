@@ -1,12 +1,53 @@
 [
     {
-        "ID": "12345",
+        "id": "12345",
         "resource_type": "Soil",
         "molecule_name": "Water",
         "molecule_formula": "H2O",
         "required": {
             "H": 2,
             "O": 1
+        }
+    },
+    {
+        "id": "67890",
+        "resource_type": "Soil",
+        "molecule_name": "Ammonia",
+        "molecule_formula": "NH3",
+        "required": {
+            "N": 1,
+            "H": 3
+        }
+    },
+    {
+        "id": "54321",
+        "resource_type": "Soil",
+        "molecule_name": "Carbon Dioxide",
+        "molecule_formula": "CO2",
+        "required": {
+            "C": 1,
+            "O": 2
+        }
+    },
+    {
+        "id": "14534",
+        "resource_type": "Soil",
+        "molecule_name": "Methane",
+        "molecule_formula": "CH4",
+        "required": {
+            "C": 1,
+            "H": 4
+        }
+    },
+    {
+        "id": "98765",
+        "resource_type": "Soil",
+        "molecule_name": "Glucose",
+        "molecule_formula": "C6H12O6",
+        "required": {
+            "C": 6,
+            "H": 12,
+            "O": 6
         }
     }
 ]

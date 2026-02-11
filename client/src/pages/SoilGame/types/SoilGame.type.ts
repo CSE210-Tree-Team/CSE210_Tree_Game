@@ -3,6 +3,14 @@
 // TODO: EXTEND THIS FOR ELEMENTS IN THE PERIODIC TABLE
 export type ElementType = 'Nitrogen' | 'Hydrogen' | 'Carbon' | 'Oxygen';
 
+// NOTE: Added
+export const SYMBOL_TO_ELEMENT: Record<string, ElementType> = {
+  H: 'Hydrogen',
+  O: 'Oxygen',
+  C: 'Carbon',
+  N: 'Nitrogen',
+};
+
 // Ordered finite states the game can take
 export type GamePhase = 'loading' | 'title' | 'tutorial' | 'playing' | 'complete';
 
