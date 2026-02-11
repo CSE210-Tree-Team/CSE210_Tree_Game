@@ -1,19 +1,28 @@
+/*
+WaterGame Page
+
+This module defines the WaterGame page, which manages the different screens 
+(start, tutorial, game, end) and handles navigation between them. It uses 
+React state to track the current screen and renders the appropriate content 
+based on that state. The component also includes navigation functionality to 
+return to the home page or move between screens using buttons and a back arrow.
+*/
+
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Popup } from "../../components/Popup";
 import styles from "./WaterGame.module.css";
 
 export const WaterGame = () => {
-  const [showStart, setShowStart] = useState(true);
-  const [showTutorial, setShowTutorial] = useState(false);
-  const [showGame, setShowGame] = useState(false);
-  const [showEnd, setShowEnd] = useState(false);
+  const [screen, setScreen] = useState<"start" | "tutorial" | "game" | "end">(
+    "start",
+  );
   const navigate = useNavigate();
 
   return (
     <div className={styles.gameContainer}>
-      {showStart && (
-        <>
+      {screen === "start" && (
+        <div data-testid="water-start">
           <img
             src="/leftArrow.svg"
             alt="Back Arrow"
@@ -27,21 +36,19 @@ export const WaterGame = () => {
             buttonText="Play"
             title="RAINDROP RUSH"
             onClick={() => {
-              setShowStart(false);
-              setShowTutorial(true);
+              setScreen("tutorial");
             }}
           />
-        </>
+        </div>
       )}
-      {showTutorial && (
-        <>
+      {screen === "tutorial" && (
+        <div data-testid="water-tutorial">
           <img
             src="/leftArrow.svg"
             alt="Back Arrow"
             className={styles.arrow}
             onClick={() => {
-              setShowTutorial(false);
-              setShowStart(true);
+              setScreen("start");
             }}
           />
           <Popup
@@ -50,8 +57,7 @@ export const WaterGame = () => {
             header="How To Play"
             buttonText="I'm Ready"
             onClick={() => {
-              setShowTutorial(false);
-              setShowGame(true);
+              setScreen("game");
             }}
             textList={[
               "A question will appear at the top of the screen",
@@ -61,10 +67,10 @@ export const WaterGame = () => {
               "Goal: Collect as many raindrops as you can to gather water for your tree!",
             ]}
           />
-        </>
+        </div>
       )}
-      {showGame && (
-        <div className={styles.gameScreen}>
+      {screen === "game" && (
+        <div data-testid="water-game" className={styles.gameScreen}>
           <span className={styles.question}>
             <p className={styles.questionText}>
               What is the chemical formula for water?
@@ -72,27 +78,28 @@ export const WaterGame = () => {
           </span>
           <button
             onClick={() => {
-              setShowGame(false);
-              setShowEnd(true);
+              setScreen("end");
             }}
           >
             End Game
           </button>
         </div>
       )}
-      {showEnd && (
-        <Popup
-          variant="water"
-          screen="end"
-          header="Time's Up"
-          buttonText="Go Back to Home"
-          onClick={() => (window.location.href = "/")}
-          textList={[
-            "Number of correctly answered questions: 7",
-            "Number of incorrectly answered questions: 3",
-            "Total number of points earned: 7",
-          ]}
-        />
+      {screen === "end" && (
+        <div data-testid="water-end">
+          <Popup
+            variant="water"
+            screen="end"
+            header="Time's Up"
+            buttonText="Go Back to Home"
+            onClick={() => (window.location.href = "/")}
+            textList={[
+              "Number of correctly answered questions: 7",
+              "Number of incorrectly answered questions: 3",
+              "Total number of points earned: 7",
+            ]}
+          />
+        </div>
       )}
     </div>
   );

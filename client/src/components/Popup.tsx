@@ -1,3 +1,21 @@
+/*
+Popup component
+
+This module contains the Popup component, which is a reusable component used in the 
+start, tutorial, and end screens of the minigames. It renders a styled popup 
+element that displays a header, optional title, instructions, and a button.
+
+Props:
+- variant: Determines the styling of the popup according to the minigame (e.g., "water" or "soil").
+- screen: Determines the content to display based on the current screen ("start", "tutorial", "end").
+- header: The main header text to display in the popup.
+- buttonText: The text to display on the button (optional).
+- onClick: A callback function that is called when the button is clicked (optional).
+- className: Additional CSS classes to apply to the popup (optional).
+- title: A title to display on the start screen. (optional)
+- textList: A list of instructions to display on the tutorial and end screens. (optional)
+*/
+
 import styles from "./Popup.module.css";
 import { Button } from "./Button";
 
