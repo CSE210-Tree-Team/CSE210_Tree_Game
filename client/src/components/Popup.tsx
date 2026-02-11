@@ -44,12 +44,8 @@ export const Popup = ({
     <div className={`${styles.popup} ${styles[variant]} ${className ?? ""}`}>
       <h2>{header}</h2>
       {screen === "start" ? (
-        variant === "water" ? (
-          <h1 className={styles.title}>{title}</h1>
-        ) : variant === "soil" ? (
-          <h1 className={styles.title}>{title}</h1>
-        ) : null
-      ) : screen === "tutorial" || screen === "end" ? (
+        <h1 className={styles.title}>{title}</h1>
+      ) : (screen === "tutorial" || screen === "end") && textList ? (
         <ul className={styles.text}>
           {textList?.map((listItem, index) => (
             <li key={index}>{listItem}</li>
