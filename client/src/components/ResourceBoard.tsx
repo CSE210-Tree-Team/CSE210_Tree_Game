@@ -1,4 +1,4 @@
-﻿import { type Resources } from "./Resources";
+import { type Resources } from "./Resources";
 import styles from "../css/homepage.module.css"
 
 interface ResourceBoardProps {
