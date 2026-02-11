@@ -256,6 +256,23 @@ def api_get_questions(numQuestions: int, resourceType: str, questionType: str, q
     return None
 
 ############################################
+#            SPA Catch-All Route           #
+############################################
+
+@app.get("/{full_path:path}")
+def catch_all(full_path: str):
+    """
+    Catch-all route to serve index.html for client-side routing.
+    This allows React Router to handle routes like /soil, /water, etc.
+    API routes (starting with /api/) and assets (starting with /assets/) 
+    are handled by their specific routes above.
+    """
+    index_path = os.path.join("..", "client", "dist", "index.html")
+    if os.path.exists(index_path):
+        return FileResponse(index_path)
+    return {"error": "Frontend not found"}
+
+############################################
 #                  Server                  #
 ############################################
 
