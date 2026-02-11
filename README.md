@@ -15,13 +15,13 @@ python main.py
 ```
 
 ## Database:
-To create the database, run `python -m Database.createDatabase`  
-To fill with test data, run `python -m Database.generateTestData`  
-To view current state of the database, run `python -m Database.printDatabase`. You may want to redirect the output into a text file.  
+To create the database, from within the `server` directory run `python -m Database.createDatabase`.  
+To fill with test data, from within the `server` directory run `python -m Database.generateTestData`.  
+To view current state of the database, from within the `server` directory run `python -m Database.printDatabase`. You may want to redirect the output into a text file.  
 
-For getting organized dictionaries from the database, please reference `Database/getItemsFromDatabase.py`. When calling these functions, use the username. Similarily, please reference `Database/addItemsToDatabase.py` for any function calls that will update the database.
+For getting organized dictionaries from the database, please reference `server/Database/getItemsFromDatabase.py`. When calling these functions, use the username. Similarly, please reference `server/Database/addItemsToDatabase.py` for any function calls that will update the database.
 
-To test the database, as per the GitHub Actions, run both: `python -m Database.databaseInteractUnitTests` and `python -m Database.databaseUnitTests`.
+To test the database, as per the GitHub Actions, from within the `server` directory run both: `python -m Database.databaseInteractUnitTests` and `python -m Database.databaseUnitTests`.
 
 ## Home Page:
 1. First, cd to Home page. And then, run `npm install`. (you should configure npm if u don't have it installed yet lol)
