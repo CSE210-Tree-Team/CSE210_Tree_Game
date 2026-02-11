@@ -46,10 +46,10 @@ export const ResourceBoard = ({ resources }: ResourceBoardProps) => {
                     <div className={styles.resourceRight}>
                         <span className={styles.resourceLabel}>Earth</span>
                         <div className={styles.progressBarContainer}>
-                                <div
-                                    className={`${styles.progressBar} ${styles.earthBar}`}
-                                    style={{ width: `${resources.earth}%` }}
-                                ></div>
+                            <div
+                                className={`${styles.progressBar} ${styles.earthBar}`}
+                                style={{ width: `${resources.earth}%` }}
+                            ></div>
                         </div>
                     </div>
                     <span className={styles.resourceValue}>{resources.earth}%</span>
@@ -65,10 +65,10 @@ export const ResourceBoard = ({ resources }: ResourceBoardProps) => {
                     <div className={styles.resourceRight}>
                         <span className={styles.resourceLabel}>Sun</span>
                         <div className={styles.progressBarContainer}>
-                                <div
-                                    className={`${styles.progressBar} ${styles.sunBar}`}
-                                    style={{ width: `${resources.sun}%` }}
-                                ></div>
+                            <div
+                                className={`${styles.progressBar} ${styles.sunBar}`}
+                                style={{ width: `${resources.sun}%` }}
+                            ></div>
                         </div>
                     </div>
                     <span className={styles.resourceValue}>{resources.sun}%</span>
