@@ -83,12 +83,12 @@ export const Homepage = () => {
     return (
         <div className={styles.homepageWrapper}>
             <div className={styles.gameConatiner}>
-                <h1 className={styles.helloTitle}>Hello, {userInfo?.displayName || 'User'}</h1>
-                <ResourceBoard resources={userInfo?.resourceLevels || userInfoMock.resourceLevels} />
+                <h1 className={styles.helloTitle}>Hello, {userInfo?.displayName ?? 'User'}</h1>
+                <ResourceBoard resources={userInfo?.resourceLevels ?? userInfoMock.resourceLevels} />
 
                 <div className={styles.treeEarthContainer}>
-                    <Tree water={userInfo?.resourceLevels.water || userInfoMock.resourceLevels.water} />
-                    <Earth earth={userInfo?.resourceLevels.earth || userInfoMock.resourceLevels.earth} onClick={handleSoilGame} />
+                    <Tree water={userInfo?.resourceLevels.water ?? userInfoMock.resourceLevels.water} />
+                    <Earth earth={userInfo?.resourceLevels.earth ?? userInfoMock.resourceLevels.earth} onClick={handleSoilGame} />
                     <WateringCan onClick={handleWaterGame} />
                 </div>
 
