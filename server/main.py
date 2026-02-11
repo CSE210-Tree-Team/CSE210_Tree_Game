@@ -285,12 +285,20 @@ async def api_update_stat(request: Request, student=Depends(student_required)):
     
     stat_name = data.get("stat_name")
     value = data.get("value")
-    tree_id = get_tree_ID(request)
+    
+    # Get tree from student's username
+    username = student.get("username") if student else None
+    tree = get_tree(username) if username else None
+    tree_id = tree.get('treeID') if tree else None
     
     if not stat_name:
         raise HTTPException(status_code=400, detail="stat_name is required")
     if value is None:
         raise HTTPException(status_code=400, detail="value is required")
+    if not isinstance(value, int) or isinstance(value, bool):
+        raise HTTPException(status_code=400, detail="value must be an integer")
+    if not tree_id:
+        raise HTTPException(status_code=404, detail="Tree not found for user")
     
     # TODO: Refactor into events potentially.
     try:

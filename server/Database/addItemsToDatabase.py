@@ -366,6 +366,7 @@ def update_stat(tree_ID: str, stat_name: str, value: int):
     Raises:
         ValueError: If stat_name is invalid
     """
+    from Database.getItemsFromDatabase import _query
 
     print("Testing")
 
@@ -377,25 +378,39 @@ def update_stat(tree_ID: str, stat_name: str, value: int):
     
     print(f"Updating stat '{stat_name_lower}' for tree '{tree_ID}' by {value}")
 
-    sql = f'''
-        UPDATE TreeResources
-        SET {stat_name_lower} = CASE 
-            WHEN {stat_name_lower} + ? < {RESOURCE_MIN_LEVEL} THEN {RESOURCE_MIN_LEVEL}
-            WHEN {stat_name_lower} + ? > {RESOURCE_MAX_LEVEL} THEN {RESOURCE_MAX_LEVEL}
-            ELSE {stat_name_lower} + ?
-        END
+    # Get current value to check if it will actually change
+    get_current_sql = f'''
+        SELECT {stat_name_lower}
+        FROM TreeResources
         WHERE treeID = ?
     '''
-
-    # Update Tree's lastUpdated timestamp as well
-    last_updated_sql = '''
-        UPDATE Tree
-        SET lastUpdated = ?
-        WHERE treeID = ?
-    '''
+    result = _query(get_current_sql, (tree_ID,), fetchone=True)
+    current_value = result[stat_name_lower] if result else 0
     
-    _execute(sql, (value, value, value, tree_ID))
-    _execute(last_updated_sql, (datetime.now().isoformat(), tree_ID))
+    # Calculate new value with clamping
+    new_value = current_value + value
+    if new_value < RESOURCE_MIN_LEVEL:
+        new_value = RESOURCE_MIN_LEVEL
+    elif new_value > RESOURCE_MAX_LEVEL:
+        new_value = RESOURCE_MAX_LEVEL
+    
+    # Only update if the value actually changes
+    if new_value != current_value:
+        sql = f'''
+            UPDATE TreeResources
+            SET {stat_name_lower} = ?
+            WHERE treeID = ?
+        '''
+        
+        # Update Tree's lastUpdated timestamp as well
+        last_updated_sql = '''
+            UPDATE Tree
+            SET lastUpdated = ?
+            WHERE treeID = ?
+        '''
+        
+        _execute(sql, (new_value, tree_ID))
+        _execute(last_updated_sql, (datetime.now().isoformat(), tree_ID))
 
 
 def update_health(tree_ID: str, health_status: str):

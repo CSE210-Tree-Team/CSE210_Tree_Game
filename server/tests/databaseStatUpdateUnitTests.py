@@ -194,7 +194,7 @@ class DatabaseStatUpdateTests(UpdateStatsTestCase):
         self.assertIn("Invalid stat name", str(context.exception))
     
     def test_update_stat_updates_lastUpdated(self):
-        """Test that update_stat updates the lastUpdated timestamp."""
+        """Test that update_stat updates the lastUpdated timestamp when value changes."""
         tree_id, username = self.create_test_tree()
         
         # Get initial lastUpdated
@@ -205,8 +205,8 @@ class DatabaseStatUpdateTests(UpdateStatsTestCase):
         import time
         time.sleep(0.01)
         
-        # Update a stat
-        update_stat(tree_id, 'water', 5)
+        # Update a stat with a value that will change it.
+        update_stat(tree_id, 'water', -5)
         
         # Verify lastUpdated changed
         tree = get_tree(username)
