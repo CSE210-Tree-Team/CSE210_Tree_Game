@@ -242,7 +242,7 @@ def get_user_info(request: Request, student=Depends(student_required)):
         }
     }
     """
-    username = get_username(request) if student else None
+    username = student.get("username") if student else None
     tree = get_tree(username) if student else None
     
     # Apply passive decay to tree before returning
