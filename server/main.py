@@ -52,7 +52,7 @@ def apply_event(treeID, eventID):
 
 def recompute_tree_health(treeID):
     # TODO: Implement tree health recomputation logic here.
-    # Will update apperance, health status, bars, etc.
+    # Will update appearance, health status, bars, etc.
     return False
 
 def serve_frontend():
@@ -263,6 +263,11 @@ def api_get_questions(numQuestions: int, resourceType: str, questionType: str, q
 ############################################
 #            SPA Catch-All Route           #
 ############################################
+# IMPORTANT: This catch-all route must be defined LAST, after all API routes.
+# FastAPI matches routes in the order they are defined, so:
+# 1. Specific routes (/, /api/*, etc.) are matched first
+# 2. Static file mounts (/assets/*) are registered before routes
+# 3. This catch-all matches any remaining GET requests
 
 @app.get("/{full_path:path}")
 def catch_all(full_path: str):
