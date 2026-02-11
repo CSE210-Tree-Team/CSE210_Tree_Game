@@ -28,8 +28,24 @@ jobs:
 
       - name: Run Database Schema Unit Tests
         run: |
-          python -m unittest Database.databaseUnitTests -v
+          python -m unittest tests.databaseUnitTests -v
 
       - name: Run Database Interaction Unit Tests
         run: |
-          python -m unittest Database.databaseInteractUnitTests -v
+          python -m unittest tests.databaseInteractUnitTests -v
+
+      - name: Run Update Tree Stat Tests
+        run: |
+          python -m unittest tests.databaseStatUpdateUnitTests -v
+
+      - name: Run API Questions Tests
+        run: |
+          python -m unittest tests.apiQuestionsUnitTests -v
+
+      - name: Run API User Tests
+        run: |
+          python -m unittest tests.apiUserUnitTests -v
+
+      - name: Run API Stat Update Tests
+        run: |
+          python -m unittest tests.apiStatUnitTests -v
