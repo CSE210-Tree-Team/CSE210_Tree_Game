@@ -34,7 +34,7 @@ Currently, an email may only be associated to one account. Upon account creation
 
 ### LLM Credits:
 - Gemini was used to generate printDatabase.py
-- Gamini was used to help with some of the addItemsToDatabase.py and getItemsFromDatabase.py
+- Gemini was used to help with some of the addItemsToDatabase.py and getItemsFromDatabase.py
 - Gemini was used to help create the databaseInteractUnitTests.
 - Gemini was used to help with authentication and combining FastAPI with React Home Page
 - Gemini was used to help create the .github workflow to automatically run tests.
