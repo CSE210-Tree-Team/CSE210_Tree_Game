@@ -54,6 +54,13 @@ def recompute_tree_health(treeID):
     # TODO: Implement tree health recomputation logic here.
     # Will update apperance, health status, bars, etc.
     return False
+
+def serve_frontend():
+    """Serves the frontend index.html file."""
+    index_path = os.path.join(os.path.dirname(__file__), "..", "client", "dist", "index.html")
+    if os.path.exists(index_path):
+        return FileResponse(index_path)
+    raise HTTPException(status_code=404, detail="Frontend not found")
     
 def get_username(request: Request):
     """Extracts the username from the session."""
@@ -134,10 +141,7 @@ async def student_required(request: Request, person = Depends(get_current_user))
 
 @app.get("/")
 def default_page():
-    index_path = os.path.join(os.path.dirname(__file__), "..", "client", "dist", "index.html")
-    if os.path.exists(index_path):
-        return FileResponse(index_path)
-    raise HTTPException(status_code=404, detail="Frontend not found")
+    return serve_frontend()
 
 @app.get("/manageAccount")
 def manage_account(account=Depends(get_current_user)):
@@ -268,10 +272,7 @@ def catch_all(full_path: str):
     API routes (starting with /api/) and assets (starting with /assets/) 
     are handled by their specific routes above.
     """
-    index_path = os.path.join(os.path.dirname(__file__), "..", "client", "dist", "index.html")
-    if os.path.exists(index_path):
-        return FileResponse(index_path)
-    raise HTTPException(status_code=404, detail="Frontend not found")
+    return serve_frontend()
 
 ############################################
 #                  Server                  #
