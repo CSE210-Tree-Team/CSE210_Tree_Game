@@ -1,6 +1,7 @@
 import os
 import uvicorn
 import logging
+import threading
 from fastapi import FastAPI, Request, Depends, HTTPException, status
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse, RedirectResponse
@@ -37,6 +38,7 @@ AUTH0_ALGORITHMS = ["RS256"]
 # JWKS cache with 1 hour TTL
 _jwks_cache = None
 _jwks_cache_time = 0
+_jwks_cache_lock = threading.Lock()
 JWKS_CACHE_TTL = 3600  # 1 hour in seconds
 
 # --- Static File Serving ---
@@ -60,29 +62,35 @@ async def redirect_to_login(request: Request, exc: NeedLoginException):
 
 async def get_jwks() -> dict:
     """
-    Fetch JWKS from Auth0 with caching.
+    Fetch JWKS from Auth0 with thread-safe caching.
     Cache is valid for 1 hour to avoid unnecessary network calls.
     """
     global _jwks_cache, _jwks_cache_time
     
     current_time = time()
     
-    # Return cached JWKS if still valid
+    # Check cache without lock first for performance
     if _jwks_cache and (current_time - _jwks_cache_time) < JWKS_CACHE_TTL:
         return _jwks_cache
     
-    # Fetch new JWKS
-    jwks_url = f"https://{AUTH0_DOMAIN}/.well-known/jwks.json"
-    async with httpx.AsyncClient() as client:
-        jwks_response = await client.get(jwks_url)
-        jwks_response.raise_for_status()
-        jwks = jwks_response.json()
-    
-    # Update cache
-    _jwks_cache = jwks
-    _jwks_cache_time = current_time
-    
-    return jwks
+    # Acquire lock to update cache
+    with _jwks_cache_lock:
+        # Double-check after acquiring lock
+        if _jwks_cache and (current_time - _jwks_cache_time) < JWKS_CACHE_TTL:
+            return _jwks_cache
+        
+        # Fetch new JWKS
+        jwks_url = f"https://{AUTH0_DOMAIN}/.well-known/jwks.json"
+        async with httpx.AsyncClient() as client:
+            jwks_response = await client.get(jwks_url)
+            jwks_response.raise_for_status()
+            jwks = jwks_response.json()
+        
+        # Update cache
+        _jwks_cache = jwks
+        _jwks_cache_time = current_time
+        
+        return jwks
 
 async def verify_jwt_token(token: str) -> dict:
     """
@@ -140,13 +148,21 @@ async def verify_jwt_token(token: str) -> dict:
         return payload
         
     except JWTError as e:
+        logger.warning(f"JWT validation failed: {type(e).__name__}")
         raise HTTPException(
             status_code=401,
             detail="Invalid or expired token"
         )
-    except Exception as e:
+    except httpx.HTTPError as e:
+        logger.error(f"Failed to fetch JWKS from Auth0: {str(e)}")
         raise HTTPException(
-            status_code=401,
+            status_code=500,
+            detail="Authentication service unavailable"
+        )
+    except Exception as e:
+        logger.error(f"Unexpected error during token verification: {type(e).__name__}")
+        raise HTTPException(
+            status_code=500,
             detail="Authentication failed"
         )
     
@@ -279,7 +295,14 @@ async def verify_auth(request: Request):
                 detail="Missing or invalid Authorization header"
             )
         
-        token = auth_header.split(" ")[1]
+        token_parts = auth_header.split(" ")
+        if len(token_parts) != 2:
+            raise HTTPException(
+                status_code=401,
+                detail="Invalid Authorization header format"
+            )
+        
+        token = token_parts[1]
         
         # Verify the JWT token and get claims
         payload = await verify_jwt_token(token)
