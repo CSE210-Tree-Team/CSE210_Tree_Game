@@ -9,7 +9,6 @@ from starlette.middleware.sessions import SessionMiddleware
 from dotenv import load_dotenv
 from jose import jwt, JWTError
 import httpx
-from functools import lru_cache
 from time import time
 from Database.getItemsFromDatabase import get_person, get_tree
 from Database.addItemsToDatabase import add_account, generate_tree
@@ -74,15 +73,11 @@ async def get_jwks() -> dict:
     """
     global _jwks_cache, _jwks_cache_time
     
-    current_time = time()
-    
-    # Check cache without lock first for performance
-    if _jwks_cache and (current_time - _jwks_cache_time) < JWKS_CACHE_TTL:
-        return _jwks_cache
-    
-    # Acquire lock to update cache
+    # Acquire lock for thread-safe cache access
     with _jwks_cache_lock:
-        # Double-check after acquiring lock
+        current_time = time()
+        
+        # Return cached JWKS if still valid
         if _jwks_cache and (current_time - _jwks_cache_time) < JWKS_CACHE_TTL:
             return _jwks_cache
         
@@ -155,7 +150,8 @@ async def verify_jwt_token(token: str) -> dict:
         return payload
         
     except JWTError as e:
-        logger.warning(f"JWT validation failed: {type(e).__name__} - {str(e)}")
+        # Log only exception type to avoid exposing token structure
+        logger.warning(f"JWT validation failed: {type(e).__name__}")
         raise HTTPException(
             status_code=401,
             detail="Invalid or expired token"
