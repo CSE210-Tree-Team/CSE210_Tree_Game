@@ -35,6 +35,13 @@ AUTH0_DOMAIN = os.getenv("AUTH0_DOMAIN")
 AUTH0_AUDIENCE = os.getenv("AUTH0_AUDIENCE")
 AUTH0_ALGORITHMS = ["RS256"]
 
+# Validate Auth0 configuration at startup
+if not AUTH0_DOMAIN or not AUTH0_AUDIENCE:
+    logger.warning(
+        "AUTH0_DOMAIN and AUTH0_AUDIENCE environment variables are not set. "
+        "Authentication will fail until these are configured."
+    )
+
 # JWKS cache with 1 hour TTL
 _jwks_cache = None
 _jwks_cache_time = 0
@@ -148,7 +155,7 @@ async def verify_jwt_token(token: str) -> dict:
         return payload
         
     except JWTError as e:
-        logger.warning(f"JWT validation failed: {type(e).__name__}")
+        logger.warning(f"JWT validation failed: {type(e).__name__} - {str(e)}")
         raise HTTPException(
             status_code=401,
             detail="Invalid or expired token"
@@ -295,14 +302,13 @@ async def verify_auth(request: Request):
                 detail="Missing or invalid Authorization header"
             )
         
-        token_parts = auth_header.split(" ")
-        if len(token_parts) != 2:
+        # Extract token (after "Bearer ")
+        token = auth_header[7:].strip()
+        if not token:
             raise HTTPException(
                 status_code=401,
-                detail="Invalid Authorization header format"
+                detail="Empty token in Authorization header"
             )
-        
-        token = token_parts[1]
         
         # Verify the JWT token and get claims
         payload = await verify_jwt_token(token)
