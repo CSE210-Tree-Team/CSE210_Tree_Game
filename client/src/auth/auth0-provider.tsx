@@ -22,7 +22,7 @@ export const Auth0ProviderWithConfig = ({ children }: Auth0ProviderWithConfigPro
                 audience: `https://${domain}/api/v2/`
             }}
             useRefreshTokens={true}
-            cacheLocation="localstorage"
+            cacheLocation="memory"
         >
             {children}
         </Auth0Provider>
