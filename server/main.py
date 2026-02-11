@@ -233,13 +233,13 @@ def update_stat(stat_name: str, percent: int, request: Request, student=Depends(
     return None
 
 @app.post("/api/update-user")
-def update_user(request: Request, user_data: UpdateUserRequest, person=Depends(get_current_user)):
+def update_user(request: Request, update_request: UpdateUserRequest, person=Depends(get_current_user)):
     """
     API endpoint to update user information.
     Requires authentication.
     """
     # TODO: Implement user update logic here.
-    return None
+    raise HTTPException(status_code=status.HTTP_501_NOT_IMPLEMENTED, detail="User update functionality not yet implemented")
 
 
 @app.post("/api/add-question")
