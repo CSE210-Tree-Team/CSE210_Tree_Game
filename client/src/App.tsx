@@ -4,6 +4,7 @@ import { Homepage } from './pages/Home/homepage';
 import { Welcome } from './pages/Home/Welcome';
 import { SoilGame } from './pages/SoilGame/SoilGame';
 import { WaterGame } from './pages/WaterGame/WaterGame';
+import { AccountSettings } from './pages/AccountSettings/AccountSettings';
 import './App.css';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 
@@ -33,6 +34,7 @@ function App() {
                         <Route path="/" element={<Homepage />} />
                         <Route path="/soil" element={<SoilGame />} />
                         <Route path="/water" element={<WaterGame />} />
+                        <Route path="/account" element={<AccountSettings />} />
                         <Route path="*" element={<Navigate to="/" replace />} />
                     </>
                 )}

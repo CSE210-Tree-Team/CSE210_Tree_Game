@@ -328,6 +328,19 @@
         background: #f0f0f0;
     }
 
+.buttonSettings {
+    padding: 15px 40px;
+    background: white;
+    border-radius: 30px;
+    position: absolute;
+    bottom: clamp(20px, 4vw, 40px);
+    right: clamp(200px, 22vw, 280px);
+}
+
+.buttonSettings:hover {
+    background: #f0f0f0;
+}
+
 
 @media (max-width: 768px) {
     .homepageWrapper {
@@ -377,6 +390,12 @@
         text-align: center;
         margin-left: 0;
     }
+
+    .buttonSettings {
+        position: static;
+        margin: 16px auto 0 auto;
+        display: block;
+    }
 }
 
 @media (min-width: 1920px) {
@@ -393,6 +412,4 @@
         width: 320px;
     }
 }
-
-
 
