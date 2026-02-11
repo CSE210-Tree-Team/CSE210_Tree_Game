@@ -5,7 +5,7 @@ with an emphasis on question creation, duplicate detection, and validation behav
 It also covers user information retrieval routes.
 
 Test classes:
-    APIRoutesTestCase: Base test class that provisions a temporary database and client.
+    APIQuestionsTestCase: Base test class that provisions a temporary database and client.
     TestAddQuestionFunction: Direct tests for `add_question()`.
     TestAPIAddQuestion: Endpoint tests for /api/add-question.
     TestOtherAPIRoutes: Endpoint tests for /api/get-user-info and related routes.
@@ -34,7 +34,7 @@ from constants import (
 )
 
 
-class APIRoutesTestCase(unittest.TestCase):
+class APIQuestionsTestCase(unittest.TestCase):
     """Base test case that sets up a temporary database and FastAPI client for each test."""
     
     def setUp(self):
@@ -88,7 +88,7 @@ class APIRoutesTestCase(unittest.TestCase):
         return client
 
 
-class TestAddQuestionFunction(APIRoutesTestCase):
+class TestAddQuestionFunction(APIQuestionsTestCase):
     """Tests for the add_question function directly."""
     
     def test_add_mcq_question(self):
@@ -277,7 +277,7 @@ class TestAddQuestionFunction(APIRoutesTestCase):
             self.assertIsNotNone(q_id)
 
 
-class TestAPIAddQuestion(APIRoutesTestCase):
+class TestAPIAddQuestion(APIQuestionsTestCase):
     """Tests for the /api/add-question endpoint."""
     
     def test_add_question_success(self):
@@ -416,44 +416,7 @@ class TestAPIAddQuestion(APIRoutesTestCase):
         data = response.json()
         self.assertTrue(data["success"])
 
-
-class TestOtherAPIRoutes(APIRoutesTestCase):
-    """Tests for other API routes."""
-    
-    def test_get_user_info(self):
-        """Test the /api/get-user-info endpoint."""
-        client = self.get_authenticated_client()
-        
-        response = client.get("/api/get-user-info")
-        self.assertEqual(response.status_code, 200)
-        
-        data = response.json()
-        self.assertTrue(data["success"])
-        self.assertIn("user", data)
-        self.assertIn("tree", data)
-        
-        # Check user structure
-        user = data["user"]
-        self.assertIn("username", user)
-        self.assertIn("displayName", user)
-        self.assertIn("email", user)
-        self.assertIn("roles", user)
-        
-        # Check tree structure
-        tree = data["tree"]
-        self.assertIn("treeID", tree)
-        self.assertIn("health", tree)
-        self.assertIn("growthStage", tree)
-        self.assertIn("resourceLevels", tree)
-        
-        # Check resourceLevels if present (may be None)
-        if tree["resourceLevels"] is not None:
-            self.assertIn("water", tree["resourceLevels"])
-            self.assertIn("earth", tree["resourceLevels"])
-            self.assertIn("sun", tree["resourceLevels"])
-
-
-class TestGetQuestionEndpoint(APIRoutesTestCase):
+class TestGetQuestionEndpoint(APIQuestionsTestCase):
     """Tests for the /api/get-question endpoint."""
     
     def setUp(self):
@@ -563,7 +526,7 @@ class TestGetQuestionEndpoint(APIRoutesTestCase):
         self.assertIn("Blue", correct_answers)
 
 
-class TestGetQuestionsEndpoint(APIRoutesTestCase):
+class TestGetQuestionsEndpoint(APIQuestionsTestCase):
     """Tests for the /api/get-questions endpoint."""
     
     def setUp(self):

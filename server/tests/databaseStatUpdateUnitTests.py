@@ -105,8 +105,8 @@ class DatabaseStatUpdateTests(UpdateStatsTestCase):
         tree = get_tree(username)
         self.assertEqual(tree['resourceLevels']['water'], initial_water - 20)
     
-    def test_update_earth_positive(self):
-        """Test increasing earth resource."""
+    def test_update_earth_both(self):
+        """Test increasing and decreasing earth resource."""
         tree_id, username = self.create_test_tree()
         
         # First reduce earth to make room for increase
@@ -123,8 +123,8 @@ class DatabaseStatUpdateTests(UpdateStatsTestCase):
         tree = get_tree(username)
         self.assertEqual(tree['resourceLevels']['earth'], initial_earth + 15)
     
-    def test_update_sun_positive(self):
-        """Test increasing sun resource."""
+    def test_update_sun_both(self):
+        """Test increasing and decreasing sun resource."""
         tree_id, username = self.create_test_tree()
         
         # First reduce sun to make room for increase

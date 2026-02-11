@@ -270,7 +270,7 @@ def get_user_info(request: Request, student=Depends(student_required)):
 @app.post("/api/update-stat")
 async def api_update_stat(request: Request, student=Depends(student_required)):
     """
-    Updates a specific stat for the student's tree. Treats this update as an event.
+    Updates a specific stat for the student's tree. NOTE: TODO: Treats this update as an event. This does not affect functionality
     
     Request body:
     {
