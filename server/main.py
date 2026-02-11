@@ -52,8 +52,15 @@ def apply_event(treeID, eventID):
 
 def recompute_tree_health(treeID):
     # TODO: Implement tree health recomputation logic here.
-    # Will update apperance, health status, bars, etc.
+    # Will update appearance, health status, bars, etc.
     return False
+
+def serve_frontend():
+    """Serves the frontend index.html file."""
+    index_path = os.path.join(os.path.dirname(__file__), "..", "client", "dist", "index.html")
+    if os.path.exists(index_path):
+        return FileResponse(index_path)
+    raise HTTPException(status_code=404, detail="Frontend not found")
     
 def get_username(request: Request):
     """Extracts the username from the session."""
@@ -134,9 +141,7 @@ async def student_required(request: Request, person = Depends(get_current_user))
 
 @app.get("/")
 def default_page():
-    index_path = os.path.join("..", "client", "dist", "index.html")
-    if os.path.exists(index_path):
-        return FileResponse(index_path)
+    return serve_frontend()
 
 @app.get("/manageAccount")
 def manage_account(account=Depends(get_current_user)):
@@ -254,6 +259,25 @@ def api_get_questions(numQuestions: int, resourceType: str, questionType: str, q
     """
     # TODO: Implement multiple question retrieval logic here.
     return None
+
+############################################
+#            SPA Catch-All Route           #
+############################################
+# IMPORTANT: This catch-all route must be defined LAST, after all API routes.
+# FastAPI matches routes in the order they are defined, so:
+# 1. Specific routes (/, /api/*, etc.) are matched first
+# 2. Static file mounts (/assets/*) are registered before routes
+# 3. This catch-all matches any remaining GET requests
+
+@app.get("/{full_path:path}")
+def catch_all(full_path: str):
+    """
+    Catch-all route to serve index.html for client-side routing.
+    This allows React Router to handle routes like /soil, /water, etc.
+    API routes (starting with /api/) and assets (starting with /assets/) 
+    are handled by their specific routes above.
+    """
+    return serve_frontend()
 
 ############################################
 #                  Server                  #
