@@ -134,9 +134,10 @@ async def student_required(request: Request, person = Depends(get_current_user))
 
 @app.get("/")
 def default_page():
-    index_path = os.path.join("..", "client", "dist", "index.html")
+    index_path = os.path.join(os.path.dirname(__file__), "..", "client", "dist", "index.html")
     if os.path.exists(index_path):
         return FileResponse(index_path)
+    raise HTTPException(status_code=404, detail="Frontend not found")
 
 @app.get("/manageAccount")
 def manage_account(account=Depends(get_current_user)):
@@ -267,10 +268,10 @@ def catch_all(full_path: str):
     API routes (starting with /api/) and assets (starting with /assets/) 
     are handled by their specific routes above.
     """
-    index_path = os.path.join("..", "client", "dist", "index.html")
+    index_path = os.path.join(os.path.dirname(__file__), "..", "client", "dist", "index.html")
     if os.path.exists(index_path):
         return FileResponse(index_path)
-    return {"error": "Frontend not found"}
+    raise HTTPException(status_code=404, detail="Frontend not found")
 
 ############################################
 #                  Server                  #
