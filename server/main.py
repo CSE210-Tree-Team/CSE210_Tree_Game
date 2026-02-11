@@ -6,6 +6,8 @@ from fastapi import FastAPI, Request, Depends, HTTPException, status
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse, RedirectResponse
 from starlette.middleware.sessions import SessionMiddleware
+from pydantic import BaseModel
+from typing import Optional
 from dotenv import load_dotenv
 from jose import jwt, JWTError
 import httpx
@@ -14,6 +16,16 @@ from Database.getItemsFromDatabase import get_person, get_tree
 from Database.addItemsToDatabase import add_account, generate_tree
 from constants import ROLE_STUDENT
 from dataRecords import Tree, Event
+
+
+############################################
+#               Request Models             #
+############################################
+
+class UpdateUserRequest(BaseModel):
+    """Request model for updating user information."""
+    displayName: Optional[str] = None
+    dateOfBirth: Optional[str] = None
 
 
 ############################################
@@ -397,12 +409,13 @@ def update_stat(stat_name: str, percent: int, request: Request, student=Depends(
     return None
 
 @app.post("/api/update-user")
-def update_user(displayName: str = None, dateOfBirth: str = None, request: Request = None):
+def update_user(request: Request, update_request: UpdateUserRequest, person=Depends(get_current_user)):
     """
     API endpoint to update user information.
+    Requires authentication.
     """
     # TODO: Implement user update logic here.
-    return None
+    raise HTTPException(status_code=status.HTTP_501_NOT_IMPLEMENTED, detail="User update functionality not yet implemented")
 
 
 @app.post("/api/add-question")
