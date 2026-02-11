@@ -11,7 +11,7 @@ source .venv/bin/activate
 pip install --upgrade pip
 pip install -r server/requirements.txt
 
-python main.py
+python server/main.py
 ```
 
 ## Database:

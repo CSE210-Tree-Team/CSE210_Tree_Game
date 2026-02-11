@@ -19,12 +19,17 @@ export const Earth = ({ earth, onClick }: EarthProps) => {
 
     return (
         <div className={styles.earthContainer}>
-            <img
-                src={getEarthImage()}
-                alt="Earth"
-                className={styles.earthImage}
+            <button
+                className={styles.earthButton}
                 onClick={onClick}
-            ></img>
+                aria-label="Interact with soil"
+            >
+                <img
+                    src={getEarthImage()}
+                    alt="Earth"
+                    className={styles.earthImage}
+                />
+            </button>
         </div>
     );
 };

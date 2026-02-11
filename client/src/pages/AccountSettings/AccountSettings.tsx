@@ -15,7 +15,7 @@ export const AccountSettings = () => {
 
     return (
         <div className={styles.homepageWrapper}>
-            <div className={styles.gameConatiner}>
+            <div className={styles.gameContainer}>
                 <h1 className={styles.helloTitle}>Account Settings</h1>
                 
                 <div style={{ marginTop: '20px', padding: '20px' }}>

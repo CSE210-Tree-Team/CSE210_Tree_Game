@@ -321,6 +321,17 @@ def join_class(student_username: str, class_code: str):
     Raises:
         ValueError: If the class is not found or student is not a student
     """
+    # Import here to avoid circular dependency
+    from Database.getItemsFromDatabase import get_person
+    
+    # Validate that the account exists and has the Student role
+    account = get_person(student_username)
+    if not account:
+        raise ValueError(f"Account '{student_username}' not found")
+    
+    if ROLE_STUDENT not in account.get('roles', []):
+        raise ValueError(f"Account '{student_username}' is not a student")
+    
     # Look up the classID by code (assuming class code matches some identifier)
     # This may need adjustment based on your actual class identification strategy
     lookup_sql = "SELECT classID FROM Class WHERE classID = ? OR className = ?"
@@ -385,6 +396,6 @@ def generate_tree(username: str) -> str:
     '''
     
     _execute(sql_tree, (tree_id, username, HEALTH_HEALTHY, datetime.now().isoformat()))
-    _execute(sql_resources, (tree_id, 100, 100, 100))  # Default resources set to 100
+    _execute(sql_resources, (tree_id, RESOURCE_MAX_LEVEL, RESOURCE_MAX_LEVEL, RESOURCE_MAX_LEVEL))
     
     return tree_id

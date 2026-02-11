@@ -26,16 +26,7 @@ export const Homepage = () => {
     //const [showResources, setShowResources] = useState(false);
     const navigate = useNavigate();
 
-    const resources: Resources = {
-        water: 40,
-        earth: 20,
-        sun: 20,
-    };
-    const userInfoMock: UserInfo = { username: "AAA", treeID: "id", resourceLevels: resources, displayName: "AAA" };
-
     useEffect(() => {
-        // Replace with actual user info fetch
-        setUserInfo(userInfoMock);
         // Establish backend session after Auth0 login
         const establishSession = async () => {
             try {

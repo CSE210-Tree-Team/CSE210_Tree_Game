@@ -64,17 +64,31 @@
     max-width: 100%; 
     height: auto;
     z-index: 1;
-    cursor: pointer;
-    transition: transform 0.3s ease;
     display: inline-block;
 }
-    .earthContainer:hover {
-        transform: translateX(-50%) scale(1.15);
-    }
 
-    .earthContainer:active {
-        transform: translateX(-50%) scale(0.95);
-    }
+.earthButton {
+    background: none;
+    border: none;
+    padding: 0;
+    cursor: pointer;
+    transition: transform 0.3s ease;
+    width: 100%;
+    display: block;
+}
+
+.earthButton:hover {
+    transform: scale(1.15);
+}
+
+.earthButton:active {
+    transform: scale(0.95);
+}
+
+.earthButton:focus {
+    outline: 2px solid #4a90e2;
+    outline-offset: 4px;
+}
 
 .earthImage {
     width: 100%;
@@ -94,6 +108,20 @@
     z-index: 4;
 }
 
+.wateringCanButton {
+    background: none;
+    border: none;
+    padding: 0;
+    cursor: pointer;
+    width: 100%;
+    display: block;
+}
+
+.wateringCanButton:focus {
+    outline: 2px solid #4a90e2;
+    outline-offset: 4px;
+}
+
 .wateringCanImage {
     width: 100%;
     height: auto;
@@ -104,11 +132,11 @@
     filter: drop-shadow(2px 2px 4px rgba(0, 0, 0, 0.2));
 }
 
-    .wateringCanImage:hover {
+    .wateringCanButton:hover .wateringCanImage {
         transform: scale(1.15) rotate(-5deg);
     }
 
-    .wateringCanImage:active {
+    .wateringCanButton:active .wateringCanImage {
         transform: scale(0.95);
     }
 

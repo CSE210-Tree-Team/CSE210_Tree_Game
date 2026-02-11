@@ -1,10 +1,10 @@
 import os
 import uvicorn
 import logging
-import threading
+import asyncio
 from fastapi import FastAPI, Request, Depends, HTTPException, status
 from fastapi.staticfiles import StaticFiles
-from fastapi.responses import FileResponse, RedirectResponse
+from fastapi.responses import FileResponse, RedirectResponse, JSONResponse
 from starlette.middleware.sessions import SessionMiddleware
 from pydantic import BaseModel
 from typing import Optional
@@ -39,6 +39,11 @@ logger = logging.getLogger(__name__)
 load_dotenv()
 app = FastAPI()
 MIDDLEWARE_SECRET_KEY = os.getenv("MIDDLEWARE_SECRET_KEY")
+if not MIDDLEWARE_SECRET_KEY:
+    raise ValueError(
+        "MIDDLEWARE_SECRET_KEY environment variable is required. "
+        "Please set it in your .env file or environment."
+    )
 app.add_middleware(SessionMiddleware, secret_key=MIDDLEWARE_SECRET_KEY)
 
 # Auth0 Configuration
@@ -56,7 +61,7 @@ if not AUTH0_DOMAIN or not AUTH0_AUDIENCE:
 # JWKS cache with 1 hour TTL
 _jwks_cache = None
 _jwks_cache_time = 0
-_jwks_cache_lock = threading.Lock()
+_jwks_cache_lock = asyncio.Lock()
 JWKS_CACHE_TTL = 3600  # 1 hour in seconds
 
 # --- Static File Serving ---
@@ -76,17 +81,24 @@ class NeedLoginException(Exception):
 
 @app.exception_handler(NeedLoginException)
 async def redirect_to_login(request: Request, exc: NeedLoginException):
+    # Return JSON error for API endpoints
+    if request.url.path.startswith("/api/"):
+        return JSONResponse(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            content={"detail": "Authentication required"}
+        )
+    # Redirect to login for page navigations
     return RedirectResponse(url="/?autoLogin=true")
 
 async def get_jwks() -> dict:
     """
-    Fetch JWKS from Auth0 with thread-safe caching.
+    Fetch JWKS from Auth0 with async-safe caching.
     Cache is valid for 1 hour to avoid unnecessary network calls.
     """
     global _jwks_cache, _jwks_cache_time
     
-    # Acquire lock for thread-safe cache access
-    with _jwks_cache_lock:
+    # Acquire lock for async-safe cache access
+    async with _jwks_cache_lock:
         current_time = time()
         
         # Return cached JWKS if still valid
@@ -230,11 +242,11 @@ def create_account(username: str, user_data: dict):
 
         output_tree_id = generate_tree(username)
 
-        print(f"Created new account for {username} with tree ID {output_tree_id}")
+        logger.info(f"Created new account for {username} with tree ID {output_tree_id}")
 
         
     except Exception as e:
-        print(f"Error creating account: {e}")
+        logger.error(f"Error creating account for {username}: {e}")
         raise HTTPException(status_code=500, detail="Failed to create account")
 
 
