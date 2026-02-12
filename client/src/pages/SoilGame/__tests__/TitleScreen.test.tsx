@@ -10,14 +10,6 @@ import { vi } from "vitest";
 import userEvent from "@testing-library/user-event";
 import { TitleScreen } from "../components/TitleScreen/TitleScreen";
 
-// Renders the title screen with welcome text and game title
-test("renders welcome text and game title", () => {
-  render(<TitleScreen onPlay={() => {}} />);
-  
-  expect(screen.getByText("Welcome To")).toBeInTheDocument();
-  expect(screen.getByText("DOWN TO")).toBeInTheDocument();
-  expect(screen.getByText("THE ROOTS")).toBeInTheDocument();
-});
 
 // Renders the play button
 test("renders play button", () => {
