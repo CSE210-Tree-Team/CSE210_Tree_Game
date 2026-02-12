@@ -139,6 +139,10 @@
     font-size: clamp(31px, 3.4vw, 45px);
     line-height: 1;
     text-align: center;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
 .input {

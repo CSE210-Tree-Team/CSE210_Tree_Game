@@ -140,6 +140,10 @@
     font-size: clamp(31px, 3.4vw, 45px);
     line-height: 1;
     box-sizing: border-box;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
 .actions {
