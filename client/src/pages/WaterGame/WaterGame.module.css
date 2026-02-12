@@ -1,0 +1,53 @@
+.gameContainer {
+  height: 100vh; /* full viewport height */
+  width: 100vw;
+  display: flex; /* center children */
+  align-items: center; /* vertical center */
+  justify-content: center; /* horizontal center */
+  flex-direction: column; /* stack children vertically (optional) */
+  background-image: url("/waterBackground.svg");
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+
+.gameScreen {
+  display: flex;
+  padding: 4rem;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  height: 100%;
+}
+
+.arrow {
+  position: absolute;
+  top: 4rem;
+  left: 4rem;
+  width: 4rem;
+  height: 4rem;
+  cursor: pointer;
+}
+
+.question {
+  display: flex;
+  padding: 2rem 4rem;
+  flex-direction: column;
+  align-items: center;
+  gap: 4rem;
+  border-radius: 100px;
+  border: 0.25rem solid var(--color-blue2);
+  background-color: color-mix(in srgb, var(--color-blue1) 80%, transparent);
+}
+
+.questionText {
+  color: var(--color-blue2, #015177);
+  text-align: center;
+  font-family: Handjet;
+  font-size: 3rem;
+  font-style: normal;
+  font-weight: 700;
+  line-height: normal;
+  margin: 0;
+}
