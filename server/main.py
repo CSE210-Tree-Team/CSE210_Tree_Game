@@ -6,7 +6,7 @@ from fastapi.responses import FileResponse, RedirectResponse
 from starlette.middleware.sessions import SessionMiddleware
 from dotenv import load_dotenv
 from Database.getItemsFromDatabase import get_person, get_tree, get_question, get_questions
-from Database.addItemsToDatabase import add_account, generate_tree, add_question
+from Database.addItemsToDatabase import add_account, generate_tree, add_question, update_last_login
 from constants import ROLE_STUDENT
 from dataRecords import Tree, Event
 
@@ -178,6 +178,10 @@ async def verify_auth(request: Request):
             # Store username in session
             request.session["user"] = username
             request.session["user_info"] = user_data
+
+            # Update last login time or other relevant info in the database if needed
+            print("Updating last login time for user:", username)
+            update_last_login(username)
             
             return {"success": True, "message": "Session established"}
         

@@ -1,0 +1,50 @@
+.button {
+  min-width: 15rem;
+  padding: 1rem 4rem;
+  border-radius: 30px;
+  box-shadow: 8px 8px 4px 0 rgba(0, 0, 0, 0.25);
+  font-family: "Handjet";
+  font-size: 3rem;
+  color: white;
+  cursor: pointer;
+}
+
+.water {
+  border: 3px solid var(--color-darkBlue);
+  background-color: var(--color-blue2);
+}
+
+.water:hover {
+  background: var(--color-blue3);
+}
+
+.water:disabled {
+  background: var(--color-grey0);
+  border: 3px solid var(--color-grey1) !important;
+  pointer-events: none;
+}
+
+.water:active {
+  background: var(--color-darkBlue);
+  box-shadow: 0 0 0 0 rgba(0, 0, 0, 0.25);
+}
+
+.soil {
+  border: 3px solid var(--color-darkBrown);
+  background-color: var(--color-brown);
+}
+
+.soil:hover {
+  background-color: var(--color-tan);
+}
+
+.soil:disabled {
+  background: var(--color-grey0);
+  border: 3px solid var(--color-grey1) !important;
+  pointer-events: none;
+}
+
+.soil:active {
+  background-color: var(--color-darkBrown);
+  box-shadow: 0 0 0 0 rgba(0, 0, 0, 0.25);
+}
