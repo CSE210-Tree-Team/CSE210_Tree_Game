@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest'
-import { render, screen } from '../test/test-utils'
-import { Tree } from './Tree'
+import { render, screen } from '../../test/test-utils'
+import { Tree } from '../Tree'
 
 describe('Tree Component', () => {
   it('renders healthy tree when water >= 70', () => {

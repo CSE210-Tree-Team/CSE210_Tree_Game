@@ -1,7 +1,7 @@
 import { describe, it, expect, vi } from 'vitest'
-import { render, screen } from '../test/test-utils'
+import { render, screen } from '../../test/test-utils'
 import userEvent from '@testing-library/user-event'
-import { Earth } from './Earth'
+import { Earth } from '../Earth'
 
 describe('Earth Component', () => {
   it('renders with correct image based on earth level - healthy', () => {

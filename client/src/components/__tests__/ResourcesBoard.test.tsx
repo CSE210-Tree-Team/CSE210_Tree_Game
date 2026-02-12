@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest'
-import { render, screen } from '../test/test-utils'
-import { ResourceBoard } from './ResourceBoard'
+import { render, screen } from '../../test/test-utils'
+import { ResourceBoard } from '../ResourceBoard'
 
 
 describe('ResourceBoard Component', () => {
