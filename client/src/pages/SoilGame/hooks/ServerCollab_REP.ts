@@ -10,7 +10,7 @@ import type {
   ElementType,
   Direction,
 //   StartGameResponse,
-} from '../types/SoilGame.type';
+} from '../types/SoilGame_REP.type';
 // {
 //     "text": "What is the powerhouse of the cell?",
 //     "question_type": "MCQ",

@@ -3,7 +3,8 @@
 // TODO: EXTEND THIS FOR ELEMENTS IN THE PERIODIC TABLE
 export type ElementType = 'Nitrogen' | 'Hydrogen' | 'Carbon' | 'Oxygen';
 
-// NOTE: Added
+// NOTE: Added 
+// NOTE: Potential type error:
 export const SYMBOL_TO_ELEMENT: Record<string, ElementType> = {
   H: 'Hydrogen',
   O: 'Oxygen',
@@ -77,6 +78,8 @@ export interface GameState {
 /** TODO: Delete this function
  * This is not used in the current implementation.
  */
+/** ALTERNATIVELY: API response for GET /api/soil-game/start */
+
 // export interface StartGameResponse {
 //   map: Array<Array<{ x: number; y: number; resource: ElementType | null }>>;
 //   quests: Array<{
