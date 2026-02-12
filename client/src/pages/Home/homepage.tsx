@@ -40,7 +40,11 @@ export const Homepage = () => {
         earth: 20,
         sun: 20,
     };
-    const userInfoMock: UserInfo = { username: "AAA", treeID: "id", resourceLevels: resources, displayName: "AAA" };
+    const userInfoMock: UserInfo = { 
+        success: true,
+        user: { username: "AAA", displayName: "AAA", email: "", roles: [] },
+        tree: { treeID: "id", health: "healthy", growthStage: 1, resourceLevels: resources }
+    };
 
     useEffect(() => {
         // Replace with actual user info fetch
@@ -92,12 +96,12 @@ export const Homepage = () => {
     return (
         <div className={styles.homepageWrapper}>
             <div className={styles.gameConatiner}>
-                <h1 className={styles.helloTitle}>Hello, {userInfo?.displayName || 'User'}</h1>
-                <ResourceBoard resources={userInfo?.resourceLevels || userInfoMock.resourceLevels} />
+                <h1 className={styles.helloTitle}>Hello, {userInfo?.user.displayName || 'User'}</h1>
+                <ResourceBoard resources={userInfo?.tree.resourceLevels ?? resources} />
 
                 <div className={styles.treeEarthContainer}>
-                    <Tree water={userInfo?.resourceLevels.water || userInfoMock.resourceLevels.water} />
-                    <Earth earth={userInfo?.resourceLevels.earth || userInfoMock.resourceLevels.earth} onClick={handleSoilGame} />
+                    <Tree water={userInfo?.tree.resourceLevels.water || userInfoMock.tree.resourceLevels.water} />
+                    <Earth earth={userInfo?.tree.resourceLevels.earth || userInfoMock.tree.resourceLevels.earth} onClick={handleSoilGame} />
                     <WateringCan onClick={handleWaterGame} />
                 </div>
 
