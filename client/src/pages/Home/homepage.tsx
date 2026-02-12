@@ -107,16 +107,6 @@ export const Homepage = () => {
                 <button className={styles.buttonSettings} onClick={handleAccountSettings}>
                     Account Settings
                 </button>
-<<<<<<< HEAD
-                {showResources && userInfo && (
-                    <div style={{ marginTop: '10px', padding: '10px', border: '1px solid #ccc' }}>
-                        <h3>Resource Levels:</h3>
-                        <p>Water: {userInfo.tree.resourceLevels.water}</p>
-                        <p>Earth: {userInfo.tree.resourceLevels.earth}</p>
-                        <p>Sun: {userInfo.tree.resourceLevels.sun}</p>
-                    </div>
-                )}
-=======
 
                 {/*<div>
                     <button onClick={handleSoilGame}>
@@ -149,7 +139,6 @@ export const Homepage = () => {
                         </div>
                     )}
                 </div>*/}
->>>>>>> homepage
             </div>
         </div>
     );

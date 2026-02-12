@@ -3,167 +3,93 @@ import { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styles from '../../css/account-settings.module.css';
 
-type AccountPrefs = {
-    emailUpdates: boolean;
-    publicProfile: boolean;
-    gameReminders: boolean;
+type SavedProfile = {
+    name: string;
+    identity: string;
+    email: string;
+    educationLevel: string;
 };
 
-const STORAGE_KEY = 'treegame.account.settings';
-
-const defaultPrefs: AccountPrefs = {
-    emailUpdates: true,
-    publicProfile: true,
-    gameReminders: false,
-};
-
-const formatDate = (value?: string) => {
-    if (!value) return 'Not available';
-    const parsed = new Date(value);
-    if (Number.isNaN(parsed.getTime())) return 'Not available';
-    return parsed.toLocaleString();
-};
+const STORAGE_KEY = 'treegame.account.profile';
 
 export const AccountSettings = () => {
     const { user, logout } = useAuth0();
     const navigate = useNavigate();
-    const [prefs, setPrefs] = useState<AccountPrefs>(defaultPrefs);
+    const [savedProfile, setSavedProfile] = useState<Partial<SavedProfile>>({});
+
+    const defaultName = useMemo(() => {
+        if (!user) return 'Player';
+        return user.name || user.nickname || user.email || 'Player';
+    }, [user]);
+
+    const defaultIdentity = useMemo(() => {
+        const appIdentity = user?.app_metadata?.identity;
+        const roleIdentity = Array.isArray(user?.app_metadata?.roles) ? user.app_metadata.roles[0] : undefined;
+        const userMetaIdentity = user?.user_metadata?.identity;
+        return appIdentity || roleIdentity || userMetaIdentity || 'Student';
+    }, [user]);
+
+    const defaultEducationLevel = useMemo(() => {
+        const appEducationLevel = user?.app_metadata?.educationLevel;
+        const userEducationLevel = user?.user_metadata?.educationLevel;
+        return appEducationLevel || userEducationLevel || '3-6';
+    }, [user]);
+
+    const defaultEmail = user?.email || 'Email not provided';
 
     useEffect(() => {
         const raw = localStorage.getItem(STORAGE_KEY);
         if (!raw) return;
         try {
-            const parsed = JSON.parse(raw) as Partial<AccountPrefs>;
-            setPrefs({ ...defaultPrefs, ...parsed });
+            const parsed = JSON.parse(raw) as Partial<SavedProfile>;
+            setSavedProfile(parsed);
         } catch {
-            setPrefs(defaultPrefs);
+            setSavedProfile({});
         }
     }, []);
 
-    useEffect(() => {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(prefs));
-    }, [prefs]);
-
-    const displayName = useMemo(() => {
-        if (!user) return 'Player';
-        return user.name || user.nickname || user.email || 'Player';
-    }, [user]);
+    const displayName = savedProfile.name || defaultName;
+    const identity = savedProfile.identity || defaultIdentity;
+    const educationLevel = savedProfile.educationLevel || defaultEducationLevel;
+    const email = savedProfile.email || defaultEmail;
 
     return (
         <div className={styles.page}>
+            <button className={styles.homeButton} onClick={() => navigate('/')} aria-label="Home">
+                <span className={styles.homeArrow}>↩</span>
+                <span className={styles.homeText}>HOME</span>
+            </button>
             <div className={styles.content}>
-                <header className={styles.header}>
-                    <div className={styles.headerActions}>
-                        <button className={styles.backButton} onClick={() => navigate('/')}>Back to Home</button>
-                        <button
-                            className={styles.logoutButton}
-                            onClick={() => logout({ logoutParams: { returnTo: window.location.origin } })}
-                        >
-                            Log out
-                        </button>
+                <h1 className={styles.title}>ACCOUNT SETTINGS</h1>
+
+                <div className={styles.formArea}>
+                    <div className={styles.row}>
+                        <p className={styles.label}>Name:</p>
+                        <div className={styles.value}>{displayName}</div>
                     </div>
-                    <div className={styles.titleBlock}>
-                        <p className={styles.kicker}>Account Settings</p>
-                        <h1 className={styles.title}>Welcome back, {displayName}</h1>
-                        <p className={styles.subtitle}>Review your profile details and tune how your account behaves.</p>
+                    <div className={styles.row}>
+                        <p className={styles.label}>Identity:</p>
+                        <div className={styles.value}>{identity}</div>
                     </div>
-                </header>
+                    <div className={styles.row}>
+                        <p className={styles.label}>Email:</p>
+                        <div className={styles.value}>{email}</div>
+                    </div>
+                    <div className={styles.row}>
+                        <p className={styles.label}>Education Level:</p>
+                        <div className={styles.value}>{educationLevel}</div>
+                    </div>
+                </div>
 
-                <main className={styles.grid}>
-                    <section className={styles.card}>
-                        <div className={styles.cardHeader}>
-                            <h2 className={styles.cardTitle}>Profile Details</h2>
-                            <p className={styles.cardHint}>Synced from Auth0.</p>
-                        </div>
-                        <div className={styles.profileRow}>
-                            <div className={styles.avatar}>
-                                {user?.picture ? (
-                                    <img src={user.picture} alt="Profile" />
-                                ) : (
-                                    <span>{displayName.slice(0, 1).toUpperCase()}</span>
-                                )}
-                            </div>
-                            <div className={styles.profileMeta}>
-                                <p className={styles.profileName}>{displayName}</p>
-                                <p className={styles.profileEmail}>{user?.email || 'Email not provided'}</p>
-                                <p className={styles.profileUpdated}>Last updated: {formatDate(user?.updated_at)}</p>
-                            </div>
-                        </div>
-                        <div className={styles.profileList}>
-                            <div>
-                                <span>Username</span>
-                                <strong>{user?.nickname || 'Not set'}</strong>
-                            </div>
-                            <div>
-                                <span>Auth Provider</span>
-                                <strong>{user?.sub?.split('|')[0] || 'Auth0'}</strong>
-                            </div>
-                        </div>
-                    </section>
-
-                    <section className={styles.card}>
-                        <div className={styles.cardHeader}>
-                            <h2 className={styles.cardTitle}>Preferences</h2>
-                            <p className={styles.cardHint}>Stored locally for now.</p>
-                        </div>
-                        <div className={styles.toggleList}>
-                            <label className={styles.toggleRow}>
-                                <div>
-                                    <p>Email updates</p>
-                                    <span>Hear about seasonal events and tips.</span>
-                                </div>
-                                <input
-                                    type="checkbox"
-                                    checked={prefs.emailUpdates}
-                                    onChange={(event) => setPrefs({ ...prefs, emailUpdates: event.target.checked })}
-                                />
-                            </label>
-                            <label className={styles.toggleRow}>
-                                <div>
-                                    <p>Public profile</p>
-                                    <span>Show your tree progress to classmates.</span>
-                                </div>
-                                <input
-                                    type="checkbox"
-                                    checked={prefs.publicProfile}
-                                    onChange={(event) => setPrefs({ ...prefs, publicProfile: event.target.checked })}
-                                />
-                            </label>
-                            <label className={styles.toggleRow}>
-                                <div>
-                                    <p>Game reminders</p>
-                                    <span>Get nudges when your tree needs attention.</span>
-                                </div>
-                                <input
-                                    type="checkbox"
-                                    checked={prefs.gameReminders}
-                                    onChange={(event) => setPrefs({ ...prefs, gameReminders: event.target.checked })}
-                                />
-                            </label>
-                        </div>
-                    </section>
-
-                    <section className={styles.card}>
-                        <div className={styles.cardHeader}>
-                            <h2 className={styles.cardTitle}>Security</h2>
-                            <p className={styles.cardHint}>Keep your account protected.</p>
-                        </div>
-                        <div className={styles.securityActions}>
-                            <button
-                                className={styles.primaryButton}
-                                onClick={() => logout({ logoutParams: { returnTo: window.location.origin } })}
-                            >
-                                Log out
-                            </button>
-                            <button className={styles.secondaryButton} disabled>
-                                Reset password (coming soon)
-                            </button>
-                            <button className={styles.dangerButton} disabled>
-                                Delete account (coming soon)
-                            </button>
-                        </div>
-                    </section>
-                </main>
+                <div className={styles.actions}>
+                    <button className={styles.actionButton} onClick={() => navigate('/account/edit')}>EDIT</button>
+                    <button
+                        className={styles.actionButton}
+                        onClick={() => logout({ logoutParams: { returnTo: window.location.origin } })}
+                    >
+                        LOG OUT
+                    </button>
+                </div>
             </div>
         </div>
     );

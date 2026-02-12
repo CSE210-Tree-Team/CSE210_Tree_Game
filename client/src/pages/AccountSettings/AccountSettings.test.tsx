@@ -1,4 +1,4 @@
-import { render, screen, waitFor } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { AccountSettings } from './AccountSettings';
 
@@ -8,8 +8,6 @@ let authUser: Record<string, string> | null = {
     name: 'Ada Lovelace',
     nickname: 'adal',
     email: 'ada@example.com',
-    updated_at: '2026-02-10T10:12:00.000Z',
-    picture: 'https://example.com/avatar.png',
     sub: 'auth0|abc123',
 };
 
@@ -34,76 +32,52 @@ describe('AccountSettings', () => {
     beforeEach(() => {
         logoutMock.mockClear();
         navigateMock.mockClear();
-        localStorage.clear();
         authUser = {
             name: 'Ada Lovelace',
             nickname: 'adal',
             email: 'ada@example.com',
-            updated_at: '2026-02-10T10:12:00.000Z',
-            picture: 'https://example.com/avatar.png',
             sub: 'auth0|abc123',
         };
     });
 
-    it('renders profile details from Auth0', () => {
+    it('renders account fields from Auth0', () => {
         renderPage();
 
-        expect(screen.getByText('Welcome back, Ada Lovelace')).toBeInTheDocument();
+        expect(screen.getByText('ACCOUNT SETTINGS')).toBeInTheDocument();
+        expect(screen.getByText('Name:')).toBeInTheDocument();
+        expect(screen.getByText('Identity:')).toBeInTheDocument();
         expect(screen.getByText('ada@example.com')).toBeInTheDocument();
-        expect(screen.getByText('adal')).toBeInTheDocument();
-        expect(screen.getByText('Auth Provider')).toBeInTheDocument();
-        expect(screen.getByText('auth0')).toBeInTheDocument();
+        expect(screen.getByText('Student')).toBeInTheDocument();
+        expect(screen.getByText('3-6')).toBeInTheDocument();
     });
 
-    it('navigates back to the homepage', async () => {
+    it('navigates home when the home button is clicked', async () => {
         renderPage();
-        await userEvent.click(screen.getByRole('button', { name: 'Back to Home' }));
+        await userEvent.click(screen.getByRole('button', { name: 'Home' }));
         expect(navigateMock).toHaveBeenCalledWith('/');
     });
 
-    it('calls logout when the header log out button is clicked', async () => {
+    it('calls logout when the log out button is clicked', async () => {
         renderPage();
-        const logoutButtons = screen.getAllByRole('button', { name: 'Log out' });
-        await userEvent.click(logoutButtons[0]);
+        await userEvent.click(screen.getByRole('button', { name: 'LOG OUT' }));
 
         expect(logoutMock).toHaveBeenCalledWith({
             logoutParams: { returnTo: window.location.origin },
         });
     });
 
-    it('persists preference toggles to localStorage', async () => {
-        const user = userEvent.setup();
+    it('navigates to the edit page when edit is clicked', async () => {
         renderPage();
-
-        const remindersToggle = screen.getByLabelText(/game reminders/i);
-        await user.click(remindersToggle);
-
-        await waitFor(() => {
-            const stored = JSON.parse(localStorage.getItem('treegame.account.settings') ?? '{}');
-            expect(stored.gameReminders).toBe(true);
-        });
-    });
-
-    it('falls back to defaults when stored settings are invalid', async () => {
-        localStorage.setItem('treegame.account.settings', 'not-json');
-        renderPage();
-
-        await waitFor(() => {
-            const stored = JSON.parse(localStorage.getItem('treegame.account.settings') ?? '{}');
-            expect(stored).toMatchObject({
-                emailUpdates: true,
-                publicProfile: true,
-                gameReminders: false,
-            });
-        });
+        await userEvent.click(screen.getByRole('button', { name: 'EDIT' }));
+        expect(navigateMock).toHaveBeenCalledWith('/account/edit');
     });
 
     it('shows fallback copy when user data is missing', () => {
         authUser = null;
         renderPage();
 
-        expect(screen.getByText('Welcome back, Player')).toBeInTheDocument();
+        expect(screen.getByText('Player')).toBeInTheDocument();
         expect(screen.getByText('Email not provided')).toBeInTheDocument();
-        expect(screen.getByText('Last updated: Not available')).toBeInTheDocument();
+        expect(screen.getByText('Student')).toBeInTheDocument();
     });
 });

@@ -5,6 +5,7 @@ import { Welcome } from './pages/Home/Welcome';
 import { SoilGame } from './pages/SoilGame/SoilGame';
 import { WaterGame } from './pages/WaterGame/WaterGame';
 import { AccountSettings } from './pages/AccountSettings/AccountSettings';
+import { AccountSettingsEdit } from './pages/AccountSettingsEdit/AccountSettingsEdit';
 import './App.css';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 
@@ -35,6 +36,7 @@ function App() {
                         <Route path="/soil" element={<SoilGame />} />
                         <Route path="/water" element={<WaterGame />} />
                         <Route path="/account" element={<AccountSettings />} />
+                        <Route path="/account/edit" element={<AccountSettingsEdit />} />
                         <Route path="*" element={<Navigate to="/" replace />} />
                     </>
                 )}
