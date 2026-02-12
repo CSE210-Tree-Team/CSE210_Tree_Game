@@ -70,6 +70,34 @@ export const Homepage = () => {
         navigate('/water');
     };
 
+    const handleAddResource = async (resourceType: 'water' | 'earth' | 'sun') => {
+        try {
+            const response = await fetch('/api/update-stat', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    stat_name: resourceType,
+                    value: 5
+                })
+            });
+
+            if (response.ok) {
+                // Refresh user info to show updated resource levels
+                const userInfoResponse = await fetch('/api/get-user-info');
+                if (userInfoResponse.ok) {
+                    const data = await userInfoResponse.json();
+                    setUserInfo(data);
+                }
+            } else {
+                console.error(`Failed to add ${resourceType}`);
+            }
+        } catch (error) {
+            console.error(`Error adding ${resourceType}:`, error);
+        }
+    };
+
     return (
         <div>
             <h1>Homepage</h1>
@@ -105,6 +133,21 @@ export const Homepage = () => {
                         <p>Sun: {userInfo.tree.resourceLevels.sun}</p>
                     </div>
                 )}
+            </div>
+
+            <br></br>
+
+            <div>
+                <h3>Add Resources:</h3>
+                <button onClick={() => handleAddResource('water')}>
+                    Add 5 Water
+                </button>
+                <button onClick={() => handleAddResource('earth')} style={{ marginLeft: '10px' }}>
+                    Add 5 Earth
+                </button>
+                <button onClick={() => handleAddResource('sun')} style={{ marginLeft: '10px' }}>
+                    Add 5 Sun
+                </button>
             </div>
         </div>
     );

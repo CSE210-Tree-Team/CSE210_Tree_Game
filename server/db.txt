@@ -3,8 +3,8 @@ Successfully connected to /home/adria/CSE210_Tree_Game/server/Database/game_data
 ==================== TABLE: Account ====================
 COLUMNS: ['username', 'email', 'passwordHash', 'displayName', 'accountReference', 'dateOfBirth', 'lastLogin']
 --------------------------------------------------------------------------------------------------------------
-   ('adrian.s.rosing@gmail.com', 'adrian.s.rosing@gmail.com', 'auth0', 'Adrian Rosing', 'adrian.s.rosing', '2000-01-01', '2026-02-05T19:29:22.751881')
-   ('arosing@ucsd.edu', 'arosing@ucsd.edu', 'auth0', 'Adrian Rosing', 'arosing', '2000-01-01', '2026-02-05T19:28:55.035383')
+   ('adrian.s.rosing@gmail.com', 'adrian.s.rosing@gmail.com', 'auth0', 'Adrian Rosing', 'adrian.s.rosing', '2000-01-01', '2026-02-05T20:50:01.598126')
+   ('arosing@ucsd.edu', 'arosing@ucsd.edu', 'auth0', 'Adrian Rosing', 'arosing', '2000-01-01', '2026-02-05T20:50:15.033282')
 
 
 ==================== TABLE: AccountRole ====================
@@ -17,15 +17,15 @@ COLUMNS: ['username', 'role']
 ==================== TABLE: Tree ====================
 COLUMNS: ['treeID', 'ownerUsername', 'health', 'growthStage', 'lastUpdated']
 -----------------------------------------------------------------------------
-   ('9fea6ad5-db45-44a1-add6-e7a30700a6fd', 'adrian.s.rosing@gmail.com', 'Healthy', 0, '2026-02-02T17:33:58.938415')
-   ('e15a247b-d618-403e-af52-86a57061308a', 'arosing@ucsd.edu', 'Healthy', 0, '2026-02-05T19:28:55.006245')
+   ('9fea6ad5-db45-44a1-add6-e7a30700a6fd', 'adrian.s.rosing@gmail.com', 'Healthy', 0, '2026-02-05T20:49:20.774760')
+   ('e15a247b-d618-403e-af52-86a57061308a', 'arosing@ucsd.edu', 'Healthy', 0, '2026-02-05T20:49:20.812673')
 
 
 ==================== TABLE: TreeResources ====================
 COLUMNS: ['treeID', 'water', 'earth', 'sun']
 ---------------------------------------------
-   ('9fea6ad5-db45-44a1-add6-e7a30700a6fd', 100, 100, 100)
-   ('e15a247b-d618-403e-af52-86a57061308a', 100, 100, 100)
+   ('9fea6ad5-db45-44a1-add6-e7a30700a6fd', 0, 0, 0)
+   ('e15a247b-d618-403e-af52-86a57061308a', 98, 98, 98)
 
 
 ==================== TABLE: TreeDecoration ====================
@@ -122,16 +122,16 @@ End of Database Dump.
 User: Adrian Rosing (adrian.s.rosing@gmail.com) [ID: adrian.s]
   Email: adrian.s.rosing@gmail.com
   Roles: Student
-  Status: Last login: 2026-02-05T19:29:22.751881
-  Tree 9fea6ad5 | Health: Healthy | Growth: 0 | Updated: 2026-02-02T17:33:58.938415
-    Resources -> Water: 100, Earth: 100, Sun: 100
+  Status: Last login: 2026-02-05T20:50:01.598126
+  Tree 9fea6ad5 | Health: Healthy | Growth: 0 | Updated: 2026-02-05T20:49:20.774760
+    Resources -> Water: 0, Earth: 0, Sun: 0
 
 User: Adrian Rosing (arosing@ucsd.edu) [ID: arosing@]
   Email: arosing@ucsd.edu
   Roles: Student
-  Status: Last login: 2026-02-05T19:28:55.035383
-  Tree e15a247b | Health: Healthy | Growth: 0 | Updated: 2026-02-05T19:28:55.006245
-    Resources -> Water: 100, Earth: 100, Sun: 100
+  Status: Last login: 2026-02-05T20:50:15.033282
+  Tree e15a247b | Health: Healthy | Growth: 0 | Updated: 2026-02-05T20:49:20.812673
+    Resources -> Water: 98, Earth: 98, Sun: 98
 
 
 
