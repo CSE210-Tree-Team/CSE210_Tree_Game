@@ -1,0 +1,10 @@
+.gameContainer {
+    width: 100%;
+    height: 100vh;
+    background-image: url('/soilBackground.svg');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    overflow: hidden;
+    position: relative;
+  }
