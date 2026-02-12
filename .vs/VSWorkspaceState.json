@@ -1,0 +1,16 @@
+{
+  "ExpandedNodes": [
+    "",
+    "\\client",
+    "\\client\\src",
+    "\\client\\src\\components",
+    "\\client\\src\\css",
+    "\\client\\src\\pages",
+    "\\client\\src\\pages\\Home",
+    "\\client\\src\\pages\\Login",
+    "\\server",
+    "\\server\\Database"
+  ],
+  "SelectedNode": "\\client\\src\\pages\\Home\\homepage.tsx",
+  "PreviewInSolutionExplorer": false
+}

@@ -35,7 +35,7 @@ export const Homepage = () => {
 
     useEffect(() => {
         // Replace with actual user info fetch
-        setUserInfo(userInfoMock);
+        //setUserInfo(userInfoMock);
         // Establish backend session after Auth0 login
         const establishSession = async () => {
             try {
