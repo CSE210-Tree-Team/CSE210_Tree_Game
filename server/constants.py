@@ -54,3 +54,6 @@ ATTEMPT_RESOURCE_EARTH = "Earth"
 ATTEMPT_RESOURCE_SUN = "Sun"
 ATTEMPT_RESOURCE_NONE = "None"
 VALID_ATTEMPT_RESOURCES = [ATTEMPT_RESOURCE_WATER, ATTEMPT_RESOURCE_EARTH, ATTEMPT_RESOURCE_SUN, ATTEMPT_RESOURCE_NONE]
+
+# Passive decay rates for resources -- how many minutes to decay 1 level of the resource
+PASSIVE_DECAY_RATE = 30 # 30 minutes to decay 1 level - 50 hours for tree to die from full.
