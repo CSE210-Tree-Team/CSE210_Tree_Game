@@ -32,17 +32,17 @@
     display: flex;
     align-items: flex-end;
     justify-content: center;
-    margin-bottom: -3vw;
+    margin-bottom: -10vw;
     margin-top: -5vw;
     margin-left:15vw;
 }
 /* Tree */
 .treeContainer {
     position: absolute;
-    bottom: 10%;
+    bottom: 17%;
     left: 70%;
     transform: translateX(-50%);
-    width: 150%;
+    width: 140%;
     height: auto;
     z-index: 2;
     pointer-events: none;
@@ -59,8 +59,9 @@
 .earthContainer {
     position: absolute;
     left: 50%;
+    bottom: 7%;
     transform: translateX(-50%);
-    width: 100%; 
+    width: 90%; 
     max-width: 100%; 
     height: auto;
     z-index: 1;
@@ -114,6 +115,7 @@
 
 
 /* For test*/
+/*
 .treeEarthContainer {
     border: 2px dashed red;
 }
@@ -124,7 +126,7 @@
 
 .earthContainer {
     border: 2px dashed green;
-}
+}*/
 
 
 /* All resource board */
@@ -136,9 +138,10 @@
     z-index: 100;
 }
 /* For test */
+/*
 .resourceBoardContainer {
     border: 2px dashed yellow;
-}
+}*/
 
 /* Board img bg */
 .resourceBoardBg {
@@ -163,11 +166,10 @@
     box-sizing: border-box;
 }
 
-.resourceBoardTitle {
-    /*font-family: 'Handjet', 'Comic Sans MS', cursive;*/
-    font-size: clamp(16px, 2.5vw, 24px);
+.homepageWrapper .resourceBoardTitle {
+    font-size: 1.8rem;
     font-weight: 700;
-    color: #713E00;
+    color: var(--color-brown);
     text-align: center;
     margin: clamp(30px, 1vw, 40px) 0 clamp(0px, 1vw, 5px) 0;
     text-shadow: 1px 1px 2px rgba(255, 255, 255, 0.8);
@@ -210,19 +212,19 @@
 }
 
 /* resource name */
-.resourceLabel {
-    font-weight: 600;
-    color: #713E00;
+.homepageWrapper .resourceLabel {
+    font-weight: 800;
+    color: var(--color-brown);
     font-size: clamp(11px, 1.3vw, 14px);
     line-height: 1.2;
     text-shadow: 0.5px 0.5px 1px rgba(255, 255, 255, 0.5);
-    white-space:nowrap;
+    white-space: nowrap;
 }
 
 /* percentage */
 .resourceValue {
     font-weight: 600;
-    color: #713E00;
+    color: var(--color-brown);
     font-size: clamp(11px, 1.3vw, 14px);
     white-space: nowrap;
     flex-shrink: 0;
@@ -257,45 +259,42 @@
     }
 
 .waterBar {
-    background: linear-gradient(90deg, #4A90E2, #83C6EA);
+    background: linear-gradient(90deg, var(--color-blue3), var(--color-blue2));
 }
 
 .earthBar {
-    background: linear-gradient(90deg, #8B4513, #946F41);
+    background: linear-gradient(90deg, var(--color-tan), var(--color-brown));
 }
 
 .sunBar {
-    background: linear-gradient(90deg, #FFD700, #FFA500);
+    background: linear-gradient(90deg, var(--color-lightYellow), var(--color-darkYellow));
 }
 
-.helloTitle {
-    font-size: clamp(25px, 4vw, 35px);
-    font-weight: 700;
+.homepageWrapper .helloTitle {
+    font-size: 4rem;
+    font-weight: 600;
     user-select: none;
-    margin-left: 2vw;
-    padding-bottom: clamp(20px, 4vw, 40px);
+    text-align: left;
+    margin: 1.5rem;
+    padding-bottom: 2rem;
 }
 
 
-.gameTitle {
-    font-size: clamp(50px, 8vw, 70px);
+.homepageWrapper .gameTitle {
+    font-size: 5rem;
     font-weight: 700;
     letter-spacing: 4px;
     user-select: none;
-    padding-top: clamp(10px, 2vw, 20px);
-    padding-bottom: clamp(20px, 4vw, 40px);
+    padding-top: 3rem;
+    padding-bottom: 2rem;
     margin: auto;
     text-align: center;
 }
-.gameIntro {
-    font-size: clamp(16px, 2.5vw, 20px);
-    font-weight: 400;
-    letter-spacing: 0px;
-    user-select: none;
-    margin-left: 5vw;
-    line-height: 1.6;
-    max-width: clamp(80vw, 70vw, 90vw);
-    margin:auto;
+
+.homepageWrapper .gameIntro {
+    margin-left: 7rem;
+    margin-right: 7rem;
+    font-size: 2rem;
 }
 .buttonContainer {
     display: flex;
@@ -306,27 +305,29 @@
     padding-top: clamp(20px, 4vw, 40px);
 }
 
-.buttonSingle {
-    padding: 15px 40px;
-    background: white;
-    border-radius: 30px;
-}
-.buttonSingle:hover {
-    background: #f0f0f0;
+.homepageWrapper .buttonSingle {
+    min-width: 5rem;
+    font-size: 1.5rem;
+    color: black;
 }
 
-.buttonLogout {
+
+.homepageWrapper .buttonLogout {
     padding: 15px 40px;
-    background: white;
     border-radius: 30px;
-    position: absolute;
+    position: fixed;
     bottom: clamp(20px, 4vw, 40px);
     right: clamp(20px, 4vw, 40px);
 }
 
-    .buttonLogout:hover {
-        background: #f0f0f0;
-    }
+.homepageWrapper .buttonSetting {
+    padding: 15px 40px;
+    border-radius: 30px;
+    position: fixed;
+    bottom: clamp(20px, 4vw, 40px);
+    right: clamp(180px, 20vw, 220px);
+}
+
 
 
 @media (max-width: 768px) {
@@ -393,6 +394,3 @@
         width: 320px;
     }
 }
-
-
-

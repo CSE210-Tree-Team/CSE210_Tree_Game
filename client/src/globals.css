@@ -1,0 +1,59 @@
+@font-face {
+  font-family: "Handjet";
+  src: url("/fonts/Handjet-VariableFont_ELGR,ELSH,wght.ttf") format("truetype");
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "CherryBombOne";
+  src: url("/fonts/CherryBombOne-Regular.ttf") format("truetype");
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+:root {
+  --color-blue1: #cfeaf9;
+  --color-blue2: #015177;
+  --color-blue3: #83c6ea;
+  --color-darkBlue: #00334b;
+
+  --color-lightTan: #f9eacf;
+  --color-tan: #eac383;
+  --color-brown: #713e00;
+  --color-darkBrown: #432501;
+
+  --color-grey0: #d9d9d9;
+  --color-grey1: #a9a9a9;
+
+  --color-darkGreen: #2F7B16;
+  --color-lightGreen: #A2CA38;
+  --color-bgGreen: #BEE751;
+
+  --color-lightYellow: #FFD700;
+  --color-darkYellow: #FFA500;
+
+  --color-error: #ff4848;
+  --color-success: #8fe45d;
+
+  background-size: auto;
+}
+
+
+
+html,
+body {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    font-family: "Handjet", sans-serif;
+}
+
+/* body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  font-family: "Handjet", sans-serif;
+} */

@@ -4,13 +4,12 @@
     "\\client",
     "\\client\\src",
     "\\client\\src\\components",
-    "\\client\\src\\css",
     "\\client\\src\\pages",
     "\\client\\src\\pages\\Home",
-    "\\client\\src\\pages\\Login",
+    "\\client\\src\\test",
     "\\server",
     "\\server\\Database"
   ],
-  "SelectedNode": "\\client\\src\\pages\\Home\\homepage.tsx",
+  "SelectedNode": "\\client\\src\\pages\\Home\\Welcome.tsx",
   "PreviewInSolutionExplorer": false
 }

@@ -1,13 +1,14 @@
 import os
 import uvicorn
+import asyncio
 from fastapi import FastAPI, Request, Depends, HTTPException, status
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse, RedirectResponse
 from starlette.middleware.sessions import SessionMiddleware
 from dotenv import load_dotenv
-from Database.getItemsFromDatabase import get_person, get_tree
-from Database.addItemsToDatabase import add_account, generate_tree
-from constants import ROLE_STUDENT
+from Database.getItemsFromDatabase import get_person, get_tree, get_question, get_questions, get_all_trees
+from Database.addItemsToDatabase import add_account, generate_tree, add_question, update_last_login, apply_passive_decay, update_stat
+from constants import ROLE_STUDENT, PASSIVE_DECAY_RATE
 from dataRecords import Tree, Event
 
 
@@ -19,6 +20,7 @@ load_dotenv()
 app = FastAPI()
 MIDDLEWARE_SECRET_KEY = os.getenv("MIDDLEWARE_SECRET_KEY")
 app.add_middleware(SessionMiddleware, secret_key=MIDDLEWARE_SECRET_KEY)
+decay_task = None
 
 # --- Static File Serving ---
 frontend_path = os.path.join("..", "client", "dist")
@@ -26,6 +28,39 @@ if os.path.exists(frontend_path):
     app.mount("/assets", StaticFiles(directory=os.path.join(frontend_path, "assets")), name="static")
 # TODO: Need to fix log out process so that session is properly cleared.
 
+async def run_passive_decay_loop():
+    """
+    Background task that applies passive decay to all trees every PASSIVE_DECAY_RATE minutes.
+    """
+    while True:
+        try:
+            # Get all trees from the database
+            all_trees = get_all_trees()
+            
+            for tree_row in all_trees:
+                tree_id = tree_row['treeID']
+                apply_passive_decay(tree_id)
+            
+            # Sleep for PASSIVE_DECAY_RATE minutes (converted to seconds)
+            await asyncio.sleep(PASSIVE_DECAY_RATE * 60)
+        except Exception as e:
+            print(f"Error in passive decay loop: {e}")
+            await asyncio.sleep(60)
+
+@app.on_event("startup")
+async def startup_event():
+    """Start the passive decay background task when the app starts."""
+    global decay_task
+    decay_task = asyncio.create_task(run_passive_decay_loop())
+    print("Passive decay background task started")
+
+@app.on_event("shutdown")
+async def shutdown_event():
+    """Cancel the passive decay background task when the app shuts down."""
+    global decay_task
+    if decay_task:
+        decay_task.cancel()
+    print("Passive decay background task stopped")
 
 ############################################
 #               Helper Functions           #
@@ -162,8 +197,6 @@ async def verify_auth(request: Request):
     try:
         data = await request.json()
         user_data = data.get('user', {})
-
-        print(f"Auth0 user data received: {user_data}")
         
         if user_data:
             # Get username (email or sub) # NOTE: sub is the unique Auth0 user ID
@@ -178,6 +211,8 @@ async def verify_auth(request: Request):
             # Store username in session
             request.session["user"] = username
             request.session["user_info"] = user_data
+
+            update_last_login(username)
             
             return {"success": True, "message": "Session established"}
         
@@ -188,40 +223,95 @@ async def verify_auth(request: Request):
 @app.get("/api/get-user-info")
 def get_user_info(request: Request, student=Depends(student_required)):
     """
-    Returns the IDs to the frontend, as well as tree stats.
+    Returns the user information and tree stats. Applies passive decay before returning tree data.
 
     Returns:
-        dict: {
+    {
+        "success": True,
+        "user": {
             "username": str,
+            "displayName": str,
+            "email": str,
+            "roles": [str]
+        },
+        "tree": {
             "treeID": str,
-            "resourceLevels": dict {'water': x, 'earth': x, 'sun': x},
-            "displayName": str
+            "health": str,
+            "growthStage": int,
+            "resourceLevels": {"water": int, "earth": int, "sun": int}
         }
+    }
     """
-    username = get_username(request) if student else None
+    username = student.get("username") if student else None
     tree = get_tree(username) if student else None
-    tree_ID = tree['treeID'] if tree else None
-    resource_levels = tree['resourceLevels'] if tree else None
+    
+    # Apply passive decay to tree before returning
+    if tree:
+        apply_passive_decay(tree['treeID'])
+        # Refresh tree data after decay TODO: Update appearance as needed.
+        tree = get_tree(username)
 
     return {
-        "username": username,
-        "treeID": tree_ID,
-        "resourceLevels": resource_levels,
-        "displayName": student.get("displayName")
+        "success": True,
+        "user": {
+            "username": student.get("username"),
+            "displayName": student.get("displayName"),
+            "email": student.get("email"),
+            "roles": student.get("roles", [])
+        },
+        "tree": {
+            "treeID": tree.get('treeID') if tree else None,
+            "health": tree.get('health') if tree else None,
+            "growthStage": tree.get('growthStage') if tree else None,
+            "resourceLevels": tree.get('resourceLevels') if tree else None
+        }
     }
 
-@app.post("/api/update-stat/{stat_name}")
-def update_stat(stat_name: str, percent: int, request: Request, student=Depends(student_required)):
+@app.post("/api/update-stat")
+async def api_update_stat(request: Request, student=Depends(student_required)):
     """
-    Updates a specific stat for the student's tree. Treats this update as an event.
-    stat_name: Name of the stat to update (e.g., "water", "earth", "sun").
-    percent: Percent increase to the stat.
+    Updates a specific stat for the student's tree. NOTE: TODO: Treats this update as an event. This does not affect functionality
+    
+    Request body:
+    {
+        "stat_name": "water",   // "water", "earth", or "sun"
+        "value": 10             // amount to add/subtract
+    }
     """
-    # TODO: Implement stat update logic here.
-    return None
+    try:
+        data = await request.json()
+    except Exception as e:
+        raise HTTPException(status_code=400, detail="Invalid JSON in request body")
+    
+    stat_name = data.get("stat_name")
+    value = data.get("value")
+    
+    # Get tree from student's username
+    username = student.get("username") if student else None
+    tree = get_tree(username) if username else None
+    tree_id = tree.get('treeID') if tree else None
+    
+    if not stat_name:
+        raise HTTPException(status_code=400, detail="stat_name is required")
+    if value is None:
+        raise HTTPException(status_code=400, detail="value is required")
+    if not isinstance(value, int) or isinstance(value, bool):
+        raise HTTPException(status_code=400, detail="value must be an integer")
+    if not tree_id:
+        raise HTTPException(status_code=404, detail="Tree not found for user")
+    
+    # TODO: Refactor into events potentially.
+    try:
+        print(f"Received update-stat request: stat_name={stat_name}, value={value} for user {student['username']} and tree {tree_id}")
+        update_stat(tree_id, stat_name, value)
+        return {"success": True, "message": f"{stat_name} updated by {value}"}
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to update stat: {str(e)}")
 
 @app.post("/api/update-user")
-def update_user(displayName: str = None, dateOfBirth: str = None, request: Request = None):
+async def update_user(request: Request, account=Depends(get_current_user)):
     """
     API endpoint to update user information.
     """
@@ -230,30 +320,160 @@ def update_user(displayName: str = None, dateOfBirth: str = None, request: Reque
 
 
 @app.post("/api/add-question")
-def api_add_question(request: Request, student=Depends(student_required)):
+async def api_add_question(request: Request, student=Depends(student_required)):
     """
     API endpoint to add a question to the database.
-    """
-    # TODO: Implement question addition logic here.
-    return None
+    
+    Request body:
+    {
+        "text": "What color is the sun?",
+        "question_type": "MCQ",
+        "resource_type": "Sun",
+        "choices": ["Yellow", "Green", "Blue"],
+        "correct_choices": [0],
+        "check_duplicates": true  // optional, defaults to true
+    }
 
-# Get question:
-@app.get("/api/get-question/{question_id}")
-def api_get_question(question_id: str, request: Request, student=Depends(student_required)):
-    """
-    API endpoint to retrieve a question from the database.
-    """
-    # TODO: Implement question retrieval logic here.
-    return None
+    Returns:
+    {
+        "success": True,
+        "message": "Question added successfully",
+        "questionID": "uuid-string"
+    }
 
-# Get questions:
-@app.get("/api/get-questions")
-def api_get_questions(numQuestions: int, resourceType: str, questionType: str, questionClass: str, request: Request, student=Depends(student_required)):
+    Note: correct_choices is a list of indices in the choices array, so multiple correct answers are possible.
+    """
+    try:
+        data = await request.json()
+    except Exception as e:
+        raise HTTPException(status_code=400, detail="Invalid JSON in request body")
+    
+    text = data.get("text")
+    question_type = data.get("question_type")
+    resource_type = data.get("resource_type")
+    choices = data.get("choices", [])
+    correct_choices = data.get("correct_choices", [])
+    check_duplicates = data.get("check_duplicates", True)
+    
+    if not text:
+        raise HTTPException(status_code=400, detail="Question text is required")
+    
+    try:
+        question_id = add_question(text, question_type, resource_type, choices, correct_choices, check_duplicates)
+        return {
+            "success": True,
+            "message": "Question added successfully",
+            "questionID": question_id
+        }
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to add question: {str(e)}")
+
+# Get single question:
+@app.post("/api/get-question")
+async def api_get_question(request: Request, student=Depends(student_required)):
+    """
+    API endpoint to retrieve a single question from the database.
+
+    Request body:
+    {
+        "questionID": "uuid-string"
+    }
+
+    Returns: Question information or error.
+    {
+        "success": True,
+        "question": {
+            'questionID': '...',
+            'text': '...',
+            'choices': ['choice1', 'choice2', ...],
+            'correct_choices': [0, 2]  -- List of indices in choices array that are correct
+        }
+    }
+    """
+    try:
+        data = await request.json()
+    except Exception as e:
+        raise HTTPException(status_code=400, detail="Invalid JSON in request body")
+    
+    question_id = data.get("questionID")
+    
+    if not question_id:
+        raise HTTPException(status_code=400, detail="questionID is required")
+    
+    try:
+        question = get_question(question_id)
+        if not question:
+            raise HTTPException(status_code=404, detail="Question not found")
+        
+        return {
+            "success": True,
+            "question": question
+        }
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to retrieve question: {str(e)}")
+
+# Get multiple questions:
+@app.post("/api/get-questions")
+async def api_get_questions(request: Request, student=Depends(student_required)):
     """
     API endpoint to retrieve multiple questions from the database.
+    
+    Request body:
+    {
+        "numQuestions": 5,              // optional - max number to return, null for all
+        "resourceType": "Water",        // optional - filter by resource type
+        "questionType": "MCQ",          // optional - filter by question type
+        "difficulty": 1                 // optional - filter by difficulty level
+    }
+    
+    Returns:
+    {
+        "success": True,
+        "count": 3,
+        "questions": [
+            {
+                "questionID": "uuid",
+                "text": "Question text",
+                "type": "MCQ",
+                "difficulty": 1,
+                "resourceType": "Water",
+                "choices": [
+                    {"text": "Option 1", "isCorrect": true},
+                    {"text": "Option 2", "isCorrect": false}
+                ]
+            },
+            ...
+        ]
+    }
     """
-    # TODO: Implement multiple question retrieval logic here.
-    return None
+    try:
+        data = await request.json()
+    except Exception as e:
+        raise HTTPException(status_code=400, detail="Invalid JSON in request body")
+    
+    num_questions = data.get("numQuestions")
+    resource_type = data.get("resourceType")
+    question_type = data.get("questionType")
+    difficulty = data.get("difficulty")
+    
+    try:
+        questions = get_questions(
+            num_questions=num_questions,
+            resource_type=resource_type,
+            question_type=question_type,
+            difficulty=difficulty
+        )
+        return {
+            "success": True,
+            "count": len(questions),
+            "questions": questions
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to retrieve questions: {str(e)}")
 
 ############################################
 #                  Server                  #

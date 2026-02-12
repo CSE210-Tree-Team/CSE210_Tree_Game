@@ -44,7 +44,7 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 # Import the modules to test using absolute imports
 from Database.createDatabase import create_schema
 from Database.addItemsToDatabase import (
-    add_account, add_role, add_question, add_question_choice,
+    add_account, add_role, add_question_alone, add_question_choice,
     update_stat, update_health, update_account, update_last_login,
     generate_tree, do_event, join_class, add_student_details
 )
@@ -220,7 +220,7 @@ class TestQuestion(DatabaseInteractTestCase):
     
     def test_add_mcq_question(self):
         """Test adding a multiple choice question."""
-        question_id = add_question(
+        question_id = add_question_alone(
             question_id="q1",
             text="What is 2+2?",
             question_type=QUESTION_MCQ,
@@ -232,7 +232,7 @@ class TestQuestion(DatabaseInteractTestCase):
     
     def test_add_question_with_choices(self):
         """Test adding a question with choices."""
-        question_id = add_question(
+        question_id = add_question_alone(
             question_id="q_math",
             text="What is 2+2?",
             question_type=QUESTION_MCQ,
@@ -260,7 +260,7 @@ class TestQuestion(DatabaseInteractTestCase):
     def test_add_question_invalid_type(self):
         """Test adding question with invalid type raises ValueError."""
         with self.assertRaises(ValueError):
-            add_question(
+            add_question_alone(
                 question_id="q_invalid",
                 text="Test question",
                 question_type="InvalidType",
@@ -270,7 +270,7 @@ class TestQuestion(DatabaseInteractTestCase):
     def test_add_question_invalid_resource_type(self):
         """Test adding question with invalid resource type."""
         with self.assertRaises(ValueError):
-            add_question(
+            add_question_alone(
                 question_id="q_invalid",
                 text="Test question",
                 question_type=QUESTION_MCQ,

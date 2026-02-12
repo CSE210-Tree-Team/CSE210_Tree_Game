@@ -1,5 +1,7 @@
 ﻿import { type Resources } from "./Resources";
-import styles from "../css/homepage.module.css"
+import styles from "./homepage.module.css"
+import fontStyles from "./Popup.module.css"
+
 
 interface ResourceBoardProps {
     resources: Resources;
@@ -14,17 +16,17 @@ export const ResourceBoard = ({ resources }: ResourceBoardProps) => {
                 className={ styles.resourceBoardBg}
             />
             <div className={styles.resourceBoardContent}>
-                <h3 className={styles.resourceBoardTitle}>Growth Progress</h3>
+                <h3 className={` ${fontStyles.text} ${styles.resourceBoardTitle}`}>Growth Progress</h3>
 
                 {/* Water */}
                 <div className={styles.resourceItem}>
                     <img
                         src="/assets/water_icon.png"
-                        alt="Water"
+                        alt="Water Resource Icon"
                         className={ styles.resourceIcon}
                     />
                     <div className={styles.resourceRight}>
-                        <span className={styles.resourceLabel}>Water</span>
+                        <span className={` ${fontStyles.text} ${styles.resourceLabel}`}>Water</span>
                         <div className={styles.progressBarWrapper}>
                         <div className={styles.progressBarContainer}>
                             <div
@@ -42,7 +44,7 @@ export const ResourceBoard = ({ resources }: ResourceBoardProps) => {
                 <div className={styles.resourceItem}>
                     <img
                         src="/assets/earth_icon.png"
-                        alt="Earth"
+                        alt="Earth Resource Icon"
                         className={styles.resourceIcon}
                     />
                     <div className={styles.resourceRight}>
@@ -63,7 +65,7 @@ export const ResourceBoard = ({ resources }: ResourceBoardProps) => {
                 <div className={styles.resourceItem}>
                     <img
                         src="/assets/sun_icon.png"
-                        alt="Sun"
+                        alt="Sun Resource Icon"
                         className={styles.resourceIcon}
                     />
                     <div className={styles.resourceRight}>

@@ -1,4 +1,4 @@
-import styles from "../css/homepage.module.css"
+import styles from "./homepage.module.css"
 interface WateringCanProps {
     onClick: () => void;
 }

@@ -5,17 +5,48 @@ import { Tree } from "../../components/Tree";
 import { Earth } from "../../components/Earth";
 import { WateringCan } from "../../components/WateringCan";
 import { ResourceBoard } from "../../components/ResourceBoard"
-import { type Resources } from "../../components/Resources";
-import styles from "../../css/homepage.module.css"
+import styles from "../../components/homepage.module.css"
+import fontStyles from "../../components/Popup.module.css"
+import buttonStyles from "../../components/Button.module.css"
 interface UserInfo {
-    username: string;
-    treeID: string;
-    resourceLevels: {
-        water: number;
-        earth: number;
-        sun: number;
+    success: boolean;
+    user: {
+        username: string;
+        displayName: string;
+        email: string;
+        roles: string[];
     };
-    displayName: string;
+    tree: {
+        treeID: string;
+        health: string;
+        growthStage: number;
+        resourceLevels: {
+            water: number;
+            earth: number;
+            sun: number;
+        };
+    };
+}
+
+const userInfoMock: UserInfo = {
+    success: true,
+    user: {
+        username: "AA",
+        displayName: "AA",
+        email: "123@example.com",
+        roles: ["11", "22"]
+    },
+    tree: {
+        treeID: "test111",
+        health: "health01",
+        growthStage: 1,
+        resourceLevels: {
+            water: 100,
+            earth: 100,
+            sun: 100,
+        }
+    }
+
 }
 
 
@@ -26,12 +57,6 @@ export const Homepage = () => {
     //const [showResources, setShowResources] = useState(false);
     const navigate = useNavigate();
 
-    const resources: Resources = {
-        water: 40,
-        earth: 20,
-        sun: 20,
-    };
-    const userInfoMock: UserInfo = { username: "AAA", treeID: "id", resourceLevels: resources, displayName: "AAA" };
 
     useEffect(() => {
         // Replace with actual user info fetch
@@ -76,55 +101,38 @@ export const Homepage = () => {
         navigate('/water');
     };
 
+    
 
     return (
         <div className={styles.homepageWrapper}>
             <div className={styles.gameConatiner}>
-                <h1 className={styles.helloTitle}>Hello, {userInfo?.displayName || 'User'}</h1>
-                <ResourceBoard resources={userInfo?.resourceLevels || userInfoMock.resourceLevels} />
+                <div className={fontStyles.grass}>
+                    <h1 className={`${fontStyles.title} ${styles.helloTitle}`}>
+                        Hello, {userInfo?.user.displayName || 'User'}
+                    </h1>
+                </div>
+                <ResourceBoard resources={userInfo?.tree.resourceLevels || userInfoMock.tree.resourceLevels} />
 
                 <div className={styles.treeEarthContainer}>
-                    <Tree water={userInfo?.resourceLevels.water || userInfoMock.resourceLevels.water} />
-                    <Earth earth={userInfo?.resourceLevels.earth || userInfoMock.resourceLevels.earth} onClick={handleSoilGame} />
+                    <Tree water={userInfo?.tree.resourceLevels.water || userInfoMock.tree.resourceLevels.water} />
+                    <Earth earth={userInfo?.tree.resourceLevels.earth || userInfoMock.tree.resourceLevels.earth} onClick={handleSoilGame} />
                     <WateringCan onClick={handleWaterGame} />
                 </div>
 
-                <button className={styles.buttonLogout} onClick={handleLogout}>
-                    Logout
-                </button>
-
-                {/*<div>
-                    <button onClick={handleSoilGame}>
-                        Play Soil Game
-                    </button>
-                    <button onClick={handleWaterGame}>
-                        Play Water Game
-                    </button>
-                    <button onClick={handleLogout}>
-                        Logout
-                    </button>
-                </div>
-
-                <p>User: {user?.email}</p>
-                <h2>Profile</h2>
-                <pre>
-                {JSON.stringify(user, null, 2)}
-                </pre>
 
                 <div>
-                    <button onClick={() => setShowResources(!showResources)}>
-                        {showResources ? 'Hide' : 'Show'} Resource Levels
+                <button className={`${buttonStyles.button} ${buttonStyles.grass} ${styles.buttonSingle} ${styles.buttonLogout}`} onClick={handleLogout}>
+                    Logout
                     </button>
-                    {showResources && userInfo && (
-                        <div style={{ marginTop: '10px', padding: '10px', border: '1px solid #ccc' }}>
-                            <h3>Resource Levels:</h3>
-                            <p>Water: {userInfo.resourceLevels.water}</p>
-                            <p>Earth: {userInfo.resourceLevels.earth}</p>
-                            <p>Sun: {userInfo.resourceLevels.sun}</p>
-                        </div>
-                    )}
-                </div>*/}
+
+                    <button className={`${buttonStyles.button} ${buttonStyles.grass} ${styles.buttonSingle} ${styles.buttonSetting}`} onClick={() => (window.location.href = "/")}>
+                    Settings
+                    </button>
+                </div>
             </div>
+
+            <br></br>
+
         </div>
     );
 

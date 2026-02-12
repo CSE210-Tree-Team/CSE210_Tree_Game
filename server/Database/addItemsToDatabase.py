@@ -13,7 +13,7 @@ Functions - Account Management:
     add_student_details(student_username, student_level, student_stats, parent_email)
 
 Functions - Question Management:
-    add_question(question_id, text, question_type, difficulty, resource_type)
+    add_question_alone(question_id, text, question_type, difficulty, resource_type)
     add_question_choice(choice_id, question_id, text, is_correct)
 
 Functions - Tree & Resource Management:
@@ -35,7 +35,7 @@ from constants import (
     RESOURCE_WATER, RESOURCE_EARTH, RESOURCE_SUN, RESOURCE_ALL, RESOURCE_NONE,
     VALID_QUESTION_TYPES, VALID_QUESTION_RESOURCE_TYPES,
     ATTEMPT_RESOURCE_NONE, EVENT_LEVEL, EVENT_BONUS, EVENT_PENALTY, EVENT_NEUTRAL,
-    RESOURCE_MAX_LEVEL, RESOURCE_MIN_LEVEL
+    RESOURCE_MAX_LEVEL, RESOURCE_MIN_LEVEL, PASSIVE_DECAY_RATE
 )
 import dataRecords as dataclasses
 import uuid
@@ -97,6 +97,83 @@ def add_account(username: str, email: str, passwordHash: str, displayName: str,
     
     return username
 
+def add_question(text: str, question_type: str, resource_type: str, choices: list, correct_choices: list, check_duplicates: bool = True) -> str:
+    """
+    Add a new question with choices to the database.
+    
+    Args:
+        text: The question text
+        question_type: Type of question ('MCQ', 'FreeResponse', or 'MultiSelect')
+        resource_type: Resource type ('Water', 'Earth', 'Sun', 'General', or 'None')
+        choices: List of choice texts
+        correct_choices: List of indices indicating which choices are correct
+        check_duplicates: Whether to check for duplicate questions (default: True)
+    
+    Returns:
+        str: The question ID
+    
+    Raises:
+        ValueError: If question_type or resource_type is invalid, or if duplicate exists
+    """
+    if question_type not in VALID_QUESTION_TYPES:
+        raise ValueError(f"Invalid question type '{question_type}'. Must be one of {VALID_QUESTION_TYPES}")
+    
+    if resource_type and resource_type not in VALID_QUESTION_RESOURCE_TYPES:
+        raise ValueError(f"Invalid resource type '{resource_type}'. Must be one of {VALID_QUESTION_RESOURCE_TYPES}")
+    
+    if not os.path.exists(DB_PATH):
+        raise FileNotFoundError(f"Database {DB_PATH} does not exist. Please create it first.")
+    
+    # Check for duplicates if requested
+    if check_duplicates:
+        with sqlite3.connect(DB_PATH) as conn:
+            cursor = conn.cursor()
+            
+            # Find questions with the same text
+            cursor.execute("SELECT questionID FROM Question WHERE text = ?", (text,))
+            potential_duplicates = cursor.fetchall()
+            
+            if potential_duplicates and choices:
+                # Check if any have the same choices
+                for (question_id,) in potential_duplicates:
+                    cursor.execute(
+                        "SELECT text, isCorrect FROM QuestionChoice WHERE questionID = ? ORDER BY text",
+                        (question_id,)
+                    )
+                    existing_choices = cursor.fetchall()
+                    
+                    # Prepare current choices for comparison
+                    current_choices = sorted([
+                        (choice_text, 1 if idx in correct_choices else 0)
+                        for idx, choice_text in enumerate(choices)
+                    ], key=lambda x: x[0])
+                    
+                    if existing_choices == current_choices:
+                        raise ValueError(f"Duplicate question detected with questionID: {question_id}")
+    
+    q_id = str(uuid.uuid4())
+    
+    with sqlite3.connect(DB_PATH) as conn:
+        cursor = conn.cursor()
+        
+        # Insert Question
+        cursor.execute(
+            "INSERT INTO Question (questionID, text, type, difficulty, resourceType) VALUES (?, ?, ?, ?, ?)",
+            (q_id, text, question_type, 1, resource_type)
+        )
+        
+        # Insert Choices (if any)
+        if choices:
+            for idx, choice_text in enumerate(choices):
+                is_correct = 1 if idx in correct_choices else 0
+                cursor.execute(
+                    "INSERT INTO QuestionChoice (choiceID, questionID, text, isCorrect) VALUES (?, ?, ?, ?)",
+                    (str(uuid.uuid4()), q_id, choice_text, is_correct)
+                )
+        
+        conn.commit()
+    
+    return q_id
 
 def add_role(username: str, role: str):
     """
@@ -121,7 +198,7 @@ def add_role(username: str, role: str):
     _execute(sql, (username, role))
 
 
-def add_question(question_id: str, text: str, question_type: str, difficulty: int = None, 
+def add_question_alone(question_id: str, text: str, question_type: str, difficulty: int = None, 
                  resource_type: str = None) -> str:
     """
     Add a new question to the database.
@@ -171,6 +248,78 @@ def add_question_choice(choice_id: str, question_id: str, text: str, is_correct:
     
     _execute(sql, (choice_id, question_id, text, 1 if is_correct else 0))
 
+def apply_passive_decay(tree_ID: str):
+    """
+    Apply passive decay to a tree's resources if enough time has passed since lastUpdated.
+    
+    The decay is calculated based on PASSIVE_DECAY_RATE (in minutes). One level decays
+    every PASSIVE_DECAY_RATE minutes. The lastUpdated field is only updated if any
+    resource values actually changed.
+    
+    Args:
+        tree_ID: The tree to apply passive decay to
+    
+    Returns:
+        bool: True if any resources were decayed, False otherwise
+    """
+    from Database.getItemsFromDatabase import _query
+    
+    # Fetch the tree data
+    tree = _query(
+        """SELECT t.*, r.water, r.earth, r.sun 
+           FROM Tree t
+           LEFT JOIN TreeResources r ON t.treeID = r.treeID
+           WHERE t.treeID = ?""",
+        (tree_ID,),
+        fetchone=True
+    )
+    
+    if not tree:
+        return False
+    
+    # Calculate time elapsed since last update in minutes
+    last_updated = datetime.fromisoformat(tree['lastUpdated'])
+    current_time = datetime.now()
+    elapsed_minutes = (current_time - last_updated).total_seconds() / 60
+    
+    # Calculate how many levels to decay (truncate to integer)
+    decay_amount = int(elapsed_minutes // PASSIVE_DECAY_RATE)
+    
+    if decay_amount <= 0:
+        return False  # Not enough time has passed
+    
+    # Store original values to check if anything changed
+    original_water = tree.get('water') or 0
+    original_earth = tree.get('earth') or 0
+    original_sun = tree.get('sun') or 0
+    
+    # Apply decay to each resource
+    update_stat(tree_ID, 'water', -decay_amount)
+    update_stat(tree_ID, 'earth', -decay_amount)
+    update_stat(tree_ID, 'sun', -decay_amount)
+    
+    # Fetch updated values to check if they actually changed
+    updated_tree = _query(
+        """SELECT r.water, r.earth, r.sun 
+           FROM TreeResources r
+           WHERE r.treeID = ?""",
+        (tree_ID,),
+        fetchone=True
+    )
+    
+    new_water = updated_tree.get('water') or 0
+    new_earth = updated_tree.get('earth') or 0
+    new_sun = updated_tree.get('sun') or 0
+    
+    # Only update lastUpdated if resources actually changed
+    if new_water != original_water or new_earth != original_earth or new_sun != original_sun:
+        sql = '''UPDATE Tree SET lastUpdated = ? WHERE treeID = ?'''
+        _execute(sql, (datetime.now().isoformat(), tree_ID))
+        return True
+    
+    return False
+
+
 def do_event(tree_ID: str, event: dataclasses.Event, value: int):
     """
     Handle an event for a tree, updating its resources based on the event type.
@@ -217,23 +366,51 @@ def update_stat(tree_ID: str, stat_name: str, value: int):
     Raises:
         ValueError: If stat_name is invalid
     """
+    from Database.getItemsFromDatabase import _query
+
+    print("Testing")
+
     stat_name_lower = stat_name.lower()
-    valid_stats = ['water', 'earth', 'sun']
+    valid_stats = ['water', 'earth', 'sun']  # TODO: Consider converting this to be: VALID_RESOURCES
     
     if stat_name_lower not in valid_stats:
         raise ValueError(f"Invalid stat name '{stat_name}'. Must be one of {valid_stats}")
     
-    sql = f'''
-        UPDATE TreeResources
-        SET {stat_name_lower} = CASE 
-            WHEN {stat_name_lower} + ? < {RESOURCE_MIN_LEVEL} THEN {RESOURCE_MIN_LEVEL}
-            WHEN {stat_name_lower} + ? > {RESOURCE_MAX_LEVEL} THEN {RESOURCE_MAX_LEVEL}
-            ELSE {stat_name_lower} + ?
-        END
+    print(f"Updating stat '{stat_name_lower}' for tree '{tree_ID}' by {value}")
+
+    # Get current value to check if it will actually change
+    get_current_sql = f'''
+        SELECT {stat_name_lower}
+        FROM TreeResources
         WHERE treeID = ?
     '''
+    result = _query(get_current_sql, (tree_ID,), fetchone=True)
+    current_value = result[stat_name_lower] if result else 0
     
-    _execute(sql, (value, value, value, tree_ID))
+    # Calculate new value with clamping
+    new_value = current_value + value
+    if new_value < RESOURCE_MIN_LEVEL:
+        new_value = RESOURCE_MIN_LEVEL
+    elif new_value > RESOURCE_MAX_LEVEL:
+        new_value = RESOURCE_MAX_LEVEL
+    
+    # Only update if the value actually changes
+    if new_value != current_value:
+        sql = f'''
+            UPDATE TreeResources
+            SET {stat_name_lower} = ?
+            WHERE treeID = ?
+        '''
+        
+        # Update Tree's lastUpdated timestamp as well
+        last_updated_sql = '''
+            UPDATE Tree
+            SET lastUpdated = ?
+            WHERE treeID = ?
+        '''
+        
+        _execute(sql, (new_value, tree_ID))
+        _execute(last_updated_sql, (datetime.now().isoformat(), tree_ID))
 
 
 def update_health(tree_ID: str, health_status: str):

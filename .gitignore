@@ -23,8 +23,10 @@ __pycache__/
 Thumbs.db
 .vscode/
 .idea/
+.vs/
 
 # Test / coverage artifacts
 .pytest_cache/
 .coverage
 htmlcov/
+
