@@ -259,3 +259,20 @@ def get_questions(num_questions=None, resource_type=None, question_type=None, di
         })
     
     return result
+
+def get_all_trees():
+    """
+    Retrieve all trees from the database.
+
+    Returns:
+        list: List of tree dictionaries, each containing:
+            {
+                'treeID': '...',
+                'ownerUsername': '...',
+                'health': 'Healthy',
+                'growthStage': 0,
+                'lastUpdated': '...'
+            }
+    """
+    trees = _query("SELECT treeID FROM Tree")
+    return trees if trees else []

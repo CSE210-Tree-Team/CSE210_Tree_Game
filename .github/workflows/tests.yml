@@ -28,7 +28,7 @@ jobs:
 
       - name: Run Database Schema Unit Tests
         run: |
-          python -m unittest Database.databaseUnitTests -v
+          python -m unittest tests.databaseUnitTests -v
 
       - name: Run Database Interaction Unit Tests
         run: |

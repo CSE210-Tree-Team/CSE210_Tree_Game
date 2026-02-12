@@ -1,13 +1,14 @@
 import os
 import uvicorn
+import asyncio
 from fastapi import FastAPI, Request, Depends, HTTPException, status
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse, RedirectResponse
 from starlette.middleware.sessions import SessionMiddleware
 from dotenv import load_dotenv
-from Database.getItemsFromDatabase import get_person, get_tree, get_question, get_questions
-from Database.addItemsToDatabase import add_account, generate_tree, add_question, update_last_login
-from constants import ROLE_STUDENT
+from Database.getItemsFromDatabase import get_person, get_tree, get_question, get_questions, get_all_trees
+from Database.addItemsToDatabase import add_account, generate_tree, add_question, update_last_login, apply_passive_decay, update_stat
+from constants import ROLE_STUDENT, PASSIVE_DECAY_RATE
 from dataRecords import Tree, Event
 
 
@@ -19,6 +20,7 @@ load_dotenv()
 app = FastAPI()
 MIDDLEWARE_SECRET_KEY = os.getenv("MIDDLEWARE_SECRET_KEY")
 app.add_middleware(SessionMiddleware, secret_key=MIDDLEWARE_SECRET_KEY)
+decay_task = None
 
 # --- Static File Serving ---
 frontend_path = os.path.join("..", "client", "dist")
@@ -26,6 +28,39 @@ if os.path.exists(frontend_path):
     app.mount("/assets", StaticFiles(directory=os.path.join(frontend_path, "assets")), name="static")
 # TODO: Need to fix log out process so that session is properly cleared.
 
+async def run_passive_decay_loop():
+    """
+    Background task that applies passive decay to all trees every PASSIVE_DECAY_RATE minutes.
+    """
+    while True:
+        try:
+            # Get all trees from the database
+            all_trees = get_all_trees()
+            
+            for tree_row in all_trees:
+                tree_id = tree_row['treeID']
+                apply_passive_decay(tree_id)
+            
+            # Sleep for PASSIVE_DECAY_RATE minutes (converted to seconds)
+            await asyncio.sleep(PASSIVE_DECAY_RATE * 60)
+        except Exception as e:
+            print(f"Error in passive decay loop: {e}")
+            await asyncio.sleep(60)
+
+@app.on_event("startup")
+async def startup_event():
+    """Start the passive decay background task when the app starts."""
+    global decay_task
+    decay_task = asyncio.create_task(run_passive_decay_loop())
+    print("Passive decay background task started")
+
+@app.on_event("shutdown")
+async def shutdown_event():
+    """Cancel the passive decay background task when the app shuts down."""
+    global decay_task
+    if decay_task:
+        decay_task.cancel()
+    print("Passive decay background task stopped")
 
 ############################################
 #               Helper Functions           #
@@ -162,8 +197,6 @@ async def verify_auth(request: Request):
     try:
         data = await request.json()
         user_data = data.get('user', {})
-
-        print(f"Auth0 user data received: {user_data}")
         
         if user_data:
             # Get username (email or sub) # NOTE: sub is the unique Auth0 user ID
@@ -179,8 +212,6 @@ async def verify_auth(request: Request):
             request.session["user"] = username
             request.session["user_info"] = user_data
 
-            # Update last login time or other relevant info in the database if needed
-            print("Updating last login time for user:", username)
             update_last_login(username)
             
             return {"success": True, "message": "Session established"}
@@ -192,7 +223,7 @@ async def verify_auth(request: Request):
 @app.get("/api/get-user-info")
 def get_user_info(request: Request, student=Depends(student_required)):
     """
-    Returns the user information and tree stats.
+    Returns the user information and tree stats. Applies passive decay before returning tree data.
 
     Returns:
     {
@@ -211,8 +242,14 @@ def get_user_info(request: Request, student=Depends(student_required)):
         }
     }
     """
-    username = get_username(request) if student else None
+    username = student.get("username") if student else None
     tree = get_tree(username) if student else None
+    
+    # Apply passive decay to tree before returning
+    if tree:
+        apply_passive_decay(tree['treeID'])
+        # Refresh tree data after decay TODO: Update appearance as needed.
+        tree = get_tree(username)
 
     return {
         "success": True,
@@ -231,9 +268,9 @@ def get_user_info(request: Request, student=Depends(student_required)):
     }
 
 @app.post("/api/update-stat")
-async def update_stat(request: Request, student=Depends(student_required)):
+async def api_update_stat(request: Request, student=Depends(student_required)):
     """
-    Updates a specific stat for the student's tree. Treats this update as an event.
+    Updates a specific stat for the student's tree. NOTE: TODO: Treats this update as an event. This does not affect functionality
     
     Request body:
     {
@@ -249,13 +286,29 @@ async def update_stat(request: Request, student=Depends(student_required)):
     stat_name = data.get("stat_name")
     value = data.get("value")
     
+    # Get tree from student's username
+    username = student.get("username") if student else None
+    tree = get_tree(username) if username else None
+    tree_id = tree.get('treeID') if tree else None
+    
     if not stat_name:
         raise HTTPException(status_code=400, detail="stat_name is required")
     if value is None:
         raise HTTPException(status_code=400, detail="value is required")
+    if not isinstance(value, int) or isinstance(value, bool):
+        raise HTTPException(status_code=400, detail="value must be an integer")
+    if not tree_id:
+        raise HTTPException(status_code=404, detail="Tree not found for user")
     
-    # TODO: Implement stat update logic here.
-    return None
+    # TODO: Refactor into events potentially.
+    try:
+        print(f"Received update-stat request: stat_name={stat_name}, value={value} for user {student['username']} and tree {tree_id}")
+        update_stat(tree_id, stat_name, value)
+        return {"success": True, "message": f"{stat_name} updated by {value}"}
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to update stat: {str(e)}")
 
 @app.post("/api/update-user")
 async def update_user(request: Request, account=Depends(get_current_user)):
