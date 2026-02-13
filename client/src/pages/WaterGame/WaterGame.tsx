@@ -8,9 +8,12 @@ based on that state. The component also includes navigation functionality to
 return to the home page or move between screens using buttons and a back arrow.
 */
 
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
+
 import { Popup } from "../../components/Popup";
+import Bucket from "./components/Bucket";
+
 import styles from "./WaterGame.module.css";
 
 export const WaterGame = () => {
@@ -18,6 +21,35 @@ export const WaterGame = () => {
     "start",
   );
   const navigate = useNavigate();
+  const [bucketX, setBucketX] = useState(0);
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (screen !== "game") return;
+    if (!containerRef.current) return;
+
+    const containerWidth = containerRef.current.offsetWidth;
+    setBucketX(containerWidth / 2 - 140 / 2);
+  }, [screen]);
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (!containerRef.current) return;
+
+      const containerWidth = containerRef.current.offsetWidth;
+      const bucketWidth = 140; // match your CSS width
+      const maxRight = containerWidth - bucketWidth;
+
+      if (e.key === "ArrowLeft") {
+        setBucketX((prev) => Math.max(prev - 20, 0));
+      } else if (e.key === "ArrowRight") {
+        setBucketX((prev) => Math.min(prev + 20, maxRight));
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, []);
 
   return (
     <div className={styles.gameContainer}>
@@ -83,6 +115,9 @@ export const WaterGame = () => {
           >
             End Game
           </button>
+          <div className={styles.bucketContainer} ref={containerRef}>
+            <Bucket x={bucketX} />
+          </div>
         </div>
       )}
       {screen === "end" && (
