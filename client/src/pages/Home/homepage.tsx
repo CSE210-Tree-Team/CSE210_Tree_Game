@@ -5,48 +5,17 @@ import { Tree } from "../../components/Tree";
 import { Earth } from "../../components/Earth";
 import { WateringCan } from "../../components/WateringCan";
 import { ResourceBoard } from "../../components/ResourceBoard"
-import styles from "../../components/homepage.module.css"
-import fontStyles from "../../components/Popup.module.css"
-import buttonStyles from "../../components/Button.module.css"
+import { type Resources } from "../../components/Resources";
+import styles from "../../css/homepage.module.css"
 interface UserInfo {
-    success: boolean;
-    user: {
-        username: string;
-        displayName: string;
-        email: string;
-        roles: string[];
+    username: string;
+    treeID: string;
+    resourceLevels: {
+        water: number;
+        earth: number;
+        sun: number;
     };
-    tree: {
-        treeID: string;
-        health: string;
-        growthStage: number;
-        resourceLevels: {
-            water: number;
-            earth: number;
-            sun: number;
-        };
-    };
-}
-
-const userInfoMock: UserInfo = {
-    success: true,
-    user: {
-        username: "AA",
-        displayName: "AA",
-        email: "123@example.com",
-        roles: ["11", "22"]
-    },
-    tree: {
-        treeID: "test111",
-        health: "health01",
-        growthStage: 1,
-        resourceLevels: {
-            water: 70,
-            earth: 50,
-            sun: 100,
-        }
-    }
-
+    displayName: string;
 }
 
 
@@ -62,15 +31,11 @@ export const Homepage = () => {
         earth: 20,
         sun: 20,
     };
-    const userInfoMock: UserInfo = { 
-        success: true,
-        user: { username: "AAA", displayName: "AAA", email: "", roles: [] },
-        tree: { treeID: "id", health: "healthy", growthStage: 1, resourceLevels: resources }
-    };
+    const userInfoMock: UserInfo = { username: "AAA", treeID: "id", resourceLevels: resources, displayName: "AAA" };
 
     useEffect(() => {
         // Replace with actual user info fetch
-        //setUserInfo(userInfoMock);
+        setUserInfo(userInfoMock);
         // Establish backend session after Auth0 login
         const establishSession = async () => {
             try {
@@ -118,12 +83,12 @@ export const Homepage = () => {
     return (
         <div className={styles.homepageWrapper}>
             <div className={styles.gameConatiner}>
-                <h1 className={styles.helloTitle}>Hello, {userInfo?.user.displayName || 'User'}</h1>
-                <ResourceBoard resources={userInfo?.tree.resourceLevels ?? resources} />
+                <h1 className={styles.helloTitle}>Hello, {userInfo?.displayName || 'User'}</h1>
+                <ResourceBoard resources={userInfo?.resourceLevels || userInfoMock.resourceLevels} />
 
                 <div className={styles.treeEarthContainer}>
-                    <Tree water={userInfo?.tree.resourceLevels.water || userInfoMock.tree.resourceLevels.water} />
-                    <Earth earth={userInfo?.tree.resourceLevels.earth || userInfoMock.tree.resourceLevels.earth} onClick={handleSoilGame} />
+                    <Tree water={userInfo?.resourceLevels.water || userInfoMock.resourceLevels.water} />
+                    <Earth earth={userInfo?.resourceLevels.earth || userInfoMock.resourceLevels.earth} onClick={handleSoilGame} />
                     <WateringCan onClick={handleWaterGame} />
                 </div>
 
@@ -153,8 +118,8 @@ export const Homepage = () => {
                 </pre>
 
                 <div>
-                <button className={`${buttonStyles.button} ${buttonStyles.grass} ${styles.buttonSingle} ${styles.buttonLogout}`} onClick={handleLogout}>
-                    Logout
+                    <button onClick={() => setShowResources(!showResources)}>
+                        {showResources ? 'Hide' : 'Show'} Resource Levels
                     </button>
                     {showResources && userInfo && (
                         <div style={{ marginTop: '10px', padding: '10px', border: '1px solid #ccc' }}>
@@ -166,9 +131,6 @@ export const Homepage = () => {
                     )}
                 </div>*/}
             </div>
-
-            <br></br>
-
         </div>
     );
 
