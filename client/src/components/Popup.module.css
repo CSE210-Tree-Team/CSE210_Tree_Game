@@ -49,6 +49,11 @@ h2 {
   -webkit-text-stroke-color: var(--color-brown);
 }
 
+.grass .title {
+    color: var(--color-lightGreen);
+    -webkit-text-stroke-color: var(--color-darkGreen);
+}
+
 .text {
   /* color: var(--color-blue2); */
   font-family: Handjet;

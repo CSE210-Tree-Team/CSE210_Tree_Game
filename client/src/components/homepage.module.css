@@ -1,0 +1,396 @@
+
+.homepageWrapper {
+    width: 100vw;
+    min-height: 100vh;
+    background-image: url('/assets/bg.svg');
+    background-size: cover;
+    background-position: center center;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+    overflow-x: hidden;
+    overflow-y:hidden;
+    position: relative;
+}
+
+.gameContainer {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: clamp(10px, 2vw, 30px);
+    max-width: 1200px;
+    min-height:100vh;
+    margin: 0 auto;
+    position: relative;
+
+}
+
+.treeEarthContainer {
+    position: relative;
+    width: clamp(300px, 40vw, 600px);
+    height: clamp(350px, 45vw, 700px);
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    margin-bottom: -10vw;
+    margin-top: -5vw;
+    margin-left:15vw;
+}
+/* Tree */
+.treeContainer {
+    position: absolute;
+    bottom: 17%;
+    left: 70%;
+    transform: translateX(-50%);
+    width: 140%;
+    height: auto;
+    z-index: 2;
+    pointer-events: none;
+}
+
+.treeImage {
+    width: 70%;
+    height: auto;
+    object-fit: contain;
+    display: block;
+}
+
+/* Earth */
+.earthContainer {
+    position: absolute;
+    left: 50%;
+    bottom: 2%;
+    transform: translateX(-50%);
+    width: 100%; 
+    max-width: 100%; 
+    height: auto;
+    z-index: 1;
+    cursor: pointer;
+    transition: transform 0.3s ease;
+    display: inline-block;
+}
+    .earthContainer:hover {
+        transform: translateX(-50%) scale(1.15);
+    }
+
+    .earthContainer:active {
+        transform: translateX(-50%) scale(0.95);
+    }
+
+.earthImage {
+    width: 100%;
+    height: auto;
+    object-fit: contain;
+    display: block;
+}
+
+/* Watering Can */
+.wateringCanContainer {
+    position: absolute;
+    right: -13%; 
+    bottom: 32%; 
+    height: auto;
+    min-width:100px;
+    max-width:180px;
+    z-index: 4;
+}
+
+.wateringCanImage {
+    width: 100%;
+    height: auto;
+    object-fit: contain;
+    cursor: pointer;
+    transition: transform 0.3s ease;
+    display: block;
+    filter: drop-shadow(2px 2px 4px rgba(0, 0, 0, 0.2));
+}
+
+    .wateringCanImage:hover {
+        transform: scale(1.15) rotate(-5deg);
+    }
+
+    .wateringCanImage:active {
+        transform: scale(0.95);
+    }
+
+
+/* For test*/
+/*
+.treeEarthContainer {
+    border: 2px dashed red;
+}
+
+.treeContainer {
+    border: 2px dashed blue;
+}
+
+.earthContainer {
+    border: 2px dashed green;
+}*/
+
+
+/* All resource board */
+.resourceBoardContainer {
+    position: fixed;
+    top: -2vw;
+    right: 7vw;
+    width: clamp(250px, 25vw, 350px);
+    z-index: 100;
+}
+/* For test */
+/*
+.resourceBoardContainer {
+    border: 2px dashed yellow;
+}*/
+
+/* Board img bg */
+.resourceBoardBg {
+    width: 105%;
+    height: auto;
+    display: block;
+    filter: drop-shadow(4px 4px 8px rgba(0, 0, 0, 0.3));
+}
+
+/* Text part*/
+.resourceBoardContent {
+    position: absolute;
+    top: 10px;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    /*up right down left*/
+    padding: 12% 16% 10% 9%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    box-sizing: border-box;
+}
+
+.homepageWrapper .resourceBoardTitle {
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: var(--color-brown);
+    text-align: center;
+    margin: clamp(30px, 1vw, 40px) 0 clamp(0px, 1vw, 5px) 0;
+    text-shadow: 1px 1px 2px rgba(255, 255, 255, 0.8);
+}
+
+/* each resource*/
+.resourceItem {
+    display: flex;
+    align-items: flex-start;
+    gap: clamp(6px, 1vw, 12px);
+    margin-bottom: clamp(5px, 1vw, 10px);
+}
+.resourceIcon {
+    width: clamp(20px, 4vw, 32px);
+    height: clamp(20px, 4vw, 32px);
+    object-fit: contain;
+    flex-shrink: 0;
+    margin-top: clamp(2px, 0.5vw, 5px);
+    filter: drop-shadow(2px 2px 3px rgba(0, 0, 0, 0.2));
+}
+
+/* name + progress bar */
+.resourceRight {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: clamp(0px, 0.2vw, 3px);
+    justify-content: center;
+    min-width:0;
+}
+
+
+
+/* name + percentage */
+.resourceLabelRow {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: clamp(6px, 1vw, 10px);
+}
+
+/* resource name */
+.homepageWrapper .resourceLabel {
+    font-weight: 800;
+    color: var(--color-brown);
+    font-size: clamp(11px, 1.3vw, 14px);
+    line-height: 1.2;
+    text-shadow: 0.5px 0.5px 1px rgba(255, 255, 255, 0.5);
+    white-space: nowrap;
+}
+
+/* percentage */
+.resourceValue {
+    font-weight: 600;
+    color: var(--color-brown);
+    font-size: clamp(11px, 1.3vw, 14px);
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+
+.progressBarContainer {
+    width: 130%;
+    height: clamp(16px, 2.5vw, 18px);
+    background-color: rgba(255, 255, 255, 0.4);
+    border-radius: 12px;
+    overflow: hidden;
+    border: 2px solid rgba(107, 52, 16, 0.3);
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.progressBar {
+    height: 100%;
+    transition: width 0.5s ease;
+    border-radius: 10px;
+    position: relative;
+}
+
+    .progressBar::after {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 50%;
+        background: linear-gradient(to bottom, rgba(255, 255, 255, 0.3), transparent);
+        border-radius: 8px 8px 0 0;
+    }
+
+.waterBar {
+    background: linear-gradient(90deg, var(--color-blue3), var(--color-blue2));
+}
+
+.earthBar {
+    background: linear-gradient(90deg, var(--color-tan), var(--color-brown));
+}
+
+.sunBar {
+    background: linear-gradient(90deg, var(--color-lightYellow), var(--color-darkYellow));
+}
+
+.homepageWrapper .helloTitle {
+    font-size: 4rem;
+    font-weight: 600;
+    user-select: none;
+    text-align: left;
+    margin: 1.5rem;
+    padding-bottom: 2rem;
+}
+
+
+.homepageWrapper .gameTitle {
+    font-size: 5rem;
+    font-weight: 700;
+    letter-spacing: 4px;
+    user-select: none;
+    padding-top: 3rem;
+    padding-bottom: 2rem;
+    margin: auto;
+    text-align: center;
+}
+
+.homepageWrapper .gameIntro {
+    margin-left: 7rem;
+    margin-right: 7rem;
+    font-size: 2rem;
+}
+.buttonContainer {
+    display: flex;
+    gap: 40px;
+    flex-wrap: wrap;
+    margin: auto;
+    justify-content: center;
+    padding-top: clamp(20px, 4vw, 40px);
+}
+
+.homepageWrapper .buttonSingle {
+    min-width: 5rem;
+    font-size: 1.5rem;
+    color: black;
+}
+
+
+.homepageWrapper .buttonLogout {
+    padding: 15px 40px;
+    border-radius: 30px;
+    position: fixed;
+    bottom: clamp(20px, 4vw, 40px);
+    right: clamp(20px, 4vw, 40px);
+}
+
+.homepageWrapper .buttonSetting {
+    padding: 15px 40px;
+    border-radius: 30px;
+    position: fixed;
+    bottom: clamp(20px, 4vw, 40px);
+    right: clamp(180px, 20vw, 220px);
+}
+
+
+
+@media (max-width: 768px) {
+    .homepageWrapper {
+        overflow-y: auto;
+    }
+
+    .gameContainer {
+        padding: 10px;
+    }
+
+    .treeEarthContainer {
+        width: 80vw;
+        max-width: 400px;
+        height: 80vw;
+        max-height: 450px;
+        margin-left: 0;
+        margin-top: 0;
+    }
+
+    .treeContainer {
+        bottom: 12%;
+        width: 100%;
+        left: 50%;
+    }
+
+    .wateringCanContainer {
+        width: 20%;
+        min-width: 60px;
+        right: -10%;
+        bottom: 28%;
+    }
+
+    .resourceBoardContainer {
+        position: relative;
+        top: auto;
+        right: auto;
+        width: 90vw;
+        max-width: 350px;
+        margin: 20px auto;
+    }
+
+    .resourceBoardContent {
+        padding: 15% 12% 12% 12%;
+    }
+
+    .helloTitle {
+        text-align: center;
+        margin-left: 0;
+    }
+}
+
+@media (min-width: 1920px) {
+    .gameContainer {
+        max-width: 1400px;
+    }
+
+    .treeEarthContainer {
+        width: 600px;
+        height: 700px;
+    }
+
+    .resourceBoardContainer {
+        width: 320px;
+    }
+}
