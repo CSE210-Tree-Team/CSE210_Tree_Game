@@ -1,7 +1,7 @@
 import { useAuth0 } from '@auth0/auth0-react';
 import { FormEvent, useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import styles from '../../css/account-settings-edit.module.css';
+import styles from '../../components/account-settings-edit.module.css';
 
 type SavedProfile = {
     name: string;
