@@ -1,7 +1,7 @@
 import { useAuth0 } from '@auth0/auth0-react';
 import { Login } from './pages/Login/Login';
 import { Homepage } from './pages/Home/homepage';
-import { SoilGame } from './pages/SoilGame/SoilGame';
+import SoilGame from './pages/SoilGame';
 import { WaterGame } from './pages/WaterGame/WaterGame';
 import './App.css';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
@@ -18,13 +18,13 @@ function App() {
             <Routes>
                 {/* If not logged in, always show login */}
                 {!isAuthenticated ? (
-                <Route path="*" element={<Login />} />
+                    <Route path="*" element={<Login />} />
                 ) : (
-                <>
-                    <Route path="/" element={<Homepage />} />
-                    <Route path="/soil" element={<SoilGame />} />
-                    <Route path="/water" element={<WaterGame />} />
-                </>
+                    <>
+                        <Route path="/" element={<Homepage />} />
+                        <Route path="/soil" element={<SoilGame />} />
+                        <Route path="/water" element={<WaterGame />} />
+                    </>
                 )}
             </Routes>
         </BrowserRouter>
