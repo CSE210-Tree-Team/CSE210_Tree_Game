@@ -52,7 +52,9 @@ test("disabled prevents clicks", async () => {
   render(<Button variant="soil" label="Play" disabled onClick={handle} />);
 
   const btn = screen.getByRole("button", { name: /play/i });
-  expect(btn).toBeDisabled();
-  await user.click(btn);
+    expect(btn).toBeDisabled();
+
+  // Add skipPointerEventsCheck to bypass pointer-events: none in CSS for disabled state
+    await user.click(btn, { pointerEventsCheck: 0 });
   expect(handle).not.toHaveBeenCalled();
 });

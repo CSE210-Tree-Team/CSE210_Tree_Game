@@ -28,18 +28,27 @@
   --color-grey0: #d9d9d9;
   --color-grey1: #a9a9a9;
 
+  --color-darkGreen: #2F7B16;
+  --color-lightGreen: #A2CA38;
+  --color-bgGreen: #BEE751;
+
+  --color-lightYellow: #FFD700;
+  --color-darkYellow: #FFA500;
+
   --color-error: #ff4848;
   --color-success: #8fe45d;
 
   background-size: auto;
 }
 
+
+
 html,
 body {
-  height: 100%;
-  margin: 0;
-  padding: 0;
-  font-family: "Handjet", sans-serif;
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    font-family: "Handjet", sans-serif;
 }
 
 /* body {

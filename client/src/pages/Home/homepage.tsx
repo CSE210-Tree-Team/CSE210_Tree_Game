@@ -1,7 +1,13 @@
 import { useAuth0 } from '@auth0/auth0-react';
-import { useNavigate } from 'react-router-dom'; 
 import { useEffect, useState } from 'react';
-
+import { useNavigate } from 'react-router-dom';
+import { Tree } from "../../components/Tree";
+import { Earth } from "../../components/Earth";
+import { WateringCan } from "../../components/WateringCan";
+import { ResourceBoard } from "../../components/ResourceBoard"
+import styles from "../../components/homepage.module.css"
+import fontStyles from "../../components/Popup.module.css"
+import buttonStyles from "../../components/Button.module.css"
 interface UserInfo {
     success: boolean;
     user: {
@@ -22,14 +28,39 @@ interface UserInfo {
     };
 }
 
+const userInfoMock: UserInfo = {
+    success: true,
+    user: {
+        username: "AA",
+        displayName: "AA",
+        email: "123@example.com",
+        roles: ["11", "22"]
+    },
+    tree: {
+        treeID: "test111",
+        health: "health01",
+        growthStage: 1,
+        resourceLevels: {
+            water: 70,
+            earth: 50,
+            sun: 100,
+        }
+    }
+
+}
+
+
+
 export const Homepage = () => {
     const { user, logout, getAccessTokenSilently } = useAuth0();
     const [userInfo, setUserInfo] = useState<UserInfo | null>(null);
-    const [showResources, setShowResources] = useState(false);
+    //const [showResources, setShowResources] = useState(false);
     const navigate = useNavigate();
 
 
     useEffect(() => {
+        // Replace with actual user info fetch
+        //setUserInfo(userInfoMock);
         // Establish backend session after Auth0 login
         const establishSession = async () => {
             try {
@@ -42,7 +73,7 @@ export const Homepage = () => {
                     },
                     body: JSON.stringify({ user })
                 });
-                
+
                 // Fetch user info including resource levels
                 const response = await fetch('/api/get-user-info');
                 if (response.ok) {
@@ -53,7 +84,7 @@ export const Homepage = () => {
                 console.error('Failed to establish backend session:', error);
             }
         };
-        
+
         if (user) {
             establishSession();
         }
@@ -70,85 +101,39 @@ export const Homepage = () => {
         navigate('/water');
     };
 
-    const handleAddResource = async (resourceType: 'water' | 'earth' | 'sun') => {
-        try {
-            const response = await fetch('/api/update-stat', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    stat_name: resourceType,
-                    value: 5
-                })
-            });
-
-            if (response.ok) {
-                // Refresh user info to show updated resource levels
-                const userInfoResponse = await fetch('/api/get-user-info');
-                if (userInfoResponse.ok) {
-                    const data = await userInfoResponse.json();
-                    setUserInfo(data);
-                }
-            } else {
-                console.error(`Failed to add ${resourceType}`);
-            }
-        } catch (error) {
-            console.error(`Error adding ${resourceType}:`, error);
-        }
-    };
+    
 
     return (
-        <div>
-            <h1>Homepage</h1>
+        <div className={styles.homepageWrapper}>
+            <div className={styles.gameConatiner}>
+                <div className={fontStyles.grass}>
+                    <h1 className={`${fontStyles.title} ${styles.helloTitle}`}>
+                        Hello, {userInfo?.user.displayName || 'User'}
+                    </h1>
+                </div>
+                <ResourceBoard resources={userInfo?.tree.resourceLevels || userInfoMock.tree.resourceLevels} />
 
-            <p>User: {user?.email}</p>
+                <div className={styles.treeEarthContainer}>
+                    <Tree water={userInfo?.tree.resourceLevels.water || userInfoMock.tree.resourceLevels.water} />
+                    <Earth earth={userInfo?.tree.resourceLevels.earth || userInfoMock.tree.resourceLevels.earth} onClick={handleSoilGame} />
+                    <WateringCan onClick={handleWaterGame} />
+                </div>
 
-            <h2>Profile</h2>
-            <pre>
-                {JSON.stringify(user, null, 2)}
-            </pre>
 
-            <div>
-                <button onClick={handleSoilGame}>
-                    Play Soil Game
-                </button>
-                <button onClick={handleWaterGame}>
-                    Play Water Game
-                </button>
-                <button onClick={handleLogout}>
+                <div>
+                <button className={`${buttonStyles.button} ${buttonStyles.grass} ${styles.buttonSingle} ${styles.buttonLogout}`} onClick={handleLogout}>
                     Logout
-                </button>
-            </div>
+                    </button>
 
-            <div>
-                <button onClick={() => setShowResources(!showResources)}>
-                    {showResources ? 'Hide' : 'Show'} Resource Levels
-                </button>
-                {showResources && userInfo && (
-                    <div style={{ marginTop: '10px', padding: '10px', border: '1px solid #ccc' }}>
-                        <h3>Resource Levels:</h3>
-                        <p>Water: {userInfo.tree.resourceLevels.water}</p>
-                        <p>Earth: {userInfo.tree.resourceLevels.earth}</p>
-                        <p>Sun: {userInfo.tree.resourceLevels.sun}</p>
-                    </div>
-                )}
+                    <button className={`${buttonStyles.button} ${buttonStyles.grass} ${styles.buttonSingle} ${styles.buttonSetting}`} onClick={() => (window.location.href = "/")}>
+                    Settings
+                    </button>
+                </div>
             </div>
 
             <br></br>
 
-            <div>
-                <h3>Add Resources:</h3>
-                <button onClick={() => handleAddResource('water')}>
-                    Add 5 Water
-                </button>
-                <button onClick={() => handleAddResource('earth')} style={{ marginLeft: '10px' }}>
-                    Add 5 Earth
-                </button>
-                <button onClick={() => handleAddResource('sun')} style={{ marginLeft: '10px' }}>
-                    Add 5 Sun
-                </button>
-            </div>
         </div>
     );
+
 };
