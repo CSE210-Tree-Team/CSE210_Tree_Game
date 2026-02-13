@@ -2,7 +2,7 @@
 .homepageWrapper {
     width: 100vw;
     min-height: 100vh;
-    background-image: url('/assets/bg.png');
+    background-image: url('/assets/bg.svg');
     background-size: cover;
     background-position: center center;
     background-repeat: no-repeat;
@@ -59,9 +59,9 @@
 .earthContainer {
     position: absolute;
     left: 50%;
-    bottom: 7%;
+    bottom: 2%;
     transform: translateX(-50%);
-    width: 90%; 
+    width: 100%; 
     max-width: 100%; 
     height: auto;
     z-index: 1;

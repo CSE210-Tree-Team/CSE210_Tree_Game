@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen, waitFor } from '../../test/test-utils'
 import userEvent from '@testing-library/user-event'
-import { Homepage } from './homepage'
+import { Homepage } from '../Home/homepage'
 
 // Mock Auth0
 vi.mock('@auth0/auth0-react', () => ({
@@ -41,7 +41,7 @@ describe('Homepage', () => {
         },
         tree: {
           treeID: 'tree123',
-          health: 'healthy',
+          health: 'Healthy',
           growthStage: 1,
           resourceLevels: {
             water: 50,
@@ -53,31 +53,45 @@ describe('Homepage', () => {
     })
   })
 
-  it('renders hello message', async () => {
+  it('renders hello message with user display name', async () => {
     render(<Homepage />)
     
     await waitFor(() => {
-      expect(screen.getByText(/Hello/i)).toBeInTheDocument()
+      expect(screen.getByText(/Hello, Test User/i)).toBeInTheDocument()
     })
   })
 
-  it('renders ResourceBoard', () => {
+  it('renders hello message with default "User" when no user info', () => {
     render(<Homepage />)
     
-      expect(screen.getByText(/Growth Progress/i)).toBeInTheDocument()
+    // Before data loads
+    expect(screen.getByText(/Hello, User/i)).toBeInTheDocument()
   })
 
-    it('renders Tree component', async () => {
-        render(<Homepage />)
-        await waitFor(() => {
-            expect(screen.getByAltText('Tree')).toBeInTheDocument()
-        })
-    })
-
-  it('renders Earth component', () => {
+  it('renders ResourceBoard with Growth Progress title', () => {
     render(<Homepage />)
     
-    expect(screen.getByAltText('Earth')).toBeInTheDocument()
+    expect(screen.getByText(/Growth Progress/i)).toBeInTheDocument()
+  })
+
+  it('renders Tree component with correct alt text based on water level', async () => {
+    render(<Homepage />)
+    
+    await waitFor(() => {
+      // Water is 50, which is between 40-70, so it's Unhealthy
+      const treeImg = screen.getByAltText(/Tree-Unhealthy/i)
+      expect(treeImg).toBeInTheDocument()
+    })
+  })
+
+  it('renders Earth component with correct alt text based on earth level', async () => {
+    render(<Homepage />)
+    
+    await waitFor(() => {
+      // Earth is 60, which is between 45-75, so it's Unhealthy
+      const earthImg = screen.getByAltText(/Earth-Unhealthy/i)
+      expect(earthImg).toBeInTheDocument()
+    })
   })
 
   it('renders WateringCan component', () => {
@@ -86,15 +100,27 @@ describe('Homepage', () => {
     expect(screen.getByAltText('Water Can')).toBeInTheDocument()
   })
 
-  it('navigates to soil game when Earth is clicked', async () => {
-    const user = userEvent.setup()
+  it('renders Logout button', () => {
     render(<Homepage />)
     
-    const earthImg = screen.getByAltText('Earth')
-    await user.click(earthImg)
-    
-    expect(mockNavigate).toHaveBeenCalledWith('/soil')
+    expect(screen.getByRole('button', { name: /logout/i })).toBeInTheDocument()
   })
+
+  it('renders Settings button', () => {
+    render(<Homepage />)
+    
+    expect(screen.getByRole('button', { name: /settings/i })).toBeInTheDocument()
+  })
+
+    it('navigates to soil game when Earth is clicked', async () => {
+        const user = userEvent.setup()
+        render(<Homepage />)
+
+        const earthImg = screen.getByAltText('Earth-Unhealthy') 
+
+        await user.click(earthImg)
+        expect(mockNavigate).toHaveBeenCalledWith('/soil')
+    })
 
   it('navigates to water game when WateringCan is clicked', async () => {
     const user = userEvent.setup()
@@ -111,6 +137,16 @@ describe('Homepage', () => {
     
     await waitFor(() => {
       expect(global.fetch).toHaveBeenCalledWith('/api/get-user-info')
+    })
+  })
+
+  it('displays resource levels from API response', async () => {
+    render(<Homepage />)
+    
+    await waitFor(() => {
+      expect(screen.getByText('50%')).toBeInTheDocument() // water
+      expect(screen.getByText('60%')).toBeInTheDocument() // earth
+      expect(screen.getByText('70%')).toBeInTheDocument() // sun
     })
   })
 })

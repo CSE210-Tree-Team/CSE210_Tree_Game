@@ -1,7 +1,7 @@
 import { describe, it, expect, vi } from 'vitest'
 import { render, screen } from '../../test/test-utils'
 import userEvent from '@testing-library/user-event'
-import { Welcome } from './Welcome'
+import { Welcome } from '../Home/Welcome'
 
 // Mock useNavigate
 const mockNavigate = vi.fn()
@@ -17,7 +17,7 @@ describe('Welcome Page', () => {
   it('renders welcome title', () => {
     render(<Welcome />)
     
-    expect(screen.getByText(/Welcome to Tree Game/i)).toBeInTheDocument()
+      expect(screen.getByText(/Welcome to Bristlecone/i)).toBeInTheDocument()
   })
 
   it('renders introduction text', () => {

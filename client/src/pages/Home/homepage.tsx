@@ -41,8 +41,8 @@ const userInfoMock: UserInfo = {
         health: "health01",
         growthStage: 1,
         resourceLevels: {
-            water: 100,
-            earth: 100,
+            water: 70,
+            earth: 50,
             sun: 100,
         }
     }

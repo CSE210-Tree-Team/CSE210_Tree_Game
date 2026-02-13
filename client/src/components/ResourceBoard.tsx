@@ -1,7 +1,7 @@
 ﻿import { type Resources } from "./Resources";
 import styles from "./homepage.module.css"
 import fontStyles from "./Popup.module.css"
-
+import { RESOURCE_BOARD_BG, RESOURCE_ICONS } from "./constant";
 
 interface ResourceBoardProps {
     resources: Resources;
@@ -11,7 +11,7 @@ export const ResourceBoard = ({ resources }: ResourceBoardProps) => {
     return (
         <div className={ styles.resourceBoardContainer}>
             <img
-                src="assets/board2.png"
+                src={RESOURCE_BOARD_BG}
                 alt="Resource Board Background"
                 className={ styles.resourceBoardBg}
             />
@@ -21,7 +21,7 @@ export const ResourceBoard = ({ resources }: ResourceBoardProps) => {
                 {/* Water */}
                 <div className={styles.resourceItem}>
                     <img
-                        src="/assets/water_icon.png"
+                        src={RESOURCE_ICONS.WATER}
                         alt="Water Resource Icon"
                         className={ styles.resourceIcon}
                     />
@@ -43,7 +43,7 @@ export const ResourceBoard = ({ resources }: ResourceBoardProps) => {
                 { /* Earth */}
                 <div className={styles.resourceItem}>
                     <img
-                        src="/assets/earth_icon.png"
+                        src={RESOURCE_ICONS.EARTH}
                         alt="Earth Resource Icon"
                         className={styles.resourceIcon}
                     />
@@ -64,7 +64,7 @@ export const ResourceBoard = ({ resources }: ResourceBoardProps) => {
                 { /* Sun */}
                 <div className={styles.resourceItem}>
                     <img
-                        src="/assets/sun_icon.png"
+                        src={RESOURCE_ICONS.SUN}
                         alt="Sun Resource Icon"
                         className={styles.resourceIcon}
                     />
