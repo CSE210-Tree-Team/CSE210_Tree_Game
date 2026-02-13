@@ -5,8 +5,9 @@ import { Tree } from "../../components/Tree";
 import { Earth } from "../../components/Earth";
 import { WateringCan } from "../../components/WateringCan";
 import { ResourceBoard } from "../../components/ResourceBoard"
-import { type Resources } from "../../components/Resources";
-import styles from "../../css/homepage.module.css"
+import styles from "../../components/homepage.module.css"
+import fontStyles from "../../components/Popup.module.css"
+import buttonStyles from "../../components/Button.module.css"
 interface UserInfo {
     success: boolean;
     user: {
@@ -25,6 +26,27 @@ interface UserInfo {
             sun: number;
         };
     };
+}
+
+const userInfoMock: UserInfo = {
+    success: true,
+    user: {
+        username: "AA",
+        displayName: "AA",
+        email: "123@example.com",
+        roles: ["11", "22"]
+    },
+    tree: {
+        treeID: "test111",
+        health: "health01",
+        growthStage: 1,
+        resourceLevels: {
+            water: 70,
+            earth: 50,
+            sun: 100,
+        }
+    }
+
 }
 
 
@@ -48,7 +70,7 @@ export const Homepage = () => {
 
     useEffect(() => {
         // Replace with actual user info fetch
-        setUserInfo(userInfoMock);
+        //setUserInfo(userInfoMock);
         // Establish backend session after Auth0 login
         const establishSession = async () => {
             try {
@@ -131,8 +153,8 @@ export const Homepage = () => {
                 </pre>
 
                 <div>
-                    <button onClick={() => setShowResources(!showResources)}>
-                        {showResources ? 'Hide' : 'Show'} Resource Levels
+                <button className={`${buttonStyles.button} ${buttonStyles.grass} ${styles.buttonSingle} ${styles.buttonLogout}`} onClick={handleLogout}>
+                    Logout
                     </button>
                     {showResources && userInfo && (
                         <div style={{ marginTop: '10px', padding: '10px', border: '1px solid #ccc' }}>
@@ -144,6 +166,9 @@ export const Homepage = () => {
                     )}
                 </div>*/}
             </div>
+
+            <br></br>
+
         </div>
     );
 

@@ -2,7 +2,7 @@ import { useAuth0 } from '@auth0/auth0-react';
 import { Login } from './pages/Login/Login';
 import { Homepage } from './pages/Home/homepage';
 import { Welcome } from './pages/Home/Welcome';
-import { SoilGame } from './pages/SoilGame/SoilGame';
+import SoilGame from './pages/SoilGame/index';
 import { WaterGame } from './pages/WaterGame/WaterGame';
 import { AccountSettings } from './pages/AccountSettings/AccountSettings';
 import { AccountSettingsEdit } from './pages/AccountSettingsEdit/AccountSettingsEdit';
@@ -23,7 +23,7 @@ function App() {
                 {/* If not logged in, always show login */}
                 {!isAuthenticated ? (
                     <>
-                        { /* Add welcome page*/ }
+                        { /* Add welcome page*/}
                         <Route path="/" element={<Welcome />} />
                         <Route path="/login" element={<Login isSignup={false} />} />
                         <Route path="/signup" element={<Login isSignup={true} />} />
@@ -33,7 +33,7 @@ function App() {
                     <>
                         {/* After login, redirect to homepage */}
                         <Route path="/" element={<Homepage />} />
-                        <Route path="/soil" element={<SoilGame />} />
+                            <Route path="/soil" element={<SoilGame />} />
                         <Route path="/water" element={<WaterGame />} />
                         <Route path="/account" element={<AccountSettings />} />
                         <Route path="/account/edit" element={<AccountSettingsEdit />} />

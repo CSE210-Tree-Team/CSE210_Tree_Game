@@ -1,5 +1,7 @@
 ﻿import { type Resources } from "./Resources";
-import styles from "../css/homepage.module.css"
+import styles from "./homepage.module.css"
+import fontStyles from "./Popup.module.css"
+import { RESOURCE_BOARD_BG, RESOURCE_ICONS } from "./constant";
 
 interface ResourceBoardProps {
     resources: Resources;
@@ -9,22 +11,22 @@ export const ResourceBoard = ({ resources }: ResourceBoardProps) => {
     return (
         <div className={ styles.resourceBoardContainer}>
             <img
-                src="assets/board2.png"
+                src={RESOURCE_BOARD_BG}
                 alt="Resource Board Background"
                 className={ styles.resourceBoardBg}
             />
             <div className={styles.resourceBoardContent}>
-                <h3 className={styles.resourceBoardTitle}>Growth Progress</h3>
+                <h3 className={` ${fontStyles.text} ${styles.resourceBoardTitle}`}>Growth Progress</h3>
 
                 {/* Water */}
                 <div className={styles.resourceItem}>
                     <img
-                        src="/assets/water_icon.png"
-                        alt="Water"
+                        src={RESOURCE_ICONS.WATER}
+                        alt="Water Resource Icon"
                         className={ styles.resourceIcon}
                     />
                     <div className={styles.resourceRight}>
-                        <span className={styles.resourceLabel}>Water</span>
+                        <span className={` ${fontStyles.text} ${styles.resourceLabel}`}>Water</span>
                         <div className={styles.progressBarWrapper}>
                         <div className={styles.progressBarContainer}>
                             <div
@@ -41,8 +43,8 @@ export const ResourceBoard = ({ resources }: ResourceBoardProps) => {
                 { /* Earth */}
                 <div className={styles.resourceItem}>
                     <img
-                        src="/assets/earth_icon.png"
-                        alt="Earth"
+                        src={RESOURCE_ICONS.EARTH}
+                        alt="Earth Resource Icon"
                         className={styles.resourceIcon}
                     />
                     <div className={styles.resourceRight}>
@@ -62,8 +64,8 @@ export const ResourceBoard = ({ resources }: ResourceBoardProps) => {
                 { /* Sun */}
                 <div className={styles.resourceItem}>
                     <img
-                        src="/assets/sun_icon.png"
-                        alt="Sun"
+                        src={RESOURCE_ICONS.SUN}
+                        alt="Sun Resource Icon"
                         className={styles.resourceIcon}
                     />
                     <div className={styles.resourceRight}>
