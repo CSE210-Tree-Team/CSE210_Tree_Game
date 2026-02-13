@@ -6,7 +6,7 @@ import { Earth } from "../../components/Earth";
 import { WateringCan } from "../../components/WateringCan";
 import { ResourceBoard } from "../../components/ResourceBoard"
 import { type Resources } from "../../components/Resources";
-import styles from "../../css/homepage.module.css"
+import styles from "../../components/homepage.module.css"
 interface UserInfo {
     username: string;
     treeID: string;
