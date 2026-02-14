@@ -13,7 +13,7 @@ import {
   formatQuestProgress,
   isValidCommand,
   parseCommand,
-} from '../utils/gameHelper_REP';
+} from '../utils/GameHelper_REP';
 
 import {
   type Node,
@@ -26,13 +26,7 @@ import {
   type Direction,
   type Inventory,
   type Quest,
-  type ElementType,
-  DIRECTION_DELTAS,
 } from '../types/soilGame_REP.type';
-import {
-  SYMBOL_TO_ELEMENT,
-  DIRECTION_LABELS,
-} from '../types/stringMappings'
 
 /**
  * Vitest (unit tests) for GameHelper implementation.

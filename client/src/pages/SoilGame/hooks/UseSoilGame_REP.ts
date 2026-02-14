@@ -27,7 +27,7 @@ import {
   getElementSymbol,
   parseCommand,
   isValidCommand,
-} from '../utils/gameHelper_REP';
+} from '../utils/GameHelper_REP';
 
 import { fetchQuestions } from './serverCollab_REP';
 
