@@ -192,21 +192,7 @@ export function getElementSymbol(element: ElementType): string {
 
 /** Format the location info block for terminal */
 export function formatLocationInfo(pos: Position, map: Node[][]): string[] {
-  // const node = getNodeAt(map, pos);
-  // const resources: Record<ElementType, number> | string = (node?.resources && !node.collected) ? node.resources : 'None';
-  // const moves = getPossibleMoves(pos, map.length);
-
-  // if (resources !== 'None' && resources !== null) {
-  //   ...
-  // }
-  // const resourceSymbol = (resources !== 'None') ? ` [${getElementSymbol(resource as ElementType)}]` : '';
-
-  // return [
-  //   `--- Current Location: [${pos.x},${pos.y}] ---`,
-  //   `--- Resources Here: ${resource}${resourceSymbol} ---`,
-  //   `Possible Moves: ${moves.join(', ')}`,
-  // ];
-
+  // TODO: This is a placeholder
   return [
     'formatLocationInfo not implemented yet',
     'Decide on how to represent ElementTypes and Symbols'
@@ -233,7 +219,11 @@ export function isValidCommand(input: string): boolean {
   return ['w', 'a', 's', 'd', 'c', 'collect', '1', '2', '3', '4'].includes(normalized);
 }
 
-/** Parse user input into a normalized command */
+/** 
+ * Normalizes the input command to Lowercase forma
+ * TODO: Either remove collect command or return a different "collect" representation
+ * TODO: Rename to a more descriptive function name
+ */
 export function parseCommand(input: string): string {
   const normalized = input.toLowerCase().trim();
   if (normalized === 'collect') return 'c';

@@ -11,20 +11,6 @@ import type {
   Direction,
 //   StartGameResponse,
 } from '../types/SoilGame_REP.type';
-// {
-//     "text": "What is the powerhouse of the cell?",
-//     "question_type": "MCQ",
-//     "resource_type": "Sun",
-//     "choices": ["The mitochondria", "The nucleus", "The ribosome", "The endoplasmic reticulum"],
-//     "correct_choices": [0]
-// },
-// {
-//     "text": "",
-//     "question_type": "",
-//     "resource_type": "",
-//     "choices": ["", "", "", ""],
-//     "correct_choices": [0]
-// },
 type responseType = {
     id: string;
     resource_type: string;
