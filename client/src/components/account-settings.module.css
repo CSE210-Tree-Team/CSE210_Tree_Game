@@ -1,0 +1,288 @@
+@font-face {
+    font-family: 'CherryBombOne';
+    src: url('/fonts/CherryBombOne-Regular.ttf') format('truetype');
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'Handjet';
+    src: url('/fonts/Handjet-VariableFont_ELGR,ELSH,wght.ttf') format('truetype');
+    font-display: swap;
+}
+
+.page {
+    min-height: 100vh;
+    width: 100%;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    box-sizing: border-box;
+    background-image: url('/assets/bg.svg');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+    overflow: hidden;
+}
+
+.homeButton {
+    position: absolute;
+    top: 22px;
+    left: 22px;
+    width: 72px;
+    height: 72px;
+    border-radius: 50%;
+    border: 2px solid var(--color-darkGreen);
+    background: linear-gradient(180deg, var(--color-lightGreen) 0%, #6da93b 100%);
+    color: white;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 2px;
+    cursor: pointer;
+    box-shadow: inset 0 5px 0 rgba(255, 255, 255, 0.35), 0 2px 0 rgba(0, 0, 0, 0.3);
+}
+
+.homeArrow {
+    font-size: 24px;
+    line-height: 1;
+    font-family: 'Handjet', sans-serif;
+}
+
+.homeText {
+    font-family: 'Handjet', sans-serif;
+    font-size: 14px;
+    line-height: 1;
+    font-weight: 700;
+}
+
+.content {
+    width: min(760px, 100%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 34px;
+    padding-top: 12px;
+}
+
+.title {
+    margin: 0;
+    color: var(--color-lightGreen);
+    font-size: clamp(42px, 7vw, 72px);
+    font-family: 'CherryBombOne', cursive;
+    letter-spacing: 1px;
+    line-height: 1;
+    text-transform: uppercase;
+    text-align: center;
+    text-shadow:
+        -2px -2px 0 var(--color-darkGreen),
+        2px -2px 0 var(--color-darkGreen),
+        -2px 2px 0 var(--color-darkGreen),
+        2px 2px 0 var(--color-darkGreen),
+        0 5px 0 rgba(26, 95, 21, 0.45);
+}
+
+.formArea {
+    width: min(660px, 100%);
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    --label-col-width: 260px;
+}
+
+.row {
+    display: grid;
+    grid-template-columns: var(--label-col-width) minmax(260px, 1fr);
+    align-items: center;
+    column-gap: 24px;
+    justify-content: center;
+}
+
+.label {
+    margin: 0;
+    justify-self: end;
+    color: var(--color-darkGreen);
+    font-family: 'Handjet', sans-serif;
+    font-size: clamp(34px, 4vw, 50px);
+    line-height: 0.95;
+    white-space: nowrap;
+    width: var(--label-col-width);
+}
+
+.value {
+    min-height: 56px;
+    border-radius: 999px;
+    border: 4px solid var(--color-darkGreen);
+    background: var(--color-lightGreen);
+    color: #1a3d1a;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 4px 22px;
+    font-family: 'Handjet', sans-serif;
+    font-size: clamp(31px, 3.4vw, 45px);
+    line-height: 1;
+    box-sizing: border-box;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.15);
+    font-weight: 600;
+}
+
+.input {
+    min-height: 56px;
+    border-radius: 999px;
+    border: 4px solid var(--color-darkGreen);
+    background: var(--color-lightGreen);
+    color: #1a3d1a;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 4px 22px;
+    font-family: 'Handjet', sans-serif;
+    font-size: clamp(31px, 3.4vw, 45px);
+    line-height: 1;
+    box-sizing: border-box;
+    min-width: 0;
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.15);
+    font-weight: 600;
+}
+
+.input:focus {
+    outline: none;
+    border-color: var(--color-darkGreen);
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.input:hover {
+    border-color: var(--color-darkGreen);
+    filter: brightness(1.05);
+}
+
+.selectWrap {
+    position: relative;
+    display: flex;
+    align-items: center;
+    width: 100%;
+}
+
+.select {
+    width: 100%;
+    min-height: 56px;
+    border-radius: 999px;
+    border: 4px solid var(--color-darkGreen);
+    background: var(--color-lightGreen);
+    color: #1a3d1a;
+    padding: 4px 22px;
+    font-family: 'Handjet', sans-serif;
+    font-size: clamp(31px, 3.4vw, 45px);
+    line-height: 1;
+    box-sizing: border-box;
+    appearance: none;
+    cursor: pointer;
+    padding-right: 50px;
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.15);
+    font-weight: 600;
+}
+
+.select:focus {
+    outline: none;
+    border-color: var(--color-darkGreen);
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.select:hover {
+    border-color: var(--color-darkGreen);
+    filter: brightness(1.05);
+}
+
+.arrow {
+    position: absolute;
+    right: 22px;
+    pointer-events: none;
+    color: #1a3d1a;
+    font-size: 20px;
+    line-height: 1;
+    text-shadow: 1px 1px 1px rgba(0, 0, 0, 0.1);
+    font-weight: 600;
+}
+
+.actions {
+    width: min(430px, 100%);
+    display: flex;
+    justify-content: center;
+    gap: 36px;
+    margin-top: 36px;
+    margin-left: auto;
+    margin-right: auto;
+    align-self: center;
+}
+
+.actionButton {
+    width: 170px;
+    min-height: 60px;
+    border-radius: 18px;
+    border: 4px solid rgba(255, 255, 255, 0.5);
+    background: linear-gradient(180deg, var(--color-lightGreen) 0%, #8fb52c 100%);
+    color: #1a3d1a;
+    font-family: 'Handjet', sans-serif;
+    font-size: 37px;
+    line-height: 1;
+    cursor: pointer;
+    box-shadow: inset 0 5px 0 rgba(255, 255, 255, 0.25);
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.15);
+    font-weight: 600;
+}
+
+.actionButton:hover {
+    filter: brightness(1.08);
+    box-shadow: inset 0 5px 0 rgba(255, 255, 255, 0.35), 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.actionButton:active {
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.actionButton:focus-visible,
+.homeButton:focus-visible {
+    outline: 3px solid rgba(34, 105, 31, 0.65);
+    outline-offset: 3px;
+}
+
+@media (max-width: 760px) {
+    .page {
+        padding: 20px 14px;
+    }
+
+    .content {
+        gap: 26px;
+    }
+
+    .row {
+        grid-template-columns: 1fr;
+        gap: 8px;
+    }
+
+    .label {
+        justify-self: start;
+        padding-left: 12px;
+    }
+
+    .actions {
+        width: 100%;
+        gap: 14px;
+        margin-top: 22px;
+    }
+
+    .actionButton {
+        width: 48%;
+        min-width: 130px;
+    }
+}

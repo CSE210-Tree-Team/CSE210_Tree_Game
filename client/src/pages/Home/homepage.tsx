@@ -101,6 +101,10 @@ export const Homepage = () => {
         navigate('/water');
     };
 
+    const handleAccountSettings = () => {
+        navigate('/account');
+    };
+
     
 
     return (
@@ -125,7 +129,7 @@ export const Homepage = () => {
                     Logout
                     </button>
 
-                    <button className={`${buttonStyles.button} ${buttonStyles.grass} ${styles.buttonSingle} ${styles.buttonSetting}`} onClick={() => (window.location.href = "/")}>
+                    <button className={`${buttonStyles.button} ${buttonStyles.grass} ${styles.buttonSingle} ${styles.buttonSetting}`} onClick={handleAccountSettings}>
                     Settings
                     </button>
                 </div>
