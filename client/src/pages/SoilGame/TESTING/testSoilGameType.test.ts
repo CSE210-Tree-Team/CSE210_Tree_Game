@@ -1,19 +1,4 @@
 import { describe, it, expect } from 'vitest';
-// import { 
-//   isValidPosition,
-//   getNextPosition,
-//   getPossibleMoves,
-//   createEmptyInventory,
-//   addToInventory,
-//   removeFromInventory,
-//   isQuestComplete,
-//   getNextNeededElement,
-//   submitElementToQuest,
-//   getElementSymbol,
-//   formatQuestProgress,
-//   isValidCommand,
-//   parseCommand,
-// } from '../utils/gameHelper_REP';
 
 import {
   type Position,

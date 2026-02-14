@@ -11,16 +11,6 @@ export type ElementType = 'Nitrogen' | 'Hydrogen' | 'Carbon' | 'Oxygen';
 // Ordered finite states the game can take
 export type GamePhase = 'loading' | 'title' | 'tutorial' | 'playing' | 'complete';
 
-// // A room on the N x N Map
-// export interface Node {
-//   x: number;
-//   y: number;
-
-//   // CHANGED
-//   resources: Record<ElementType, number> | null;
-//   collected: boolean;
-// }
-
 /**
  * @interface 
  * id: Unique identifier for each quest
