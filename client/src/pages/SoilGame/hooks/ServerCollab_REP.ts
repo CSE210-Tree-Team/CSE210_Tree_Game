@@ -1,4 +1,4 @@
-import type { Quest, } from '../types/soilGame_REP.type';
+import type { Quest, } from '../types/SoilGame_REP.type';
 
 type questFormat = {
     id: string;

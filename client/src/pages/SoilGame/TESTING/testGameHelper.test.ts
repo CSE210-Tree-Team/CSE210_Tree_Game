@@ -26,7 +26,7 @@ import {
   type Direction,
   type Inventory,
   type Quest,
-} from '../types/soilGame_REP.type';
+} from '../types/SoilGame_REP.type';
 
 /**
  * Vitest (unit tests) for GameHelper implementation.

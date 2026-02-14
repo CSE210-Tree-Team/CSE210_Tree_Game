@@ -1,7 +1,7 @@
 import {
   type Direction,
   type ElementType,
-} from './soilGame_REP.type';
+} from './SoilGame_REP.type';
 
 
 export const SYMBOL_TO_ELEMENT: Record<string, ElementType> = {

@@ -5,7 +5,7 @@ import {
   type Quest,
   type ElementType,
   DIRECTION_DELTAS,
-} from '../types/soilGame_REP.type';
+} from '../types/SoilGame_REP.type';
 
 import {
   type Node

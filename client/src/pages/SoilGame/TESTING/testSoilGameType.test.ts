@@ -12,7 +12,7 @@ import {
   type CompleteGameResponse,
   type PlayerCommand,
   DIRECTION_DELTAS,
-} from '../types/soilGame_REP.type';
+} from '../types/SoilGame_REP.type';
 
 import {
   SYMBOL_TO_ELEMENT,

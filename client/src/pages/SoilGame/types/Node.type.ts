@@ -2,7 +2,7 @@
 import { 
     type ElementType,
     type Position,
-} from "./soilGame_REP.type";
+} from "./SoilGame_REP.type";
 
 import { isValidPosition } from "../utils/GameHelper_REP";
 

@@ -8,7 +8,7 @@ import type {
   Inventory,
   ElementType,
   Direction
-} from '../types/soilGame_REP.type';
+} from '../types/SoilGame_REP.type';
 
 import { 
   type Node,
@@ -29,7 +29,7 @@ import {
   isValidCommand,
 } from '../utils/GameHelper_REP';
 
-import { fetchQuestions } from './serverCollab_REP';
+import { fetchQuestions } from './ServerCollab_REP';
 
 const MAP_SIZE = 5; // TODO: Make this dependent on the game difficulty
 const TOTAL_QUESTS = 4; // TODO: Make this dependent on the game difficulty
