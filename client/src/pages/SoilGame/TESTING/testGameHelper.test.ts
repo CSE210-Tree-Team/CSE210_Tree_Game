@@ -3,8 +3,6 @@ import {
   isValidPosition,
   getNextPosition,
   getPossibleMoves,
-  getNodeAt,
-  hasUncollectedResource,
   createEmptyInventory,
   addToInventory,
   removeFromInventory,
@@ -15,18 +13,26 @@ import {
   formatQuestProgress,
   isValidCommand,
   parseCommand,
-} from '../utils/GameHelper_REP';
+} from '../utils/gameHelper_REP';
 
 import {
   type Node,
+  getNodeAt,
+  hasUncollectedResource,
+} from '../types/Node.type'
+
+import {
   type Position,
   type Direction,
   type Inventory,
   type Quest,
   type ElementType,
   DIRECTION_DELTAS,
+} from '../types/soilGame_REP.type';
+import {
+  SYMBOL_TO_ELEMENT,
   DIRECTION_LABELS,
-} from '../types/SoilGame_REP.type';
+} from '../types/stringMappings'
 
 /**
  * Vitest (unit tests) for GameHelper implementation.

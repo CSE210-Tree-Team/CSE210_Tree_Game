@@ -3,21 +3,23 @@ import { useState, useCallback, useEffect } from 'react';
 import type {
   GameState,
   GamePhase,
-  Node,
   Quest,
   Position,
   Inventory,
   ElementType,
   Direction
-  // StartGameResponse,
-} from '../types/SoilGame_REP.type';
+} from '../types/soilGame_REP.type';
 
-import {SYMBOL_TO_ELEMENT} from '../types/SoilGame_REP.type';
+import { 
+  type Node,
+  getNodeAt,
+  hasUncollectedResource,
+} from '../types/Node.type';
+
+import {SYMBOL_TO_ELEMENT} from '../types/stringMappings';
 
 import {
   getNextPosition,
-  getNodeAt,
-  hasUncollectedResource,
   createEmptyInventory,
   addToInventory,
   submitElementToQuest,
@@ -25,9 +27,9 @@ import {
   getElementSymbol,
   parseCommand,
   isValidCommand,
-} from '../utils/GameHelper_REP';
+} from '../utils/gameHelper_REP';
 
-import { fetchQuestions } from './ServerCollab_REP';
+import { fetchQuestions } from './serverCollab_REP';
 
 const MAP_SIZE = 5; // TODO: Make this dependent on the game difficulty
 const TOTAL_QUESTS = 4; // TODO: Make this dependent on the game difficulty

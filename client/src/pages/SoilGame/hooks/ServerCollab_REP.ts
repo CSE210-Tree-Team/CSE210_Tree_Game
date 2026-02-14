@@ -1,17 +1,6 @@
-import { useState, useCallback, useEffect } from 'react';
+import type { Quest, } from '../types/soilGame_REP.type';
 
-import type {
-  GameState,
-  GamePhase,
-  Node,
-  Quest,
-  Position,
-  Inventory,
-  ElementType,
-  Direction,
-//   StartGameResponse,
-} from '../types/SoilGame_REP.type';
-type responseType = {
+type questFormat = {
     id: string;
     resource_type: string;
     molecule_name: string;
@@ -24,7 +13,7 @@ export async function fetchQuestions(): Promise<Quest[]> {
     if (!response.ok) {
         throw new Error('Failed to fetch questions');
     }
-    const raw: responseType[] = await response.json();
+    const raw: questFormat[] = await response.json();
 
     // Filter for Soil related questions.
     const relevantQuestions = raw.filter(
@@ -33,7 +22,7 @@ export async function fetchQuestions(): Promise<Quest[]> {
     return convertToQuests(relevantQuestions);
 }
 
-function convertToQuests(raw: responseType[]): Quest[] {
+function convertToQuests(raw: questFormat[]): Quest[] {
     const quests: Quest[] = raw.map((q) => ({
         id: Number(q.id),
         moleculeName: q.molecule_name,

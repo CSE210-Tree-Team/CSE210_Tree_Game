@@ -1,29 +1,25 @@
-// Definition of elements the player can collect
+import {
+  type Node,
+  getNodeAt,
+  hasUncollectedResource,
+} from '../types/Node.type';
 
 // TODO: EXTEND THIS FOR ELEMENTS IN THE PERIODIC TABLE
 export type ElementType = 'Nitrogen' | 'Hydrogen' | 'Carbon' | 'Oxygen';
 
-// NOTE: Added 
-// NOTE: Potential type error:
-export const SYMBOL_TO_ELEMENT: Record<string, ElementType> = {
-  H: 'Hydrogen',
-  O: 'Oxygen',
-  C: 'Carbon',
-  N: 'Nitrogen',
-};
 
 // Ordered finite states the game can take
 export type GamePhase = 'loading' | 'title' | 'tutorial' | 'playing' | 'complete';
 
-// A room on the N x N Map
-export interface Node {
-  x: number;
-  y: number;
+// // A room on the N x N Map
+// export interface Node {
+//   x: number;
+//   y: number;
 
-  // CHANGED
-  resources: Record<ElementType, number> | null;
-  collected: boolean;
-}
+//   // CHANGED
+//   resources: Record<ElementType, number> | null;
+//   collected: boolean;
+// }
 
 /**
  * @interface 
@@ -102,12 +98,4 @@ export const DIRECTION_DELTAS: Record<Direction, { dx: number; dy: number }> = {
   a: { dx: -1, dy: 0 },  // left
   s: { dx: 0, dy: 1 },   // down
   d: { dx: 1, dy: 0 },   // right
-};
-
-/** Direction labels for display */
-export const DIRECTION_LABELS: Record<Direction, string> = {
-  w: 'Up',
-  a: 'Left',
-  s: 'Down',
-  d: 'Right',
 };

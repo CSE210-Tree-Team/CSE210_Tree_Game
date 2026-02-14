@@ -1,20 +1,27 @@
 import {
-  type Node,
   type Position,
   type Direction,
   type Inventory,
   type Quest,
   type ElementType,
   DIRECTION_DELTAS,
-  DIRECTION_LABELS,
-} from '../types/SoilGame_REP.type';
+} from '../types/soilGame_REP.type';
+
+import {
+  type Node
+} from '../types/Node.type';
+
+import {
+    DIRECTION_LABELS,
+    SYMBOL_TO_ELEMENT
+} from '../types/stringMappings';
 
 // TODO: Might need to make this variable, unsure
 const MAP_SIZE = 5;
 
 // ========================
 // Movement Helpers
-// ========================
+// ========================map
 
 /** Check if a position is within the grid bounds */
 export function isValidPosition(pos: Position, mapSize: number = MAP_SIZE): boolean {
@@ -48,21 +55,21 @@ export function getPossibleMoves(pos: Position, mapSize: number = MAP_SIZE): str
   return moves;
 }
 
-// ========================
-// Map Helpers
-// ========================
+// // ========================
+// // Map Helpers
+// // ========================
 
-/** Get the node at a given position */
-export function getNodeAt(map: Node[][], pos: Position): Node | null {
-  if (!isValidPosition(pos, map.length)) return null;
-  return map[pos.y][pos.x];
-}
+// /** Get the node at a given position */
+// export function getNodeAt(map: Node[][], pos: Position): Node | null {
+//   if (!isValidPosition(pos, .length)) return null;
+//   return map[pos.y][pos.x];
+// }
 
-/** Check if current node has an uncollected resource */
-export function hasUncollectedResource(map: Node[][], pos: Position): boolean {
-  const node = getNodeAt(map, pos);
-  return node !== null && node.resources !== null && !node.collected;
-}
+// /** Check if current node has an uncollected resource */
+// export function hasUncollectedResource(map: Node[][], pos: Position): boolean {
+//   const node = getNodeAt(map, pos);
+//   return node !== null && node.resources !== null && !node.collected;
+// }
 
 // ========================
 // Inventory Helpers
