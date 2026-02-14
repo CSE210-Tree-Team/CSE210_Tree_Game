@@ -17,5 +17,8 @@ export default defineConfig({
         environment: "jsdom",
         setupFiles: "./src/setupTests.ts",
         globals: true,
+        // CI runners are memory-constrained; reduce worker count to avoid OOM.
+        maxWorkers: process.env.CI ? 1 : undefined,
+        minWorkers: process.env.CI ? 1 : undefined,
     },
 });
