@@ -4,7 +4,7 @@ import { Homepage } from './pages/Home/homepage';
 import { Welcome } from './pages/Home/Welcome';
 import SoilGame from './pages/SoilGame/index';
 import { AccountSettings } from './pages/AccountSettings/AccountSettings';
-import { AccountSettingsEdit } from './pages/AccountSettingsEdit/AccountSettingsEdit';
+import { AccountSettingsEdit } from './pages/AccountSettings/AccountSettingsEdit';
 import { WaterGame } from './pages/WaterGame/WaterGame';
 import './App.css';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
