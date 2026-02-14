@@ -5,8 +5,28 @@ import {
   getPossibleMoves,
   getNodeAt,
   hasUncollectedResource,
-  createEmptyInventory
+  createEmptyInventory,
+  addToInventory,
+  removeFromInventory,
+  isQuestComplete,
+  getNextNeededElement,
+  submitElementToQuest,
+  getElementSymbol,
+  formatQuestProgress,
+  isValidCommand,
+  parseCommand,
 } from '../utils/GameHelper_REP';
+
+import {
+  type Node,
+  type Position,
+  type Direction,
+  type Inventory,
+  type Quest,
+  type ElementType,
+  DIRECTION_DELTAS,
+  DIRECTION_LABELS,
+} from '../types/SoilGame_REP.type';
 
 /**
  * Vitest (unit tests) for GameHelper implementation.
@@ -155,7 +175,7 @@ describe('GameHelper_REP', () => {
   });
 
   describe('getNodeAt', () => {
-    const testMap: typeof Node[][] = [
+    const testMap: Node[][] = [
       [
         { x: 0, y: 0, resources: { Nitrogen: 1, Hydrogen: 0, Carbon: 0, Oxygen: 0 }, collected: false },
         { x: 1, y: 0, resources: null, collected: false },
@@ -218,5 +238,172 @@ describe('GameHelper_REP', () => {
     });
   });
 
-  // describe('hasUncollectedResource ', () => {});
+  describe('hasUncollectedResource', () => {
+    it('returns true when the node has resources and is not collected', () => {
+      const map: Node[][] = [
+        [
+          { x: 0, y: 0, resources: { Nitrogen: 1, Hydrogen: 0, Carbon: 0, Oxygen: 0 }, collected: false },
+        ],
+      ];
+      expect(hasUncollectedResource(map, { x: 0, y: 0 })).toBe(true);
+    });
+
+    it('returns false when the node has null resources', () => {
+      const map: Node[][] = [
+        [
+          { x: 0, y: 0, resources: null, collected: false },
+        ],
+      ];
+      expect(hasUncollectedResource(map, { x: 0, y: 0 })).toBe(false);
+    });
+
+    it('returns false when the node has resources but is already collected', () => {
+      const map: Node[][] = [
+        [
+          { x: 0, y: 0, resources: { Nitrogen: 0, Hydrogen: 1, Carbon: 0, Oxygen: 0 }, collected: true },
+        ],
+      ];
+      expect(hasUncollectedResource(map, { x: 0, y: 0 })).toBe(false);
+    });
+
+    it('returns false for positions outside the map bounds', () => {
+      const map: Node[][] = [
+        [
+          { x: 0, y: 0, resources: { Nitrogen: 1, Hydrogen: 0, Carbon: 0, Oxygen: 0 }, collected: false },
+        ],
+      ];
+      expect(hasUncollectedResource(map, { x: 5, y: 5 })).toBe(false);
+      expect(hasUncollectedResource(map, { x: -1, y: 0 })).toBe(false);
+    });
+  });
+
+  describe('createEmptyInventory', () => {
+    it('creates an inventory with all counts zero', () => {
+      const inv = createEmptyInventory();
+      expect(inv.Nitrogen).toBe(0);
+      expect(inv.Hydrogen).toBe(0);
+      expect(inv.Carbon).toBe(0);
+      expect(inv.Oxygen).toBe(0);
+    });
+  });
+
+  describe('addToInventory', () => {
+    it('increments the specified element by one', () => {
+      const inv = createEmptyInventory();
+      const updated = addToInventory(inv, 'Hydrogen');
+      expect(updated.Hydrogen).toBe(1);
+      expect(updated.Nitrogen).toBe(0);
+      expect(updated.Carbon).toBe(0);
+      expect(updated.Oxygen).toBe(0);
+    });
+  });
+
+  describe('removeFromInventory', () => {
+    it('decrements the specified element when enough is available', () => {
+      const inv = createEmptyInventory();
+      const withItem = addToInventory(inv, 'Carbon'); // Carbon = 1
+      const after = removeFromInventory(withItem, 'Carbon');
+      expect(after).not.toBeNull();
+      expect(after?.Carbon).toBe(0);
+    });
+
+    it('returns null when trying to remove more than available', () => {
+      const inv = createEmptyInventory();
+      expect(removeFromInventory(inv, 'Nitrogen')).toBeNull();
+    });
+
+    it('supports removing a custom amount when sufficient', () => {
+      let inv = createEmptyInventory();
+      inv = addToInventory(inv, 'Oxygen');
+      inv = addToInventory(inv, 'Oxygen'); // Oxygen = 2
+      const after = removeFromInventory(inv, 'Oxygen', 2);
+      expect(after).not.toBeNull();
+      expect(after?.Oxygen).toBe(0);
+    });
+  });
+
+  describe('isQuestComplete', () => {
+    it('returns true when all required elements are submitted', () => {
+      const quest: Quest = { id: 1, moleculeName: 'Water', moleculeFormula: 'H2O', required: { Hydrogen: 2 }, submitted: { Hydrogen: 2 }, completed: false };
+      expect(isQuestComplete(quest)).toBe(true);
+    });
+
+    it('returns false when requirements are not met', () => {
+      const quest: Quest = { id: 2, moleculeName: 'Ammonia', moleculeFormula: 'NH3', required: { Nitrogen: 1, Hydrogen: 3 }, submitted: { Nitrogen: 1, Hydrogen: 2 }, completed: false };
+      expect(isQuestComplete(quest)).toBe(false);
+    });
+  });
+
+  describe('getNextNeededElement', () => {
+    it('returns the next needed element and remaining count', () => {
+      const quest: Quest = { id: 3, moleculeName: 'Test', moleculeFormula: '', required: { Nitrogen: 1, Hydrogen: 2 }, submitted: { Nitrogen: 0, Hydrogen: 1 }, completed: false };
+      const next = getNextNeededElement(quest);
+      expect(next).not.toBeNull();
+      expect(next?.element).toBe('Nitrogen');
+      expect(next?.remaining).toBe(1);
+    });
+
+    it('returns null when quest is complete', () => {
+      const quest: Quest = { id: 4, moleculeName: 'Done', moleculeFormula: '', required: { Carbon: 1 }, submitted: { Carbon: 1 }, completed: true };
+      expect(getNextNeededElement(quest)).toBeNull();
+    });
+  });
+
+  describe('submitElementToQuest', () => {
+    it('submits the next available element from inventory to the quest', () => {
+      const quest: Quest = { id: 5, moleculeName: 'Make', moleculeFormula: '', required: { Nitrogen: 1, Hydrogen: 1 }, submitted: { Nitrogen: 0, Hydrogen: 0 }, completed: false };
+      const inventory = { Nitrogen: 1, Hydrogen: 0, Carbon: 0, Oxygen: 0 } as Inventory;
+      const result = submitElementToQuest(quest, inventory);
+      expect(result).not.toBeNull();
+      expect(result?.elementUsed).toBe('Nitrogen');
+      expect(result?.updatedInventory.Nitrogen).toBe(0);
+      expect(result?.updatedQuest.submitted.Nitrogen).toBe(1);
+    });
+
+    it('returns null when no required elements are available in inventory', () => {
+      const quest: Quest = { id: 6, moleculeName: 'None', moleculeFormula: '', required: { Oxygen: 1 }, submitted: { Oxygen: 0 }, completed: false };
+      const inventory = createEmptyInventory();
+      expect(submitElementToQuest(quest, inventory)).toBeNull();
+    });
+  });
+
+  // ========================
+  // (TESTs) Terminal Log Helpers
+  // ========================
+  describe('getElementSymbol', () => {
+    it('returns the correct chemical symbol for an element', () => {
+      expect(getElementSymbol('Nitrogen')).toBe('N');
+      expect(getElementSymbol('Hydrogen')).toBe('H');
+      expect(getElementSymbol('Carbon')).toBe('C');
+      expect(getElementSymbol('Oxygen')).toBe('O');
+    });
+  });
+
+  // TODO: Insert test when we develop formatLocationInfo
+  // describe('formatLocationInfo', () => {});
+  describe('formatQuestProgress', () => {
+    it('formats quest progress as submitted/required pairs', () => {
+      const quest: Quest = { id: 7, moleculeName: 'X', moleculeFormula: '', required: { Nitrogen: 1, Hydrogen: 2 }, submitted: { Nitrogen: 1, Hydrogen: 1 }, completed: false };
+      const formatted = formatQuestProgress(quest);
+      expect(formatted).toBe('1/1 Nitrogen, 1/2 Hydrogen');
+    });
+  });
+
+  describe('isValidCommand', () => {
+    it('validates allowed commands and rejects others', () => {
+      expect(isValidCommand('w')).toBe(true);
+      expect(isValidCommand('W')).toBe(true);
+      expect(isValidCommand('collect')).toBe(true);
+      expect(isValidCommand('foo')).toBe(false);
+    });
+  });
+
+  describe('parseCommand', () => {
+    it('normalizes collect to c and trims input', () => {
+      expect(parseCommand('Collect')).toBe('c');
+      expect(parseCommand(' w ')).toBe('w');
+    });
+  });
+
+  // describe('', () => {});
 });
