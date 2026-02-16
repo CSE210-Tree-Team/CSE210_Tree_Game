@@ -37,8 +37,8 @@ export const WaterGame = () => {
       if (!containerRef.current) return;
 
       const containerWidth = containerRef.current.offsetWidth;
-      const bucketWidth = 140; // match your CSS width
-      const maxRight = containerWidth - bucketWidth;
+      const bucketWidth = 140;
+      const maxRight = Math.max(containerWidth - bucketWidth, 0);
 
       if (e.key === "ArrowLeft") {
         setBucketX((prev) => Math.max(prev - 20, 0));
@@ -103,7 +103,7 @@ export const WaterGame = () => {
       )}
       {screen === "game" && (
         <div data-testid="water-game" className={styles.gameScreen}>
-          <span className={styles.question}>
+          <span data-testid="question" className={styles.question}>
             <p className={styles.questionText}>
               What is the chemical formula for water?
             </p>
@@ -115,8 +115,12 @@ export const WaterGame = () => {
           >
             End Game
           </button>
-          <div className={styles.bucketContainer} ref={containerRef}>
-            <Bucket x={bucketX} />
+          <div
+            data-testid="bucket-container"
+            className={styles.bucketContainer}
+            ref={containerRef}
+          >
+            <Bucket data-testid="bucket" x={bucketX} />
           </div>
         </div>
       )}
