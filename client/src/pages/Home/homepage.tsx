@@ -106,11 +106,9 @@ export const Homepage = () => {
     return (
         <div className={styles.homepageWrapper}>
             <div className={styles.gameConatiner}>
-                <div className={fontStyles.grass}>
                     <h1 className={`${fontStyles.title} ${styles.helloTitle}`}>
                         Hello, {userInfo?.user.displayName || 'User'}
                     </h1>
-                </div>
                 <ResourceBoard resources={userInfo?.tree.resourceLevels || userInfoMock.tree.resourceLevels} />
 
                 <div className={styles.treeEarthContainer}>
