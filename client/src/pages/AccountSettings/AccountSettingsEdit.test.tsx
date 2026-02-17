@@ -1,6 +1,6 @@
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { AccountSettingsEdit } from './AccountSettingsEdit';
+import { AccountSettingsEdit } from './AccountSettings';
 
 const navigateMock = vi.fn();
 let authUser: Record<string, string> | null = {
