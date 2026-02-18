@@ -8,13 +8,28 @@ based on that state. The component also includes navigation functionality to
 return to the home page or move between screens using buttons and a back arrow.
 */
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 
 import { Popup } from "../../components/Popup";
 import Bucket from "./components/Bucket";
+import { Raindrop } from "./components/Raindrop";
+import type { RaindropData } from "./types";
 
 import styles from "./WaterGame.module.css";
+
+const SAMPLE_ANSWERS = [
+  { text: "H2O", isCorrect: true },
+  { text: "CO2", isCorrect: false },
+  { text: "O2", isCorrect: false },
+  { text: "NaCl", isCorrect: false },
+  { text: "O2", isCorrect: false },
+  { text: "He", isCorrect: false },
+];
+const RAINDROP_WIDTH = 96; // 6rem
+const RAINDROP_HEIGHT = 128; // 8rem
+const RAINDROP_FALL_SPEED = 1.2;
+const SPAWN_INTERVAL_MS = 1750;
 
 export const WaterGame = () => {
   const [screen, setScreen] = useState<"start" | "tutorial" | "game" | "end">(
@@ -23,6 +38,11 @@ export const WaterGame = () => {
   const navigate = useNavigate();
   const [bucketX, setBucketX] = useState(0);
   const containerRef = useRef<HTMLDivElement>(null);
+  const gameScreenRef = useRef<HTMLDivElement>(null);
+
+  const [raindrops, setRaindrops] = useState<RaindropData[]>([]);
+  const nextRaindropId = useRef(0);
+  const answerQueueRef = useRef([...SAMPLE_ANSWERS]);
 
   useEffect(() => {
     if (screen !== "game") return;
@@ -50,6 +70,62 @@ export const WaterGame = () => {
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, []);
+
+  const startGame = () => {
+    setRaindrops([]);
+    answerQueueRef.current = [...SAMPLE_ANSWERS];
+    nextRaindropId.current = 0;
+    setScreen("game");
+  };
+
+  const spawnRaindrop = useCallback(() => {
+    if (!containerRef.current) return;
+
+    const queue = answerQueueRef.current;
+    if (queue.length === 0) return;
+
+    const nextAnswer = queue.shift()!; // mutate ref safely
+    const containerWidth = containerRef.current.offsetWidth;
+
+    setRaindrops((prev) => [
+      ...prev,
+      {
+        id: nextRaindropId.current++,
+        x: Math.random() * (containerWidth - RAINDROP_WIDTH),
+        y: 0,
+        velocity: RAINDROP_FALL_SPEED,
+        answer: nextAnswer.text,
+        isCorrect: nextAnswer.isCorrect,
+      },
+    ]);
+  }, []);
+
+  useEffect(() => {
+    if (screen !== "game") return;
+
+    const interval = setInterval(spawnRaindrop, SPAWN_INTERVAL_MS);
+    return () => clearInterval(interval);
+  }, [screen, spawnRaindrop]);
+
+  useEffect(() => {
+    if (screen !== "game") return;
+    if (!gameScreenRef.current) return;
+
+    const floorY = gameScreenRef.current.offsetHeight - RAINDROP_HEIGHT;
+
+    const interval = setInterval(() => {
+      setRaindrops((prev) =>
+        prev
+          .map((drop) => ({
+            ...drop,
+            y: drop.y + RAINDROP_FALL_SPEED,
+          }))
+          .filter((drop) => drop.y < floorY),
+      );
+    }, 16);
+
+    return () => clearInterval(interval);
+  }, [screen]);
 
   return (
     <div className={styles.gameContainer}>
@@ -89,7 +165,7 @@ export const WaterGame = () => {
             header="How To Play"
             buttonText="I'm Ready"
             onClick={() => {
-              setScreen("game");
+              startGame();
             }}
             textList={[
               "A question will appear at the top of the screen",
@@ -102,7 +178,11 @@ export const WaterGame = () => {
         </div>
       )}
       {screen === "game" && (
-        <div data-testid="water-game" className={styles.gameScreen}>
+        <div
+          data-testid="water-game"
+          className={styles.gameScreen}
+          ref={gameScreenRef}
+        >
           <span data-testid="question" className={styles.question}>
             <p className={styles.questionText}>
               What is the chemical formula for water?
@@ -112,9 +192,19 @@ export const WaterGame = () => {
             onClick={() => {
               setScreen("end");
             }}
+            style={{ position: "absolute", right: "16px", top: "16px" }}
           >
             End Game
           </button>
+          {raindrops.map((drop) => (
+            <Raindrop
+              key={drop.id}
+              x={drop.x}
+              y={drop.y}
+              answer={drop.answer}
+            />
+          ))}
+
           <div
             data-testid="bucket-container"
             className={styles.bucketContainer}
