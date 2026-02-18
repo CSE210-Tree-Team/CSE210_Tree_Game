@@ -4,7 +4,7 @@ import {
     type Position,
 } from "./SoilGame_REP.type";
 
-import { isValidPosition } from "../utils/GameHelper_REP";
+import { isValidPosition } from "../utils/PositionHelper";
 
 // A room on the N x N Map
 export interface Node {

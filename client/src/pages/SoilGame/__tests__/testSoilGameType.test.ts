@@ -1,5 +1,12 @@
 import { describe, it, expect } from 'vitest';
 
+import { type Node, } from '../types/Node.type'
+
+import {
+  SYMBOL_TO_ELEMENT,
+  DIRECTION_LABELS,
+} from '../types/stringMappings'
+
 import {
   type Position,
   type Direction,
@@ -13,15 +20,6 @@ import {
   type PlayerCommand,
   DIRECTION_DELTAS,
 } from '../types/SoilGame_REP.type';
-
-import {
-  SYMBOL_TO_ELEMENT,
-  DIRECTION_LABELS,
-} from '../types/stringMappings'
-
-import {
-  type Node,
-} from '../types/Node.type'
 
 describe('SoilGame_REP.type exports', () => {
   it('SYMBOL_TO_ELEMENT maps symbols to ElementType', () => {

@@ -16,6 +16,9 @@ import {
     SYMBOL_TO_ELEMENT
 } from '../types/stringMappings';
 
+// TODO: Potentially disconnect this to remove dependencies
+import { removeFromInventory } from './InventoryHelper';
+
 // TODO: Might need to make this variable, unsure
 const MAP_SIZE = 5;
 
@@ -24,77 +27,80 @@ const MAP_SIZE = 5;
 // ========================map
 
 /** Check if a position is within the grid bounds */
-export function isValidPosition(pos: Position, mapSize: number = MAP_SIZE): boolean {
-  return pos.x >= 0 && pos.x < mapSize && pos.y >= 0 && pos.y < mapSize;
-}
+// export function isValidPosition(pos: Position, mapSize: number = MAP_SIZE): boolean {
+//   return pos.x >= 0 && pos.x < mapSize && pos.y >= 0 && pos.y < mapSize;
+// }
 
-/** Calculate new position after a move, returns null if invalid */
-export function getNextPosition(
-  current: Position,
-  direction: Direction,
-  mapSize: number = MAP_SIZE
-): Position | null {
-  const delta = DIRECTION_DELTAS[direction];
-  const next: Position = {
-    x: current.x + delta.dx,
-    y: current.y + delta.dy,
-  };
-  return isValidPosition(next, mapSize) ? next : null;
-}
+// /** Calculate new position after a move, returns null if invalid */
+// export function getNextPosition(
+//   current: Position,
+//   direction: Direction,
+//   mapSize: number = MAP_SIZE
+// ): Position | null {
+//   const delta = DIRECTION_DELTAS[direction];
+//   const next: Position = {
+//     x: current.x + delta.dx,
+//     y: current.y + delta.dy,
+//   };
+//   return isValidPosition(next, mapSize) ? next : null;
+// }
 
-/** Get list of possible move directions from a position */
-export function getPossibleMoves(pos: Position, mapSize: number = MAP_SIZE): string[] {
-  const moves: string[] = ['w', 'a', 's', 'd'];
-  const directions: Direction[] = ['w', 'a', 's', 'd'];
+// /** 
+//  * Get list of possible move directions from a position 
+//  * TODO: (Optional) refactor to utilize isValidPosition()
+//  */
+// export function getPossibleMoves(pos: Position, mapSize: number = MAP_SIZE): string[] {
+//   const moves: string[] = ['w', 'a', 's', 'd'];
+//   const directions: Direction[] = ['w', 'a', 's', 'd'];
 
-  for (const dir of directions) {
-    if (getNextPosition(pos, dir, mapSize) !== null) {
-      moves.push(DIRECTION_LABELS[dir]);
-    }
-  }
-  return moves;
-}
+//   for (const dir of directions) {
+//     if (getNextPosition(pos, dir, mapSize) !== null) {
+//       moves.push(DIRECTION_LABELS[dir]);
+//     }
+//   }
+//   return moves;
+// }
 
 // ========================
 // Inventory Helpers
 // ========================
 
 /** Create an empty inventory */
-export function createEmptyInventory(): Inventory {
-  // TODO: MAJOR BAD, we need to remove hardcoding here
-  return {
-    Nitrogen: 0,
-    Hydrogen: 0,
-    Carbon: 0,
-    Oxygen: 0,
-  };
-}
+// export function createEmptyInventory(): Inventory {
+//   // TODO: MAJOR BAD, we need to remove hardcoding here
+//   return {
+//     Nitrogen: 0,
+//     Hydrogen: 0,
+//     Carbon: 0,
+//     Oxygen: 0,
+//   };
+// }
 
-/** Add an element to inventory */
-export function addToInventory(inventory: Inventory, element: ElementType): Inventory {
-  return {
-    ...inventory,
-    [element]: inventory[element] + 1,
-  };
-}
+// /** Add an element to inventory */
+// export function addToInventory(inventory: Inventory, element: ElementType): Inventory {
+//   return {
+//     ...inventory,
+//     [element]: inventory[element] + 1,
+//   };
+// }
 
-/** 
- * @param inventory: Current Inventory
- * @param element: Element to be decremented
- * @param amount: Amount to remove (Default = 1)
- * @returns Updated Inventory OR null if amount > inventory[element]
- */
-export function removeFromInventory(
-  inventory: Inventory,
-  element: ElementType,
-  amount: number = 1
-): Inventory | null {
-  if (inventory[element] < amount) return null;
-  return {
-    ...inventory,
-    [element]: inventory[element] - amount,
-  };
-}
+// /** 
+//  * @param inventory: Current Inventory
+//  * @param element: Element to be decremented
+//  * @param amount: Amount to remove (Default = 1)
+//  * @returns Updated Inventory OR null if amount > inventory[element]
+//  */
+// export function removeFromInventory(
+//   inventory: Inventory,
+//   element: ElementType,
+//   amount: number = 1
+// ): Inventory | null {
+//   if (inventory[element] < amount) return null;
+//   return {
+//     ...inventory,
+//     [element]: inventory[element] - amount,
+//   };
+// }
 
 // ========================
 // Quest Helpers

@@ -19,15 +19,19 @@ import {
 import {SYMBOL_TO_ELEMENT} from '../types/stringMappings';
 
 import {
-  getNextPosition,
   createEmptyInventory,
   addToInventory,
+} from '../utils/InventoryHelper'
+
+import {
   submitElementToQuest,
   formatLocationInfo,
   getElementSymbol,
   parseCommand,
   isValidCommand,
 } from '../utils/GameHelper_REP';
+
+import { getNextPosition, } from '../utils/PositionHelper';
 
 import { fetchQuestions } from './ServerCollab_REP';
 

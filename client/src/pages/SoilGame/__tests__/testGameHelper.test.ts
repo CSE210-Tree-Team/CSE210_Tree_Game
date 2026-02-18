@@ -1,11 +1,12 @@
 import { describe, it, expect } from 'vitest';
+
+import {
+  type Node,
+  getNodeAt,
+  hasUncollectedResource,
+} from '../types/Node.type'
+
 import { 
-  isValidPosition,
-  getNextPosition,
-  getPossibleMoves,
-  createEmptyInventory,
-  addToInventory,
-  removeFromInventory,
   isQuestComplete,
   getNextNeededElement,
   submitElementToQuest,
@@ -16,10 +17,16 @@ import {
 } from '../utils/GameHelper_REP';
 
 import {
-  type Node,
-  getNodeAt,
-  hasUncollectedResource,
-} from '../types/Node.type'
+  isValidPosition,
+  getNextPosition,
+  getPossibleMoves,
+} from '../utils/PositionHelper';
+
+import {
+  createEmptyInventory,
+  addToInventory,
+  removeFromInventory,
+} from '../utils/InventoryHelper'
 
 import {
   type Position,
@@ -103,10 +110,10 @@ describe('GameHelper_REP', () => {
   describe('getPossibleMoves', () => {
     it('should return all direction labels for a center position with all moves available', () => {
       const moves = getPossibleMoves({ x: 2, y: 2 }, 5);
-      expect(moves).toContain('w');
-      expect(moves).toContain('a');
-      expect(moves).toContain('s');
-      expect(moves).toContain('d');
+      // expect(moves).toContain('w');
+      // expect(moves).toContain('a');
+      // expect(moves).toContain('s');
+      // expect(moves).toContain('d');
       expect(moves).toContain('Up');
       expect(moves).toContain('Left');
       expect(moves).toContain('Down');
@@ -115,8 +122,8 @@ describe('GameHelper_REP', () => {
 
     it('should exclude direction labels for blocked moves at top-left corner', () => {
       const moves = getPossibleMoves({ x: 0, y: 0 }, 5);
-      expect(moves).toContain('s');
-      expect(moves).toContain('d');
+      // expect(moves).toContain('s');
+      // expect(moves).toContain('d');
       expect(moves).toContain('Down');
       expect(moves).toContain('Right');
       expect(moves).not.toContain('Up');
@@ -125,8 +132,8 @@ describe('GameHelper_REP', () => {
 
     it('should exclude direction labels for blocked moves at top-right corner', () => {
       const moves = getPossibleMoves({ x: 4, y: 0 }, 5);
-      expect(moves).toContain('s');
-      expect(moves).toContain('a');
+      // expect(moves).toContain('s');
+      // expect(moves).toContain('a');
       expect(moves).toContain('Down');
       expect(moves).toContain('Left');
       expect(moves).not.toContain('Up');
@@ -135,8 +142,8 @@ describe('GameHelper_REP', () => {
 
     it('should exclude direction labels for blocked moves at bottom-left corner', () => {
       const moves = getPossibleMoves({ x: 0, y: 4 }, 5);
-      expect(moves).toContain('w');
-      expect(moves).toContain('d');
+      // expect(moves).toContain('w');
+      // expect(moves).toContain('d');
       expect(moves).toContain('Up');
       expect(moves).toContain('Right');
       expect(moves).not.toContain('Down');
@@ -145,28 +152,28 @@ describe('GameHelper_REP', () => {
 
     it('should exclude direction labels for blocked moves at bottom-right corner', () => {
       const moves = getPossibleMoves({ x: 4, y: 4 }, 5);
-      expect(moves).toContain('w');
-      expect(moves).toContain('a');
+      // expect(moves).toContain('w');
+      // expect(moves).toContain('a');
       expect(moves).toContain('Up');
       expect(moves).toContain('Left');
       expect(moves).not.toContain('Down');
       expect(moves).not.toContain('Right');
     });
 
-    it('should use default MAP_SIZE when mapSize is not provided', () => {
+    it('should use default MAP_SIZE=5 when mapSize is not provided', () => {
       const moves = getPossibleMoves({ x: 2, y: 2 });
-      expect(moves).toContain('w');
-      expect(moves).toContain('a');
-      expect(moves).toContain('s');
-      expect(moves).toContain('d');
+      // expect(moves).toContain('w');
+      // expect(moves).toContain('a');
+      // expect(moves).toContain('s');
+      // expect(moves).toContain('d');
+      expect(moves).toContain('Up');
+      expect(moves).toContain('Right');
+      expect(moves).toContain('Down');
+      expect(moves).toContain('Left');
     });
 
     it('should work with different map sizes', () => {
       const moves = getPossibleMoves({ x: 5, y: 5 }, 10);
-      expect(moves).toContain('w');
-      expect(moves).toContain('a');
-      expect(moves).toContain('s');
-      expect(moves).toContain('d');
       expect(moves).toContain('Up');
       expect(moves).toContain('Left');
       expect(moves).toContain('Down');
