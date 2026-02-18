@@ -14,7 +14,7 @@ import sys
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 # Import the test base class
-from tests.apiQuestionsUnitTests import APIQuestionsTestCase
+from apiQuestionsUnitTests import APIQuestionsTestCase
 from fastapi.testclient import TestClient
 
 # Import the modules to test

@@ -36,6 +36,48 @@ def _query(sql, params=(), fetchone=False):
             return dict(res) if res else None
         return [dict(row) for row in cursor.fetchall()]
 
+def _ensure_account_profile_table(cursor):
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS AccountProfile (
+            username TEXT PRIMARY KEY,
+            identity TEXT,
+            educationLevel TEXT,
+            FOREIGN KEY (username) REFERENCES Account(username) ON DELETE CASCADE
+        )
+    ''')
+
+def get_account_profile(username):
+    """
+    Retrieve additional account profile information by username.
+
+    Returns:
+        dict | None: Example: { 'username': '...', 'educationLevel': '3-6' }
+    """
+    if not os.path.exists(DB_PATH):
+        return None
+
+    with sqlite3.connect(DB_PATH) as conn:
+        conn.row_factory = sqlite3.Row
+        cursor = conn.cursor()
+        cursor.execute("PRAGMA foreign_keys = ON;")
+        _ensure_account_profile_table(cursor)
+        cursor.execute("SELECT username, educationLevel FROM AccountProfile WHERE username = ?", (username,))
+        row = cursor.fetchone()
+        return dict(row) if row else None
+
+def get_student_details(username):
+    """
+    Retrieve student details by username.
+
+    Returns:
+        dict | None: Example: { 'studentUsername': '...', 'studentLevel': '3-6', 'studentStats': '{...}', 'parentEmail': '...' }
+    """
+    return _query(
+        "SELECT studentUsername, studentLevel, studentStats, parentEmail FROM StudentDetails WHERE studentUsername = ?",
+        (username,),
+        fetchone=True,
+    )
+
 def get_person(username):
     """
     Retrieve user information by username (user identifier).

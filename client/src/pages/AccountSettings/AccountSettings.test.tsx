@@ -4,6 +4,7 @@ import { AccountSettings } from './AccountSettings';
 
 const logoutMock = vi.fn();
 const navigateMock = vi.fn();
+const fetchMock = vi.fn();
 let authUser: Record<string, string> | null = {
     name: 'Ada Lovelace',
     nickname: 'adal',
@@ -15,6 +16,7 @@ vi.mock('@auth0/auth0-react', () => ({
     useAuth0: () => ({
         user: authUser,
         logout: logoutMock,
+        getAccessTokenSilently: vi.fn().mockResolvedValue('token'),
     }),
 }));
 
@@ -32,12 +34,25 @@ describe('AccountSettings', () => {
     beforeEach(() => {
         logoutMock.mockClear();
         navigateMock.mockClear();
+        fetchMock.mockClear();
+        vi.stubGlobal('fetch', fetchMock);
         authUser = {
             name: 'Ada Lovelace',
             nickname: 'adal',
             email: 'ada@example.com',
             sub: 'auth0|abc123',
         };
+
+        fetchMock.mockImplementation(async (input: RequestInfo | URL) => {
+            const url = String(input);
+            if (url === '/api/auth/verify') {
+                return { ok: true, json: async () => ({ success: true }) } as Response;
+            }
+            if (url === '/api/account/profile') {
+                return { ok: false, json: async () => ({}) } as Response;
+            }
+            return { ok: false, json: async () => ({}) } as Response;
+        });
     });
 
     it('renders account fields from Auth0', () => {
@@ -45,9 +60,8 @@ describe('AccountSettings', () => {
 
         expect(screen.getByText('ACCOUNT SETTINGS')).toBeInTheDocument();
         expect(screen.getByText('Name:')).toBeInTheDocument();
-        expect(screen.getByText('Identity:')).toBeInTheDocument();
+        expect(screen.getByText('Parent Email:')).toBeInTheDocument();
         expect(screen.getByText('ada@example.com')).toBeInTheDocument();
-        expect(screen.getByText('Student')).toBeInTheDocument();
         expect(screen.getByText('3-6')).toBeInTheDocument();
     });
 
@@ -78,6 +92,5 @@ describe('AccountSettings', () => {
 
         expect(screen.getByText('Player')).toBeInTheDocument();
         expect(screen.getByText('Email not provided')).toBeInTheDocument();
-        expect(screen.getByText('Student')).toBeInTheDocument();
     });
 });

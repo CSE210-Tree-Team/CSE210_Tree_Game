@@ -79,7 +79,7 @@ def add_students(conn, cursor):
 
         # Student Details
         cursor.execute("INSERT INTO StudentDetails (studentUsername, studentLevel, studentStats) VALUES (?, ?, ?)",
-                       (username, 1, '{"xp": 0}'))
+                       (username, "3-6", '{"xp": 0}'))
                        
         # Create a Tree for the account.
         tree_id = create_tree(conn, cursor, username)

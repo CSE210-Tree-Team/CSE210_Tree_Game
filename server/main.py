@@ -1,13 +1,35 @@
 import os
 import uvicorn
 import asyncio
+from contextlib import asynccontextmanager
 from fastapi import FastAPI, Request, Depends, HTTPException, status
 from fastapi.staticfiles import StaticFiles
-from fastapi.responses import FileResponse, RedirectResponse
+from fastapi.responses import FileResponse, RedirectResponse, JSONResponse
 from starlette.middleware.sessions import SessionMiddleware
 from dotenv import load_dotenv
-from Database.getItemsFromDatabase import get_person, get_tree, get_question, get_questions, get_all_trees
-from Database.addItemsToDatabase import add_account, generate_tree, add_question, update_last_login, apply_passive_decay, update_stat
+from pydantic import BaseModel
+from Database.createDatabase import create_schema
+from Database.getItemsFromDatabase import (
+    get_person,
+    get_tree,
+    get_question,
+    get_questions,
+    get_all_trees,
+    get_account_profile,
+    get_student_details,
+)
+from Database.addItemsToDatabase import (
+    add_account,
+    generate_tree,
+    add_question,
+    update_last_login,
+    apply_passive_decay,
+    update_stat,
+    update_account,
+    upsert_account_profile,
+    add_student_details,
+    upsert_student_details,
+)
 from constants import ROLE_STUDENT, PASSIVE_DECAY_RATE
 from dataRecords import Tree, Event
 
@@ -17,15 +39,9 @@ from dataRecords import Tree, Event
 ############################################
 
 load_dotenv()
-app = FastAPI()
 MIDDLEWARE_SECRET_KEY = os.getenv("MIDDLEWARE_SECRET_KEY")
-app.add_middleware(SessionMiddleware, secret_key=MIDDLEWARE_SECRET_KEY)
 decay_task = None
 
-# --- Static File Serving ---
-frontend_path = os.path.join("..", "client", "dist")
-if os.path.exists(frontend_path):
-    app.mount("/assets", StaticFiles(directory=os.path.join(frontend_path, "assets")), name="static")
 # TODO: Need to fix log out process so that session is properly cleared.
 
 async def run_passive_decay_loop():
@@ -47,20 +63,31 @@ async def run_passive_decay_loop():
             print(f"Error in passive decay loop: {e}")
             await asyncio.sleep(60)
 
-@app.on_event("startup")
-async def startup_event():
-    """Start the passive decay background task when the app starts."""
+@asynccontextmanager
+async def lifespan(_: FastAPI):
+    """Initialize DB + background tasks for app lifecycle."""
     global decay_task
+    try:
+        create_schema()
+    except Exception as e:
+        print(f"Error creating/upgrading database schema: {e}")
+
     decay_task = asyncio.create_task(run_passive_decay_loop())
     print("Passive decay background task started")
+    try:
+        yield
+    finally:
+        if decay_task:
+            decay_task.cancel()
+        print("Passive decay background task stopped")
 
-@app.on_event("shutdown")
-async def shutdown_event():
-    """Cancel the passive decay background task when the app shuts down."""
-    global decay_task
-    if decay_task:
-        decay_task.cancel()
-    print("Passive decay background task stopped")
+app = FastAPI(lifespan=lifespan)
+app.add_middleware(SessionMiddleware, secret_key=MIDDLEWARE_SECRET_KEY)
+
+# --- Static File Serving ---
+frontend_path = os.path.join("..", "client", "dist")
+if os.path.exists(frontend_path):
+    app.mount("/assets", StaticFiles(directory=os.path.join(frontend_path, "assets")), name="static")
 
 ############################################
 #               Helper Functions           #
@@ -72,6 +99,11 @@ class NeedLoginException(Exception):
 
 @app.exception_handler(NeedLoginException)
 async def redirect_to_login(request: Request, exc: NeedLoginException):
+    if request.url.path.startswith("/api/"):
+        return JSONResponse(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            content={"success": False, "detail": "Not authenticated"},
+        )
     return RedirectResponse(url="/?autoLogin=true")
     
 def is_student(username: str) -> bool:
@@ -115,6 +147,7 @@ def create_account(username: str, user_data: dict):
         )
 
         output_tree_id = generate_tree(username)
+        add_student_details(student_username=username, student_level="3-6", student_stats='{"xp": 0}', parent_email=None)
 
         print(f"Created new account for {username} with tree ID {output_tree_id}")
 
@@ -139,8 +172,8 @@ async def get_current_user(request: Request):
         raise NeedLoginException()
 
     person = get_person(username)
-    if not person or 'Student' not in person.get('roles', []):
-        raise HTTPException(status_code=403, detail="Student role required")
+    if not person:
+        raise HTTPException(status_code=403, detail="User not found")
         
     return person
 
@@ -191,6 +224,12 @@ def manage_account(account=Depends(get_current_user)):
 #               API Endpoints              #
 ############################################
 
+class AccountProfilePayload(BaseModel):
+    name: str | None = None
+    email: str | None = None
+    parentEmail: str | None = None
+    educationLevel: str | None = None
+
 @app.post("/api/auth/verify")
 async def verify_auth(request: Request):
     """Verify Auth0 token and establish backend session."""
@@ -217,6 +256,8 @@ async def verify_auth(request: Request):
             return {"success": True, "message": "Session established"}
         
         return {"success": False, "message": "No user data provided"}
+    except HTTPException:
+        raise
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
 
@@ -266,6 +307,59 @@ def get_user_info(request: Request, student=Depends(student_required)):
             "resourceLevels": tree.get('resourceLevels') if tree else None
         }
     }
+
+@app.get("/api/account/profile")
+def api_get_account_profile(student=Depends(student_required)):
+    """
+    Returns the student's editable profile fields.
+
+    Response:
+    {
+        "success": True,
+        "profile": { "name": str, "email": str, "parentEmail": str, "educationLevel": str }
+    }
+    """
+    username = student.get("username") if student else None
+    if not username:
+        raise HTTPException(status_code=400, detail="Missing username")
+
+    student_details = get_student_details(username) or {}
+    education_level = student_details.get("studentLevel") or "3-6"
+    parent_email = student_details.get("parentEmail") or ""
+
+    return {
+        "success": True,
+        "username": username,
+        "roles": student.get("roles", []),
+        "profile": {
+            "name": student.get("displayName") or "",
+            "email": student.get("email") or "",
+            "parentEmail": parent_email,
+            "educationLevel": education_level,
+        },
+    }
+
+@app.put("/api/account/profile")
+def api_update_account_profile(payload: AccountProfilePayload, student=Depends(student_required)):
+    """
+    Updates the student's editable profile fields.
+
+    Request body:
+    { "name"?: str, "email"?: str, "parentEmail"?: str, "educationLevel"?: str }
+    """
+    username = student.get("username") if student else None
+    if not username:
+        raise HTTPException(status_code=400, detail="Missing username")
+
+    try:
+        update_account(username, display_name=payload.name, email=payload.email)
+        upsert_student_details(username, parent_email=payload.parentEmail, education_level=payload.educationLevel)
+        updated = get_person(username) or {}
+        return {"success": True, "username": username, "roles": updated.get("roles", [])}
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to update profile: {str(e)}")
 
 @app.post("/api/update-stat")
 async def api_update_stat(request: Request, student=Depends(student_required)):

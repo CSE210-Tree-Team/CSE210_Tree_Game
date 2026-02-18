@@ -14,7 +14,7 @@ import sys
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 # Import the test base class
-from tests.apiQuestionsUnitTests import APIQuestionsTestCase
+from apiQuestionsUnitTests import APIQuestionsTestCase
 from fastapi.testclient import TestClient
 
 # Import the modules to test
@@ -184,8 +184,46 @@ class TestUserAPIRoutes(APIQuestionsTestCase):
         self.assertFalse(data["success"])
         self.assertEqual(data["message"], "No user data provided")
 
+    def test_get_account_profile_defaults(self):
+        """Test that /api/account/profile returns defaults when no custom profile is stored."""
+        client = self.get_authenticated_client()
+
+        response = client.get("/api/account/profile")
+        self.assertEqual(response.status_code, 200)
+
+        data = response.json()
+        self.assertTrue(data["success"])
+        profile = data["profile"]
+
+        self.assertEqual(profile["name"], "Test Student")
+        self.assertEqual(profile["email"], "test_student@example.com")
+        self.assertEqual(profile["parentEmail"], "")
+        self.assertEqual(profile["educationLevel"], "3-6")
+
+    def test_update_account_profile_persists(self):
+        """Test that /api/account/profile can be updated and is persisted in the database."""
+        client = self.get_authenticated_client()
+
+        update_payload = {
+            "name": "Updated Student",
+            "email": "updated@example.com",
+            "parentEmail": "parent@example.com",
+            "educationLevel": "6-8",
+        }
+        response = client.put("/api/account/profile", json=update_payload)
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(response.json()["success"])
+
+        response = client.get("/api/account/profile")
+        self.assertEqual(response.status_code, 200)
+
+        profile = response.json()["profile"]
+        self.assertEqual(profile["name"], "Updated Student")
+        self.assertEqual(profile["email"], "updated@example.com")
+        self.assertEqual(profile["parentEmail"], "parent@example.com")
+        self.assertEqual(profile["educationLevel"], "6-8")
+
 
 if __name__ == '__main__':
     import unittest
     unittest.main()
-

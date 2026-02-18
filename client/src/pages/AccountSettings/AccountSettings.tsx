@@ -1,28 +1,24 @@
 import { useAuth0 } from '@auth0/auth0-react';
-import { FormEvent, useEffect, useMemo, useState } from 'react';
+import { FormEvent, useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styles from '../../components/account-settings.module.css';
 
-type SavedProfile = {
+type Profile = {
     name: string;
-    identity: string;
     email: string;
+    parentEmail: string;
     educationLevel: string;
 };
 
-const STORAGE_KEY = 'treegame.account.profile';
+type AccountProfileResponse = {
+    success: boolean;
+    profile?: Partial<Profile>;
+};
 
 const useProfileDefaults = (user: ReturnType<typeof useAuth0>['user']) => {
     const defaultName = useMemo(() => {
         if (!user) return 'Player';
         return user.name || user.nickname || user.email || 'Player';
-    }, [user]);
-
-    const defaultIdentity = useMemo(() => {
-        const appIdentity = user?.app_metadata?.identity;
-        const roleIdentity = Array.isArray(user?.app_metadata?.roles) ? user.app_metadata.roles[0] : undefined;
-        const userMetaIdentity = user?.user_metadata?.identity;
-        return appIdentity || roleIdentity || userMetaIdentity || 'Student';
     }, [user]);
 
     const defaultEducationLevel = useMemo(() => {
@@ -33,31 +29,52 @@ const useProfileDefaults = (user: ReturnType<typeof useAuth0>['user']) => {
 
     const defaultEmail = user?.email || 'Email not provided';
 
-    return { defaultName, defaultIdentity, defaultEducationLevel, defaultEmail };
+    return { defaultName, defaultEducationLevel, defaultEmail };
 };
 
 export const AccountSettings = () => {
-    const { user, logout } = useAuth0();
+    const { user, logout, getAccessTokenSilently } = useAuth0();
     const navigate = useNavigate();
-    const [savedProfile, setSavedProfile] = useState<Partial<SavedProfile>>({});
+    const [profile, setProfile] = useState<Partial<Profile>>({});
 
-    const { defaultName, defaultIdentity, defaultEducationLevel, defaultEmail } = useProfileDefaults(user);
+    const { defaultName, defaultEducationLevel, defaultEmail } = useProfileDefaults(user);
 
     useEffect(() => {
-        const raw = localStorage.getItem(STORAGE_KEY);
-        if (!raw) return;
-        try {
-            const parsed = JSON.parse(raw) as Partial<SavedProfile>;
-            setSavedProfile(parsed);
-        } catch {
-            setSavedProfile({});
-        }
-    }, []);
+        const load = async () => {
+            if (!user) return;
 
-    const displayName = savedProfile.name || defaultName;
-    const identity = savedProfile.identity || defaultIdentity;
-    const educationLevel = savedProfile.educationLevel || defaultEducationLevel;
-    const email = savedProfile.email || defaultEmail;
+            try {
+                const token = await getAccessTokenSilently();
+                await fetch('/api/auth/verify', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        Authorization: `Bearer ${token}`,
+                    },
+                    credentials: 'include',
+                    body: JSON.stringify({ user }),
+                });
+            } catch {
+                // If session establishment fails, the profile request may still succeed (e.g., existing session).
+            }
+
+            try {
+                const response = await fetch('/api/account/profile', { credentials: 'include' });
+                if (!response.ok) return;
+                const data = (await response.json()) as AccountProfileResponse;
+                if (data?.profile) setProfile(data.profile);
+            } catch {
+                // Ignore profile load errors and fall back to Auth0-derived defaults.
+            }
+        };
+
+        load();
+    }, [user]);
+
+    const displayName = profile.name || defaultName;
+    const parentEmail = profile.parentEmail || '';
+    const educationLevel = profile.educationLevel || defaultEducationLevel;
+    const email = profile.email || defaultEmail;
 
     return (
         <div className={styles.page}>
@@ -74,8 +91,8 @@ export const AccountSettings = () => {
                         <div className={styles.value}>{displayName}</div>
                     </div>
                     <div className={styles.row}>
-                        <p className={styles.label}>Identity:</p>
-                        <div className={styles.value}>{identity}</div>
+                        <p className={styles.label}>Parent Email:</p>
+                        <div className={styles.value}>{parentEmail || '(not set)'}</div>
                     </div>
                     <div className={styles.row}>
                         <p className={styles.label}>Email:</p>
@@ -102,45 +119,82 @@ export const AccountSettings = () => {
 };
 
 export const AccountSettingsEdit = () => {
-    const { user } = useAuth0();
+    const { user, getAccessTokenSilently } = useAuth0();
     const navigate = useNavigate();
-    const { defaultName, defaultIdentity, defaultEducationLevel, defaultEmail } = useProfileDefaults(user);
+    const { defaultName, defaultEducationLevel, defaultEmail } = useProfileDefaults(user);
+    const isDirtyRef = useRef(false);
+    const [isSaving, setIsSaving] = useState(false);
+    const [saveError, setSaveError] = useState<string | null>(null);
 
-    const [formData, setFormData] = useState<SavedProfile>({
+    const [formData, setFormData] = useState<Profile>({
         name: defaultName,
-        identity: defaultIdentity,
         email: defaultEmail,
+        parentEmail: '',
         educationLevel: defaultEducationLevel,
     });
 
     useEffect(() => {
-        const raw = localStorage.getItem(STORAGE_KEY);
-        if (!raw) return;
-        try {
-            const parsed = JSON.parse(raw) as Partial<SavedProfile>;
-            setFormData((prev) => ({
-                ...prev,
-                ...parsed,
-            }));
-        } catch {
-            // Ignore invalid local profile data and keep defaults.
-        }
-    }, []);
+        const load = async () => {
+            if (!user) return;
 
-    useEffect(() => {
-        setFormData((prev) => ({
-            ...prev,
-            name: prev.name || defaultName,
-            identity: prev.identity || defaultIdentity,
-            email: prev.email || defaultEmail,
-            educationLevel: prev.educationLevel || defaultEducationLevel,
-        }));
-    }, [defaultName, defaultIdentity, defaultEmail, defaultEducationLevel]);
+            try {
+                const token = await getAccessTokenSilently();
+                await fetch('/api/auth/verify', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        Authorization: `Bearer ${token}`,
+                    },
+                    credentials: 'include',
+                    body: JSON.stringify({ user }),
+                });
+            } catch {
+                // Ignore session establishment failures.
+            }
 
-    const handleSave = (event: FormEvent<HTMLFormElement>) => {
+            try {
+                const response = await fetch('/api/account/profile', { credentials: 'include' });
+                if (!response.ok) return;
+                const data = (await response.json()) as AccountProfileResponse;
+                if (!data?.profile) return;
+                if (isDirtyRef.current) return;
+                setFormData((prev) => ({
+                    ...prev,
+                    ...data.profile,
+                }));
+            } catch {
+                // Ignore profile load errors and keep defaults.
+            }
+        };
+
+        load();
+    }, [user]);
+
+    const handleSave = async (event: FormEvent<HTMLFormElement>) => {
         event.preventDefault();
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(formData));
-        navigate('/account');
+        setIsSaving(true);
+        setSaveError(null);
+        try {
+            const response = await fetch('/api/account/profile', {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                credentials: 'include',
+                body: JSON.stringify(formData),
+            });
+
+            if (!response.ok) {
+                setSaveError('Save failed. Please log in again and try again.');
+                return;
+            }
+
+            navigate('/account');
+        } catch {
+            setSaveError('Save failed. Please try again.');
+        } finally {
+            setIsSaving(false);
+        }
     };
 
     return (
@@ -154,31 +208,35 @@ export const AccountSettingsEdit = () => {
                 <h1 className={styles.title}>ACCOUNT SETTINGS</h1>
 
                 <form className={styles.formArea} onSubmit={handleSave}>
+                    {saveError ? (
+                        <p role="alert" style={{ color: 'darkred', marginTop: 0 }}>
+                            {saveError}
+                        </p>
+                    ) : null}
                     <div className={styles.row}>
                         <label htmlFor="name" className={styles.label}>Name:</label>
                         <input
                             id="name"
                             className={styles.input}
                             value={formData.name}
-                            onChange={(event) => setFormData({ ...formData, name: event.target.value })}
+                            onChange={(event) => {
+                                isDirtyRef.current = true;
+                                setFormData({ ...formData, name: event.target.value });
+                            }}
                         />
                     </div>
 
                     <div className={styles.row}>
-                        <label htmlFor="identity" className={styles.label}>Identity:</label>
-                        <div className={styles.selectWrap}>
-                            <select
-                                id="identity"
-                                className={styles.select}
-                                value={formData.identity}
-                                onChange={(event) => setFormData({ ...formData, identity: event.target.value })}
-                            >
-                                <option>Student</option>
-                                <option>Teacher</option>
-                                <option>Parent</option>
-                            </select>
-                            <span className={styles.arrow}>▼</span>
-                        </div>
+                        <label htmlFor="parentEmail" className={styles.label}>Parent Email:</label>
+                        <input
+                            id="parentEmail"
+                            className={styles.input}
+                            value={formData.parentEmail}
+                            onChange={(event) => {
+                                isDirtyRef.current = true;
+                                setFormData({ ...formData, parentEmail: event.target.value });
+                            }}
+                        />
                     </div>
 
                     <div className={styles.row}>
@@ -187,7 +245,10 @@ export const AccountSettingsEdit = () => {
                             id="email"
                             className={styles.input}
                             value={formData.email}
-                            onChange={(event) => setFormData({ ...formData, email: event.target.value })}
+                            onChange={(event) => {
+                                isDirtyRef.current = true;
+                                setFormData({ ...formData, email: event.target.value });
+                            }}
                         />
                     </div>
 
@@ -198,9 +259,10 @@ export const AccountSettingsEdit = () => {
                                 id="educationLevel"
                                 className={styles.select}
                                 value={formData.educationLevel}
-                                onChange={(event) =>
-                                    setFormData({ ...formData, educationLevel: event.target.value })
-                                }
+                                onChange={(event) => {
+                                    isDirtyRef.current = true;
+                                    setFormData({ ...formData, educationLevel: event.target.value });
+                                }}
                             >
                                 <option>3-6</option>
                                 <option>6-8</option>
@@ -211,7 +273,9 @@ export const AccountSettingsEdit = () => {
                     </div>
 
                     <div className={styles.actions}>
-                        <button className={styles.actionButton} type="submit">SAVE</button>
+                        <button className={styles.actionButton} type="submit" disabled={isSaving}>
+                            SAVE
+                        </button>
                         <button className={styles.actionButton} type="button" onClick={() => navigate('/account')}>CANCEL</button>
                     </div>
                 </form>

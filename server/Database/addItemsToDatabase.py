@@ -57,6 +57,64 @@ def _execute(sql, params=(), commit=True):
             conn.commit()
         return cursor.lastrowid
 
+def _ensure_account_profile_table(cursor):
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS AccountProfile (
+            username TEXT PRIMARY KEY,
+            identity TEXT,
+            educationLevel TEXT,
+            FOREIGN KEY (username) REFERENCES Account(username) ON DELETE CASCADE
+        )
+    ''')
+
+def upsert_account_profile(username: str, identity: str = None, education_level: str = None):
+    """
+    Create or update additional profile fields for an account.
+
+    Args:
+        username: Existing account username
+        identity: Deprecated (unused)
+        education_level: Optional education level (e.g., 3-6/6-8/9-12)
+    """
+    if not os.path.exists(DB_PATH):
+        raise FileNotFoundError(f"Database {DB_PATH} does not exist. Please create it first.")
+
+    # identity is kept for backward compatibility; roles are stored in AccountRole.
+    if education_level is None:
+        return
+
+    with sqlite3.connect(DB_PATH) as conn:
+        cursor = conn.cursor()
+        cursor.execute("PRAGMA foreign_keys = ON;")
+        _ensure_account_profile_table(cursor)
+
+        cursor.execute("SELECT username FROM AccountProfile WHERE username = ?", (username,))
+        exists = cursor.fetchone() is not None
+
+        if not exists:
+            cursor.execute(
+                "INSERT INTO AccountProfile (username, identity, educationLevel) VALUES (?, ?, ?)",
+                (username, None, education_level),
+            )
+            conn.commit()
+            return
+
+        updates = []
+        params = []
+        if education_level is not None:
+            updates.append("educationLevel = ?")
+            params.append(education_level)
+
+        if not updates:
+            return
+
+        params.append(username)
+        cursor.execute(
+            f"UPDATE AccountProfile SET {', '.join(updates)} WHERE username = ?",
+            tuple(params),
+        )
+        conn.commit()
+
 
 def add_account(username: str, email: str, passwordHash: str, displayName: str, 
                 accountReference: str, dateOfBirth: str, role: str) -> str:
@@ -469,7 +527,6 @@ def update_account(username: str, display_name: str = None, email: str = None):
     
     _execute(sql, params)
 
-
 def update_last_login(username: str):
     """
     Update the last login timestamp for an account.
@@ -520,13 +577,13 @@ def join_class(student_username: str, class_code: str):
     
     _execute(sql, (student_username, class_id))
 
-def add_student_details(student_username: str, student_level: int = 1, student_stats: str = None, parent_email: str = None):
+def add_student_details(student_username: str, student_level: str = "3-6", student_stats: str = None, parent_email: str = None):
     """
     Add student-specific details to an account.
     
     Args:
         studentUsername: The student's username
-        studentLevel: The student's level (default: 1)
+        studentLevel: The student's education level (default: '3-6')
         studentStats: JSON string of student stats
         parentEmail: Parent's email (optional)
     """
@@ -536,6 +593,38 @@ def add_student_details(student_username: str, student_level: int = 1, student_s
     '''
     
     _execute(sql, (student_username, student_level, student_stats, parent_email))
+
+def upsert_student_details(student_username: str, parent_email: str | None = None, education_level: str | None = None):
+    """
+    Create StudentDetails row if missing and update parentEmail and/or studentLevel (education level).
+    """
+    if not os.path.exists(DB_PATH):
+        raise FileNotFoundError(f"Database {DB_PATH} does not exist. Please create it first.")
+
+    if parent_email is None and education_level is None:
+        return
+
+    with sqlite3.connect(DB_PATH) as conn:
+        cursor = conn.cursor()
+        cursor.execute("PRAGMA foreign_keys = ON;")
+        cursor.execute(
+            "SELECT studentUsername FROM StudentDetails WHERE studentUsername = ?",
+            (student_username,),
+        )
+        exists = cursor.fetchone() is not None
+        if not exists:
+            cursor.execute(
+                "INSERT INTO StudentDetails (studentUsername, studentLevel, studentStats, parentEmail) VALUES (?, ?, ?, ?)",
+                (student_username, education_level or "3-6", '{"xp": 0}', parent_email),
+            )
+            conn.commit()
+            return
+
+        cursor.execute(
+            "UPDATE StudentDetails SET parentEmail = COALESCE(?, parentEmail), studentLevel = COALESCE(?, studentLevel) WHERE studentUsername = ?",
+            (parent_email, education_level, student_username),
+        )
+        conn.commit()
 
 def generate_tree(username: str) -> str:
     """

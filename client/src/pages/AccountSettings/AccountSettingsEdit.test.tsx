@@ -3,6 +3,7 @@ import userEvent from '@testing-library/user-event';
 import { AccountSettingsEdit } from './AccountSettings';
 
 const navigateMock = vi.fn();
+const fetchMock = vi.fn();
 let authUser: Record<string, string> | null = {
     name: 'Ada Lovelace',
     nickname: 'adal',
@@ -12,6 +13,7 @@ let authUser: Record<string, string> | null = {
 vi.mock('@auth0/auth0-react', () => ({
     useAuth0: () => ({
         user: authUser,
+        getAccessTokenSilently: vi.fn().mockResolvedValue('token'),
     }),
 }));
 
@@ -28,12 +30,27 @@ const renderPage = () => render(<AccountSettingsEdit />);
 describe('AccountSettingsEdit', () => {
     beforeEach(() => {
         navigateMock.mockClear();
-        localStorage.clear();
+        fetchMock.mockClear();
+        vi.stubGlobal('fetch', fetchMock);
         authUser = {
             name: 'Ada Lovelace',
             nickname: 'adal',
             email: 'ada@example.com',
         };
+
+        fetchMock.mockImplementation(async (input: RequestInfo | URL, init?: RequestInit) => {
+            const url = String(input);
+            if (url === '/api/auth/verify') {
+                return { ok: true, json: async () => ({ success: true }) } as Response;
+            }
+            if (url === '/api/account/profile' && (!init?.method || init.method === 'GET')) {
+                return { ok: false, json: async () => ({}) } as Response;
+            }
+            if (url === '/api/account/profile' && init?.method === 'PUT') {
+                return { ok: true, json: async () => ({ success: true }) } as Response;
+            }
+            return { ok: false, json: async () => ({}) } as Response;
+        });
     });
 
     it('renders edit fields', () => {
@@ -41,7 +58,7 @@ describe('AccountSettingsEdit', () => {
 
         expect(screen.getByText('ACCOUNT SETTINGS')).toBeInTheDocument();
         expect(screen.getByLabelText('Name:')).toHaveValue('Ada Lovelace');
-        expect(screen.getByLabelText('Identity:')).toHaveValue('Student');
+        expect(screen.getByLabelText('Parent Email:')).toHaveValue('');
         expect(screen.getByLabelText('Email:')).toHaveValue('ada@example.com');
         expect(screen.getByLabelText('Education Level:')).toHaveValue('3-6');
     });
@@ -52,12 +69,19 @@ describe('AccountSettingsEdit', () => {
 
         await user.clear(screen.getByLabelText('Name:'));
         await user.type(screen.getByLabelText('Name:'), 'AAA');
-        await user.selectOptions(screen.getByLabelText('Identity:'), 'Teacher');
+        await user.type(screen.getByLabelText('Parent Email:'), 'p@example.com');
         await user.click(screen.getByRole('button', { name: 'SAVE' }));
 
-        const stored = JSON.parse(localStorage.getItem('treegame.account.profile') ?? '{}');
-        expect(stored.name).toBe('AAA');
-        expect(stored.identity).toBe('Teacher');
+        expect(fetchMock).toHaveBeenCalledWith(
+            '/api/account/profile',
+            expect.objectContaining({
+                method: 'PUT',
+            })
+        );
+        const putCall = fetchMock.mock.calls.find((call) => String(call[0]) === '/api/account/profile' && call[1]?.method === 'PUT');
+        const body = JSON.parse(String(putCall?.[1]?.body ?? '{}'));
+        expect(body.name).toBe('AAA');
+        expect(body.parentEmail).toBe('p@example.com');
         expect(navigateMock).toHaveBeenCalledWith('/account');
     });
 

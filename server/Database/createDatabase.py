@@ -71,6 +71,17 @@ def create_schema(db_path=DB_PATH):
     )
     ''')
 
+    # AccountProfile Table
+    # Stores additional profile fields that are edited in the frontend.
+    cursor.execute('''
+    CREATE TABLE IF NOT EXISTS AccountProfile (
+        username TEXT PRIMARY KEY,
+        identity TEXT,
+        educationLevel TEXT,
+        FOREIGN KEY (username) REFERENCES Account(username) ON DELETE CASCADE
+    )
+    ''')
+
     # Tree Table
     # health can only be 'Dead', 'Withered', 'Unhealthy', 'Healthy'
     # growthStage is an INTEGER representing stages of growth --> currently undefined specification
@@ -202,7 +213,7 @@ def create_schema(db_path=DB_PATH):
     cursor.execute('''
     CREATE TABLE IF NOT EXISTS StudentDetails (
         studentUsername TEXT PRIMARY KEY,
-        studentLevel INTEGER,
+        studentLevel TEXT,
         studentStats TEXT, -- JSON
         parentEmail TEXT,
         FOREIGN KEY (studentUsername) REFERENCES Account(username) ON DELETE CASCADE
