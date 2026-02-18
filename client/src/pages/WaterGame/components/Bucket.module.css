@@ -1,0 +1,5 @@
+.bucket {
+  position: absolute;
+  bottom: 0;
+  transition: left 0.05s linear;
+}
