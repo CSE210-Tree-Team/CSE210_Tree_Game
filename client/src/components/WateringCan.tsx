@@ -11,6 +11,8 @@ export const WateringCan = ({ onClick }: WateringCanProps) => {
                 src={WATER_CAN_IMAGE}
                 alt="Water Can"
                 className={styles.wateringCanImage}
+                loading="eager"
+                decoding="async"
             />
         </div>
         
