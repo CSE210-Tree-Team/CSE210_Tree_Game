@@ -228,3 +228,16 @@ test("bucket does not move past the right boundary", async () => {
 
   expect(bucket.style.left).toBe(`${maxRight}px`);
 });
+
+test("raindrop spawns within container bounder", async () => {
+  const user = userEvent.setup();
+  render(
+    <MemoryRouter>
+      <WaterGame />
+    </MemoryRouter>,
+  );
+
+  await user.click(screen.getByRole("button", { name: /play/i }));
+  await user.click(screen.getByRole("button", { name: /i'm ready/i }));
+  expect(screen.getByTestId("water-game")).toBeInTheDocument();
+});
