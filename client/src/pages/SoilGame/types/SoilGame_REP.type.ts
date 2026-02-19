@@ -2,7 +2,7 @@ import {
   type Node,
   getNodeAt,
   hasUncollectedResource,
-} from './Node.type';
+} from './Map.type';
 
 // TODO: EXTEND THIS FOR ELEMENTS IN THE PERIODIC TABLE
 export type ElementType = 'Nitrogen' | 'Hydrogen' | 'Carbon' | 'Oxygen';

@@ -15,7 +15,7 @@ import {
   type Node,
   getNodeAt,
   hasUncollectedResource,
-} from '../types/Node.type';
+} from '../types/Map.type';
   
 const MAP_SIZE = 5;
 

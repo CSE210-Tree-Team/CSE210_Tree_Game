@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 
-import { type Node, } from '../types/Node.type'
+import { type Node, } from '../types/Map.type'
 
 import {
   SYMBOL_TO_ELEMENT,

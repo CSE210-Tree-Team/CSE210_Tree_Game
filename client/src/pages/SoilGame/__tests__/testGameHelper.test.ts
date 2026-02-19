@@ -4,7 +4,8 @@ import {
   type Node,
   getNodeAt,
   hasUncollectedResource,
-} from '../types/Node.type'
+  generateMap,
+} from '../types/Map.type'
 
 import { 
   isQuestComplete,
@@ -281,6 +282,17 @@ describe('GameHelper_REP', () => {
       ];
       expect(hasUncollectedResource(map, { x: 5, y: 5 })).toBe(false);
       expect(hasUncollectedResource(map, { x: -1, y: 0 })).toBe(false);
+    });
+  });
+
+  describe('generateMap', () => {
+    it('generates a DEFAULT = 5 x 5 size map', () => {
+      const questList: Quest[] = [
+        {id: 1, moleculeName: "Water", moleculeFormula: "H2O", required:{"H": 2,"O": 1}, submitted:{}, completed: false}
+      ]; 
+      const map: Node[][] = generateMap(questList);
+      expect(map.length).toBe(5);
+      expect(map[0].length).toBe(5);
     });
   });
 

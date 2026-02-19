@@ -9,7 +9,7 @@ import {
 
 import {
   type Node
-} from '../types/Node.type';
+} from '../types/Map.type';
 
 import {
     DIRECTION_LABELS,

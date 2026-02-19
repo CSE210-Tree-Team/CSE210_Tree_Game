@@ -14,7 +14,8 @@ import {
   type Node,
   getNodeAt,
   hasUncollectedResource,
-} from '../types/Node.type';
+  generateMap,
+} from '../types/Map.type';
 
 import {SYMBOL_TO_ELEMENT} from '../types/stringMappings';
 
@@ -33,68 +34,37 @@ import {
 
 import { getNextPosition, } from '../utils/PositionHelper';
 
-import { fetchQuestions } from './ServerCollab_REP';
+import { fetchQuestions } from '../../ServerCalls/ServerCollab_REP';
 
 const MAP_SIZE = 5; // TODO: Make this dependent on the game difficulty
 const TOTAL_QUESTS = 4; // TODO: Make this dependent on the game difficulty
 const SPAWN_PROBABILITY = 0.2; // 20% chance to spawn a resource in each cell
 
-/**
- * Random number generator 
- * e.g. randomInt(1, 10) returns a random integer between 1 and 10
- */
-const randomInt = (min: number, max: number): number => {
-  return Math.floor(Math.random() * (max - min + 1)) + min;
-};
-
-// ========================
-// Map Generation (client-side fallback / mock)
-// ========================
-
-// Generates a empty map
-
-// NOTE: Added "quests" inputa
-function generateMap(quests: Quest[]): Node[][] {
-  const map: Node[][] = [];
-
-  // Initialize empty grid
-  for (let y = 0; y < MAP_SIZE; y++) {
-    const row: Node[] = [];
-    for (let x = 0; x < MAP_SIZE; x++) {
-      row.push({ x, y, resources: null, collected: false });
-    }
-    map.push(row);
-  }
-
-  const requiredElements: ElementType[] = []
-
-  // Uses input list of elements to propagate requiredElements
-  for (const quest of quests) {
-    for (const [symbol, count] of Object.entries(quest.required)) {
-      const element = SYMBOL_TO_ELEMENT[symbol];
-      if (!element) {
-        throw new Error(`Unknown element symbol "${symbol}" in quest ${quest.moleculeName}`);
-      }
-      for (let i = 0; i < count; i++) {
-        requiredElements.push(element as ElementType);
-      }
-    }
-  }
-
-  // Initialize random Nodes with the resources needed to complete the game
-  for (let i = requiredElements.length - 1; i >= 0; i--) {
-    const currNode = map[randomInt(0, MAP_SIZE-1)][randomInt(0, MAP_SIZE-1)]
-    if (currNode.resources === null) {
-      currNode.resources = {[requiredElements[i]]: 1} as Record<ElementType, number>;
-    } else {
-      currNode.resources[requiredElements[i]] = (currNode.resources[requiredElements[i]] ?? 0) + 1;;
-    }
-  }
-
-  // TODO Add addional resources with probabilty
-
-  return map;
+type questFormat = {
+    id: string;
+    resource_type: string;
+    molecule_name: string;
+    molecule_formula: string;
+    required: Record<string, number>;
 }
+
+// Filter for Soil related questions.
+    // const relevantQuestions = raw.filter(
+    //     (q) => q.resource_type === "Soil"
+    // );
+
+function convertToQuests(raw: questFormat[]): Quest[] {
+    const quests: Quest[] = raw.map((q) => ({
+        id: Number(q.id),
+        moleculeName: q.molecule_name,
+        moleculeFormula: q.molecule_formula,
+        required: q.required,
+        submitted: {}, // Initialize submitted as an empty object
+        completed: false,
+    }));
+    return quests;
+}
+
 // ========================
 // Initial State
 // ========================
