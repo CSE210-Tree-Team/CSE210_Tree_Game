@@ -1,0 +1,63 @@
+.terminalContainer {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    background: var(--color-darkBrown);
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.5);
+    font-family: 'Handjet', monospace;
+}
+
+.logArea {
+    flex: 1;
+    overflow-y: auto;
+    padding: 1.25rem;
+    font-family: 'Handjet', monospace;
+    font-size: 1.5rem;
+    line-height: 1.4;
+    white-space: pre-wrap;
+}
+
+.inputArea {
+    display: flex;
+    align-items: center;
+    padding: 1.25rem 1.25rem;
+    border-top: 1px solid rgba(234, 195, 131, 0.2);
+    background: rgba(0, 0, 0, 0.3);
+}
+
+.prompt {
+    color: var(--color-tan);
+    margin-right: 1.5rem;
+    font-weight: bold;
+}
+
+.inputField {
+    flex: 1;
+    background: transparent;
+    border: none;
+    outline: none;
+    color: var(--color-lightTan);
+    font-family: inherit;
+    font-size: 1.5rem;
+}
+
+/* Color coding for logs */
+.logLine {
+    color: var(--color-lightTan);
+}
+
+.successLine {
+    color: var(--color-success);
+    font-weight: bold;
+}
+
+.commandLine {
+    color: var(--color-tan);
+    font-weight: bold;
+}
+
+.locationLine {
+    color: var(--color-lightGreen);
+}
