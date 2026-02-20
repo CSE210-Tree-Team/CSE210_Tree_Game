@@ -8,7 +8,11 @@ export type RaindropProps = {
 
 export const Raindrop = ({ x, y, answer }: RaindropProps) => {
   return (
-    <div className={styles.raindrop} style={{ left: x, top: y }}>
+    <div
+      className={styles.raindrop}
+      data-testid="raindrop"
+      style={{ left: x, top: y }}
+    >
       <span className={styles.answer}>{answer}</span>
     </div>
   );
