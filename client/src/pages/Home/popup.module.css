@@ -1,0 +1,25 @@
+.overlay {
+    position: fixed;
+    width: 100vw;
+    height: 100vh;
+    background-image: url('/assets/bg.svg');
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+}
+
+.gameScreen {
+    display: flex;
+    padding: 4rem;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: center;
+    height: 100%;
+    width: -webkit-fill-available;
+}
+
+.popup {
+    position:relative;
+    z-index:1001;
+}

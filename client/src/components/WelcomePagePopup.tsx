@@ -2,12 +2,11 @@ import styles from "./WelcomePopup.module.css";
 
 interface WelcomePagePopupProps {
     text: string;
-    className?: string;
 }
 
-export const WelcomePagePopup = ({ text, className }: WelcomePagePopupProps) => {
+export const WelcomePagePopup = ({ text }: WelcomePagePopupProps) => {
     return (
-        <div className={`${styles.welcomePopup} ${className ?? ""}`}>
+        <div className={`${styles.welcomePopup}`}>
             <p className={styles.welcomeText}>{text}</p>
         </div>
     );

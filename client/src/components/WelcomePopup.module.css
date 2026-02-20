@@ -1,8 +1,16 @@
+﻿.welcomeContainer {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+}
+
 .welcomePopup {
-  composes: popup grass from "./Popup.module.css";
-  width: 70%;
-  padding: 3rem 2rem;
-  margin:auto;
+    composes: popup grass from "./Popup.module.css";
+    width: 70%;
+    padding: 3rem 2rem;
+  
 }
 
 .welcomeText {

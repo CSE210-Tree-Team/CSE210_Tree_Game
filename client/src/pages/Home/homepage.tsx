@@ -8,6 +8,7 @@ import { ResourceBoard } from "../../components/ResourceBoard"
 import styles from "../../components/homepage.module.css"
 import fontStyles from "../../components/Popup.module.css"
 import buttonStyles from "../../components/Button.module.css"
+import Tutorial from "./Tutorial"
 interface UserInfo {
     success: boolean;
     user: {
@@ -54,8 +55,8 @@ const userInfoMock: UserInfo = {
 export const Homepage = () => {
     const { user, logout, getAccessTokenSilently } = useAuth0();
     const [userInfo, setUserInfo] = useState<UserInfo | null>(null);
-    //const [showResources, setShowResources] = useState(false);
     const navigate = useNavigate();
+    const [showTutorial, setShowTutorial] = useState(false);
 
 
     useEffect(() => {
@@ -101,10 +102,15 @@ export const Homepage = () => {
         navigate('/water');
     };
 
+    const handleCloseTutorial = () => {
+        setShowTutorial(false);
+    }
+
     
 
     return (
         <div className={styles.homepageWrapper}>
+            {showTutorial && (<Tutorial onClose={handleCloseTutorial} />)}
             <div className={styles.gameConatiner}>
                     <h1 className={`${fontStyles.title} ${styles.helloTitle}`}>
                         Hello, {userInfo?.user.displayName || 'User'}
