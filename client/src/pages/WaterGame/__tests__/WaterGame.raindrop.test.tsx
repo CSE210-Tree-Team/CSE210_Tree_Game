@@ -3,8 +3,7 @@ import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { MemoryRouter } from "react-router-dom";
 import { WaterGame } from "../WaterGame";
-
-const RAINDROP_WIDTH = 96; // 6rem
+import { SPAWN_INTERVAL_MS, RAINDROP_WIDTH } from "../constants";
 
 test("spawns raindrops within container bounds", async () => {
   const user = userEvent.setup();
@@ -50,7 +49,6 @@ test("raindrop moves downward over time", async () => {
     value: 800,
   });
 
-  // Enter game screen
   await user.click(screen.getByRole("button", { name: /play/i }));
   await user.click(screen.getByRole("button", { name: /i'm ready/i }));
 
@@ -67,3 +65,63 @@ test("raindrop moves downward over time", async () => {
     { timeout: 1500 },
   );
 });
+
+test("raindrop disappears once it hits the bottom", async () => {
+  Object.defineProperty(HTMLElement.prototype, "offsetHeight", {
+    configurable: true,
+    value: 200,
+  });
+  Object.defineProperty(HTMLElement.prototype, "offsetWidth", {
+    configurable: true,
+    value: 800,
+  });
+
+  const user = userEvent.setup();
+
+  render(
+    <MemoryRouter>
+      <WaterGame />
+    </MemoryRouter>,
+  );
+
+  await user.click(screen.getByRole("button", { name: /play/i }));
+  await user.click(screen.getByRole("button", { name: /i'm ready/i }));
+
+  await screen.findByTestId("raindrop-0", {}, { timeout: 3000 });
+
+  await waitFor(
+    () => {
+      expect(screen.queryByTestId("raindrop-0")).not.toBeInTheDocument();
+    },
+    { timeout: 3000 },
+  );
+});
+
+test("raindrops spawn at the correct interval", async () => {
+  Object.defineProperty(HTMLElement.prototype, "offsetHeight", {
+    configurable: true,
+    value: 1000,
+  });
+  Object.defineProperty(HTMLElement.prototype, "offsetWidth", {
+    configurable: true,
+    value: 800,
+  });
+
+  const user = userEvent.setup();
+
+  render(
+    <MemoryRouter>
+      <WaterGame />
+    </MemoryRouter>,
+  );
+
+  await user.click(screen.getByRole("button", { name: /play/i }));
+  await user.click(screen.getByRole("button", { name: /i'm ready/i }));
+
+  expect(screen.queryByTestId("raindrop-0")).not.toBeInTheDocument();
+
+  await screen.findByTestId("raindrop-0", {}, { timeout: SPAWN_INTERVAL_MS });
+  expect(screen.queryByTestId("raindrop-1")).not.toBeInTheDocument();
+
+  await screen.findByTestId("raindrop-1", {}, { timeout: SPAWN_INTERVAL_MS });
+}, 10000);

@@ -15,21 +15,15 @@ import { Popup } from "../../components/Popup";
 import Bucket from "./components/Bucket";
 import { Raindrop } from "./components/Raindrop";
 import type { RaindropData } from "./types";
+import {
+  SAMPLE_ANSWERS,
+  RAINDROP_FALL_SPEED,
+  RAINDROP_HEIGHT,
+  RAINDROP_WIDTH,
+  SPAWN_INTERVAL_MS,
+} from "./constants";
 
 import styles from "./WaterGame.module.css";
-
-const SAMPLE_ANSWERS = [
-  { text: "H2O", isCorrect: true },
-  { text: "CO2", isCorrect: false },
-  { text: "O2", isCorrect: false },
-  { text: "NaCl", isCorrect: false },
-  { text: "O2", isCorrect: false },
-  { text: "He", isCorrect: false },
-];
-const RAINDROP_WIDTH = 96; // 6rem
-const RAINDROP_HEIGHT = 128; // 8rem
-const RAINDROP_FALL_SPEED = 1.2;
-const SPAWN_INTERVAL_MS = 1750;
 
 export const WaterGame = () => {
   const [screen, setScreen] = useState<"start" | "tutorial" | "game" | "end">(
@@ -198,6 +192,7 @@ export const WaterGame = () => {
           </button>
           {raindrops.map((drop) => (
             <Raindrop
+              id={drop.id}
               key={drop.id}
               x={drop.x}
               y={drop.y}
