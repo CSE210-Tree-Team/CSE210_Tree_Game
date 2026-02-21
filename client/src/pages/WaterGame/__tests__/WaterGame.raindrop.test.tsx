@@ -1,3 +1,14 @@
+/*
+Integration tests for the raindrop in WaterGame component
+
+This module contains integration tests for the Raindrop component, 
+within the WaterGame, which is essential for tracking the player's
+progress throughout the minigame. These tests verify the raindrop
+animations are as expected: render within horizontal bounds, move
+downward over time, spawn at a specified interval, and disappears
+once it hits the floor.
+*/
+
 import { test, expect } from "vitest";
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";

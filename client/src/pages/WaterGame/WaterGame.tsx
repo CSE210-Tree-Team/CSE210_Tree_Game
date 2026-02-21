@@ -38,6 +38,8 @@ export const WaterGame = () => {
   const nextRaindropId = useRef(0);
   const answerQueueRef = useRef([...SAMPLE_ANSWERS]);
 
+  // Sets the bucket's initial horizontal position to the center of the container
+  // when the game screen mounts
   useEffect(() => {
     if (screen !== "game") return;
     if (!containerRef.current) return;
@@ -46,6 +48,8 @@ export const WaterGame = () => {
     setBucketX(containerWidth / 2 - 140 / 2);
   }, [screen]);
 
+  // Listens for left and right arrow key presses and moves the bucket
+  // horizontally, clamping its position within the container bounds
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (!containerRef.current) return;
@@ -65,6 +69,7 @@ export const WaterGame = () => {
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, []);
 
+  // Resets game state and transitions to the game screen
   const startGame = () => {
     setRaindrops([]);
     answerQueueRef.current = [...SAMPLE_ANSWERS];
@@ -72,13 +77,15 @@ export const WaterGame = () => {
     setScreen("game");
   };
 
+  // Pulls the next answer from the queue and spawns a raindrop at a random
+  // horizontal position along the top of the container
   const spawnRaindrop = useCallback(() => {
     if (!containerRef.current) return;
 
     const queue = answerQueueRef.current;
     if (queue.length === 0) return;
 
-    const nextAnswer = queue.shift()!; // mutate ref safely
+    const nextAnswer = queue.shift()!;
     const containerWidth = containerRef.current.offsetWidth;
 
     setRaindrops((prev) => [
@@ -94,6 +101,7 @@ export const WaterGame = () => {
     ]);
   }, []);
 
+  // Spawns a new raindrop at a fixed interval while the game screen is active
   useEffect(() => {
     if (screen !== "game") return;
 
@@ -101,6 +109,8 @@ export const WaterGame = () => {
     return () => clearInterval(interval);
   }, [screen, spawnRaindrop]);
 
+  // Moves all raindrops downward on each tick and removes any that have
+  // fallen past the bottom of the game screen
   useEffect(() => {
     if (screen !== "game") return;
     if (!gameScreenRef.current) return;
