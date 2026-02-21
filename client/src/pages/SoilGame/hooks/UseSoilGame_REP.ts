@@ -16,7 +16,7 @@ import {
   hasUncollectedResource,
 } from '../types/Node.type';
 
-import {SYMBOL_TO_ELEMENT} from '../types/stringMappings';
+import {DIRECTION_LABELS, SYMBOL_TO_ELEMENT} from '../types/stringMappings';
 
 import {
   getNextPosition,
@@ -132,7 +132,6 @@ export function useSoilGame() {
 
     const initialLog = [
       'Welcome to the Roots:',
-      '',
       ...formatLocationInfo(startPos, map),
     ];
 
@@ -140,7 +139,7 @@ export function useSoilGame() {
       ...prev,
       phase: 'playing',
       map,
-      fetchedQuests,
+      quests: fetchedQuests,
       playerPosition: startPos,
       inventory: createEmptyInventory(),
       terminalLog: initialLog,
