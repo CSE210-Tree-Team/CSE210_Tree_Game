@@ -16,7 +16,7 @@ import { Raindrop } from "../Raindrop";
 import styles from "../Raindrop.module.css";
 
 test("renders the raindrop with correct styling and answer text", () => {
-  render(<Raindrop x={0} y={0} answer={"answer"} />);
+  render(<Raindrop id={0} x={0} y={0} answer={"answer"} />);
   const raindrop = screen.getByText("answer").closest("div");
   expect(raindrop).toBeInTheDocument();
   expect(raindrop).toHaveClass(styles.raindrop);
@@ -27,30 +27,34 @@ test("renders the raindrop with correct styling and answer text", () => {
 });
 
 test("sets left position based on x prop", () => {
-  render(<Raindrop x={150} y={0} answer={"answer"} />);
+  render(<Raindrop id={0} x={150} y={0} answer={"answer"} />);
 
   const raindrop = screen.getByText("answer").closest("div");
   expect(raindrop).toHaveStyle({ left: "150px" });
 });
 
 test("updates position when x prop changes", () => {
-  const { rerender } = render(<Raindrop x={150} y={0} answer={"answer"} />);
+  const { rerender } = render(
+    <Raindrop id={0} x={150} y={0} answer={"answer"} />,
+  );
 
   let raindrop = screen.getByText("answer").closest("div");
   expect(raindrop).toHaveStyle({ left: "150px" });
 
-  rerender(<Raindrop x={200} y={0} answer={"answer"} />);
+  rerender(<Raindrop id={0} x={200} y={0} answer={"answer"} />);
   raindrop = screen.getByText("answer").closest("div");
   expect(raindrop).toHaveStyle({ left: "200px" });
 });
 
 test("updates position when y prop changes", () => {
-  const { rerender } = render(<Raindrop x={0} y={0} answer={"answer"} />);
+  const { rerender } = render(
+    <Raindrop id={0} x={0} y={0} answer={"answer"} />,
+  );
 
   let raindrop = screen.getByText("answer").closest("div");
   expect(raindrop).toHaveStyle({ top: "0px" });
 
-  rerender(<Raindrop x={0} y={200} answer={"answer"} />);
+  rerender(<Raindrop id={0} x={0} y={200} answer={"answer"} />);
   raindrop = screen.getByText("answer").closest("div");
   expect(raindrop).toHaveStyle({ top: "200px" });
 });
