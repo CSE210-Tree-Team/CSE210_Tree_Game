@@ -6,11 +6,17 @@ interface TerminalProps {
   onCommand: (cmd: string) => void;
 }
 
+/**
+ * Terminal: Displays the game log and handles player input.
+ * - Renders each log line with a color based on its type (command, location, success, default)
+ * - Auto-scrolls to the latest log entry whenever logs update
+ * - Submits trimmed input to onCommand and clears the field on Enter
+ */
 export function Terminal({ logs, onCommand }: TerminalProps) {
   const [input, setInput] = useState("");
   const logRef = useRef<HTMLDivElement>(null);
 
-// scrolling to the botoom auto
+  // Auto-scroll to the bottom whenever a new log line is added
   useEffect(() => {
     if (logRef.current) {
       logRef.current.scrollTop = logRef.current.scrollHeight;

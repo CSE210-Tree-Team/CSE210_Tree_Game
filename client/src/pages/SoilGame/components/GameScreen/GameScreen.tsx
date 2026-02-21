@@ -8,6 +8,12 @@ interface GameScreenProps {
     onCommand: (rawInput: string) => void;
 }
 
+/**
+ * GameScreen: Top-level layout for the active game.
+ * Splits the screen into two panels:
+ *   - Left (75%): Terminal for player input and game output
+ *   - Right: Sidebar showing quests, inventory, and commands
+ */
 export function GameScreen({ state, onCommand }: GameScreenProps) {
     return (
         <div className={styles.gameBoard}>
