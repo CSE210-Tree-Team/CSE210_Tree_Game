@@ -1,5 +1,5 @@
 import { useNavigate } from 'react-router-dom';
-import { useSoilGame } from './hooks/useSoilGame';
+import { useSoilGame } from './hooks/UseSoilGame';
 import { TitleScreen } from './components/TitleScreen/TitleScreen';
 import { TutorialScreen } from './components/TutorialScreen/TutorialScreen';
 import styles from './SoilGame.module.css';
