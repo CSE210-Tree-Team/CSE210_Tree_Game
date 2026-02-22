@@ -15,7 +15,7 @@ function Tutorial({ onClose }: TutorialProps) {
                 <Popup
                     variant="grass"
                     screen="tutorial"
-                    header="Welcome to"
+                        header="Welcome to Bristlecone"
                         buttonText="Next"
                         onClick={() => { setCurrentPage("end") }}
                     textList={[

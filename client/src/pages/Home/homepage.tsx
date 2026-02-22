@@ -56,7 +56,7 @@ export const Homepage = () => {
     const { user, logout, getAccessTokenSilently } = useAuth0();
     const [userInfo, setUserInfo] = useState<UserInfo | null>(null);
     const navigate = useNavigate();
-    const [showTutorial, setShowTutorial] = useState(false);
+    const [showTutorial, setShowTutorial] = useState(true);
 
 
     useEffect(() => {
