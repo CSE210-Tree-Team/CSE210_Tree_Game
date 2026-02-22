@@ -17,6 +17,15 @@ import { WaterGame } from "../WaterGame";
 import { SPAWN_INTERVAL_MS, RAINDROP_WIDTH } from "../constants";
 
 test("spawns raindrops within container bounds", async () => {
+  Object.defineProperty(HTMLElement.prototype, "offsetHeight", {
+    configurable: true,
+    value: 1000,
+  });
+  Object.defineProperty(HTMLElement.prototype, "offsetWidth", {
+    configurable: true,
+    value: 800,
+  });
+
   const user = userEvent.setup();
 
   render(
@@ -28,18 +37,15 @@ test("spawns raindrops within container bounds", async () => {
   await user.click(screen.getByRole("button", { name: /play/i }));
   await user.click(screen.getByRole("button", { name: /i'm ready/i }));
 
-  const container = screen.getByTestId("bucket-container");
-  Object.defineProperty(container, "offsetWidth", {
-    configurable: true,
-    value: 500,
-  });
-
-  const raindropText = await screen.findByText("H2O", {}, { timeout: 3000 });
-  const raindrop = raindropText.closest("div")!;
+  const raindrop = await screen.findByTestId(
+    "raindrop-0",
+    {},
+    { timeout: 3000 },
+  );
 
   const left = parseFloat(raindrop.style.left);
   expect(left).toBeGreaterThanOrEqual(0);
-  expect(left).toBeLessThanOrEqual(500 - RAINDROP_WIDTH);
+  expect(left).toBeLessThanOrEqual(800 - RAINDROP_WIDTH);
 });
 
 test("raindrop moves downward over time", async () => {
@@ -63,8 +69,12 @@ test("raindrop moves downward over time", async () => {
   await user.click(screen.getByRole("button", { name: /play/i }));
   await user.click(screen.getByRole("button", { name: /i'm ready/i }));
 
-  const firstText = await screen.findByText("H2O", {}, { timeout: 3000 });
-  const initialTop = parseFloat(firstText.closest("div")!.style.top);
+  const raindrop = await screen.findByTestId(
+    "raindrop-0",
+    {},
+    { timeout: 3000 },
+  );
+  const initialTop = parseFloat(raindrop.style.top);
 
   await waitFor(
     () => {
