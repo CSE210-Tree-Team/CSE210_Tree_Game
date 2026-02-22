@@ -10,3 +10,4 @@ export const RAINDROP_WIDTH = 96; // 6rem
 export const RAINDROP_HEIGHT = 128; // 8rem
 export const RAINDROP_FALL_SPEED = 1.2;
 export const SPAWN_INTERVAL_MS = 1750;
+export const BUCKET_WIDTH = 140;

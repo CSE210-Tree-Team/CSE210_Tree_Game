@@ -21,6 +21,7 @@ import {
   RAINDROP_HEIGHT,
   RAINDROP_WIDTH,
   SPAWN_INTERVAL_MS,
+  BUCKET_WIDTH,
 } from "./constants";
 
 import styles from "./WaterGame.module.css";
@@ -45,7 +46,7 @@ export const WaterGame = () => {
     if (!containerRef.current) return;
 
     const containerWidth = containerRef.current.offsetWidth;
-    setBucketX(containerWidth / 2 - 140 / 2);
+    setBucketX(containerWidth / 2 - BUCKET_WIDTH / 2);
   }, [screen]);
 
   // Listens for left and right arrow key presses and moves the bucket
@@ -55,8 +56,7 @@ export const WaterGame = () => {
       if (!containerRef.current) return;
 
       const containerWidth = containerRef.current.offsetWidth;
-      const bucketWidth = 140;
-      const maxRight = Math.max(containerWidth - bucketWidth, 0);
+      const maxRight = Math.max(containerWidth - BUCKET_WIDTH, 0);
 
       if (e.key === "ArrowLeft") {
         setBucketX((prev) => Math.max(prev - 20, 0));
@@ -88,11 +88,17 @@ export const WaterGame = () => {
     const nextAnswer = queue.shift()!;
     const containerWidth = containerRef.current.offsetWidth;
 
+    const minX = BUCKET_WIDTH - RAINDROP_WIDTH;
+    const maxX = containerWidth - (BUCKET_WIDTH - RAINDROP_WIDTH);
+
+    console.log("minX", minX);
+    console.log("maxX", maxX);
+
     setRaindrops((prev) => [
       ...prev,
       {
         id: nextRaindropId.current++,
-        x: Math.random() * (containerWidth - RAINDROP_WIDTH),
+        x: Math.random() * (maxX - minX),
         y: 0,
         velocity: RAINDROP_FALL_SPEED,
         answer: nextAnswer.text,
