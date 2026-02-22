@@ -1,25 +1,51 @@
 import { describe, it, expect } from 'vitest';
 
-import { type Node, } from '../types/Map.type'
-
-import {
-  SYMBOL_TO_ELEMENT,
-  DIRECTION_LABELS,
-} from '../types/stringMappings'
-
-import {
-  type Position,
-  type Direction,
-  type Inventory,
-  type Quest,
+import { 
   type ElementType,
-  type GamePhase,
+  type GamePhase, 
+  type Inventory,
+  type Position,
+  type Node,
+  type Quest,
   type GameState,
   type CompleteGameRequest,
   type CompleteGameResponse,
+  type Direction,
   type PlayerCommand,
   DIRECTION_DELTAS,
-} from '../types/SoilGame_REP.type';
+  SYMBOL_TO_ELEMENT,
+  DIRECTION_LABELS
+} from '../types/Abstract.types';
+
+import {
+  getNodeAt,
+  hasUncollectedResource,
+  generateMap
+} from '../utils/MapHelper'
+
+import {
+  createEmptyInventory,
+  addToInventory,
+  removeFromInventory
+} from '../utils/InventoryHelper';
+
+import {
+  isQuestComplete,
+  getNextNeededElement,
+  submitElementToQuest,
+  formatQuestProgress,
+  getElementSymbol,
+  formatLocationInfo,
+  isValidCommand,
+  parseCommand
+} from '../utils/QuestListHelper';
+
+import {
+  isValidPosition,
+  getNextPosition,
+  getPossibleMoves
+} from '../utils/PositionHelper';
+
 
 describe('SoilGame_REP.type exports', () => {
   it('SYMBOL_TO_ELEMENT maps symbols to ElementType', () => {

@@ -1,5 +1,50 @@
 import { useState, useCallback } from 'react';
-import type { GameState, GamePhase } from '../types/soilGame.types';
+
+import { 
+  type ElementType,
+  type GamePhase, 
+  type Inventory,
+  type Position,
+  type Node,
+  type Quest,
+  type GameState,
+  type CompleteGameRequest,
+  type CompleteGameResponse,
+  type Direction,
+  type PlayerCommand,
+  DIRECTION_DELTAS,
+  SYMBOL_TO_ELEMENT,
+  DIRECTION_LABELS
+} from '../types/Abstract.types';
+
+import {
+  getNodeAt,
+  hasUncollectedResource,
+  generateMap
+} from '../utils/MapHelper'
+
+import {
+  createEmptyInventory,
+  addToInventory,
+  removeFromInventory
+} from '../utils/InventoryHelper';
+
+import {
+  isQuestComplete,
+  getNextNeededElement,
+  submitElementToQuest,
+  formatQuestProgress,
+  getElementSymbol,
+  formatLocationInfo,
+  isValidCommand,
+  parseCommand
+} from '../utils/QuestListHelper';
+
+import {
+  isValidPosition,
+  getNextPosition,
+  getPossibleMoves
+} from '../utils/PositionHelper';
 
 const MAP_SIZE = 5;
 
@@ -25,13 +70,13 @@ function createInitialState(): GameState {
 // ========================
 
 export function useSoilGame() {
-  const [state, setState] = useState<GameState>(createInitialState);
+  const [state, setGameState] = useState<GameState>(createInitialState);
 
   /**
    * Change the game phase (title → tutorial)
    */
   const setPhase = useCallback((phase: GamePhase) => {
-    setState((prev) => ({ ...prev, phase }));
+    setGameState((prev) => ({ ...prev, phase }));
   }, []);
 
   return {

@@ -1,11 +1,13 @@
 
-import {SYMBOL_TO_ELEMENT, DIRECTION_LABELS} from "./stringMappings"
 import { 
-    type ElementType,
-    type Position,
-    type Quest,
-} from "./SoilGame_REP.type";
-import { isValidPosition } from "../utils/PositionHelper";
+  type Node,
+  type ElementType,
+  type Position,
+  type Quest,
+  SYMBOL_TO_ELEMENT, 
+} from "../types/Abstract.types";
+
+import { isValidPosition } from "./PositionHelper";
 
 const MAP_SIZE = 5;
 
@@ -16,16 +18,6 @@ const MAP_SIZE = 5;
 const randomInt = (min: number, max: number): number => {
   return Math.floor(Math.random() * (max - min + 1)) + min;
 };
-
-// A room on the N x N Map
-export interface Node {
-  x: number;
-  y: number;
-
-  // CHANGED
-  resources: Record<ElementType, number> | null;
-  collected: boolean;
-}
 
 // ========================
 // Map Helpers

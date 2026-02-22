@@ -1,20 +1,7 @@
 import {
-  type Position,
-  type Direction,
   type Inventory,
-  type Quest,
   type ElementType,
-  DIRECTION_DELTAS,
-} from '../types/SoilGame_REP.type';
-
-import {
-  type Node
-} from '../types/Map.type';
-
-import {
-    DIRECTION_LABELS,
-    SYMBOL_TO_ELEMENT
-} from '../types/stringMappings';
+} from '../types/Abstract.types';
 
 export function createEmptyInventory(): Inventory {
   // TODO: MAJOR BAD, we need to remove hardcoding here

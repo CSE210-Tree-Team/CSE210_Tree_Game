@@ -27,7 +27,7 @@ interface UpdateStatResponse {
 /**
  * Fetches questions list from Server. Refer to main.py for more.
  * @param numQuestions - Max number of questions to return
- * @param resourceType - Filter by resource
+ * @param resourceType - Filter by resource (Defines the minigame the pulled questions pertained to)
  * @param questionType - Filter by question type (MCQ, etc.)
  * @param difficulty - Filter by difficulty level (not implemented yet)
  * @returns Array of questions

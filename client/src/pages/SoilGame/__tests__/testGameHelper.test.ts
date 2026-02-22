@@ -1,40 +1,50 @@
 import { describe, it, expect } from 'vitest';
 
-import {
+import { 
+  type ElementType,
+  type GamePhase, 
+  type Inventory,
+  type Position,
   type Node,
+  type Quest,
+  type GameState,
+  type CompleteGameRequest,
+  type CompleteGameResponse,
+  type Direction,
+  type PlayerCommand,
+  DIRECTION_DELTAS,
+  SYMBOL_TO_ELEMENT,
+  DIRECTION_LABELS
+} from '../types/Abstract.types';
+
+import {
   getNodeAt,
   hasUncollectedResource,
-  generateMap,
-} from '../types/Map.type'
+  generateMap
+} from '../utils/MapHelper'
 
-import { 
+import {
+  createEmptyInventory, 
+  addToInventory,
+  removeFromInventory
+} from '../utils/InventoryHelper';
+
+import {
   isQuestComplete,
   getNextNeededElement,
   submitElementToQuest,
-  getElementSymbol,
   formatQuestProgress,
+  getElementSymbol,
+  formatLocationInfo,
   isValidCommand,
-  parseCommand,
-} from '../utils/GameHelper_REP';
+  parseCommand
+} from '../utils/QuestListHelper';
 
 import {
   isValidPosition,
   getNextPosition,
-  getPossibleMoves,
+  getPossibleMoves
 } from '../utils/PositionHelper';
-
-import {
-  createEmptyInventory,
-  addToInventory,
-  removeFromInventory,
-} from '../utils/InventoryHelper'
-
-import {
-  type Position,
-  type Direction,
-  type Inventory,
-  type Quest,
-} from '../types/SoilGame_REP.type';
 
 /**
  * Vitest (unit tests) for GameHelper implementation.

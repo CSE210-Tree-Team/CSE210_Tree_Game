@@ -1,22 +1,12 @@
-import {
-  SYMBOL_TO_ELEMENT,
-  DIRECTION_LABELS,
-} from '../types/stringMappings'
 
 import {
   type Position,
   type Direction,
-  type Inventory,
-  type Quest,
-  type ElementType,
   DIRECTION_DELTAS,
-} from '../types/SoilGame_REP.type';
-import {
-  type Node,
-  getNodeAt,
-  hasUncollectedResource,
-} from '../types/Map.type';
+  DIRECTION_LABELS,
+} from '../types/Abstract.types';
   
+// Default Map size
 const MAP_SIZE = 5;
 
 // ========================
@@ -54,19 +44,3 @@ export function getPossibleMoves(pos: Position, mapSize: number = MAP_SIZE): str
   }
   return moves;
 }
-
-// ========================
-// Map Helpers
-// ========================
-
-/** Get the node at a given position */
-// export function getNodeAt(map: Node[][], pos: Position): Node | null {
-//   if (!isValidPosition(pos, map.length)) return null;
-//   return map[pos.y][pos.x];
-// }
-
-/** Check if current node has an uncollected resource */
-// export function hasUncollectedResource(map: Node[][], pos: Position): boolean {
-//   const node = getNodeAt(map, pos);
-//   return node !== null && node.resources !== null && !node.collected;
-// }
