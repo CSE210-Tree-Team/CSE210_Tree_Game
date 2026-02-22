@@ -91,9 +91,6 @@ export const WaterGame = () => {
     const minX = BUCKET_WIDTH - RAINDROP_WIDTH;
     const maxX = containerWidth - (BUCKET_WIDTH - RAINDROP_WIDTH);
 
-    console.log("minX", minX);
-    console.log("maxX", maxX);
-
     setRaindrops((prev) => [
       ...prev,
       {
