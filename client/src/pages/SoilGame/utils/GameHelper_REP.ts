@@ -8,6 +8,7 @@ import {
 } from '../types/SoilGame_REP.type';
 
 import {
+  getNodeAt,
   type Node
 } from '../types/Node.type';
 
