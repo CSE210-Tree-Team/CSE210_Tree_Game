@@ -4,19 +4,52 @@ interface QuestionChoice {
     isCorrect: boolean;
 }
 
-export interface Question {
+/**
+ * TODO: 
+ * Question is formatted wrong for Soilminigame
+ * 1) explicitly define resourceType as "earth" and "water"
+ * 2) Abstract a BaseQuestion to only house the common fields
+ * 3) Extend BaseQuestion with the earth and water minigame extensions 
+ *      (these contain the updated question and answer fields)
+ * 4) Have AI rewrite some tests for this implementation 
+ *      (half of the current tests should become invalid due to the wrong soil game question format)
+ * 5) Ensure the backend follows the naming convention used here
+ */
+
+// Used to determine what questions to filter by
+type ResourceType = "earth" | "water";
+
+type QuestionMap = {
+    water: WaterQuestion;
+    earth: EarthQuestion;
+};
+
+export interface BaseQuestion {
     questionID: string;
+    difficulty: number;
+    resourceType: ResourceType;
+}
+
+export interface WaterQuestion extends BaseQuestion {
+    resourceType: "water";
     text: string;
     type: string;
-    difficulty: number;
-    resourceType: string;
     choices: QuestionChoice[];
 }
 
-interface GetQuestionsResponse {
+export interface EarthQuestion extends BaseQuestion {
+    resourceType: "earth";
+    moleculeName: string;
+    moleculeFormula: string;
+    required: Record<string, number>;
+}
+
+export type Question = WaterQuestion | EarthQuestion;
+
+interface GetQuestionsResponse<T> {
     success: boolean;
     count: number;
-    questions: Question[];
+    questions: T[];
 }
 
 interface UpdateStatResponse {
@@ -32,8 +65,13 @@ interface UpdateStatResponse {
  * @param difficulty - Filter by difficulty level (not implemented yet)
  * @returns Array of questions
  */
-export async function fetchQuestions(numQuestions?: number, resourceType?: string,
-        questionType?: string, difficulty?: number): Promise<Question[]> {
+export async function fetchQuestions<T extends ResourceType>(
+    resourceType: T,
+    numQuestions?: number, 
+    questionType?: string, 
+    difficulty?: number
+): Promise<QuestionMap[T][]> {
+
     const response = await fetch('/api/get-questions', {
         method: 'POST',
         headers: {
@@ -51,13 +89,13 @@ export async function fetchQuestions(numQuestions?: number, resourceType?: strin
         throw new Error('Failed to fetch questions');
     }
 
-    const data: GetQuestionsResponse = await response.json();
+    const data: GetQuestionsResponse<QuestionMap[T]> = await response.json();
     
     if (!data.success) {
         throw new Error('Server returned unsuccessful response');
     }
 
-    return data.questions;
+    return data.questions as QuestionMap[T][];
 }
 
 /**

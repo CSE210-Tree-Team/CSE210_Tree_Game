@@ -1,0 +1,21 @@
+.raindrop {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-image: url("/raindrop.svg");
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+  width: 6rem;
+  height: 8rem;
+  position: absolute;
+  box-sizing: border-box;
+}
+
+.answer {
+  color: var(--color-blue2);
+  text-align: center;
+  font-size: 2.5rem;
+  font-weight: 400;
+  margin: 0;
+}

@@ -46,6 +46,10 @@ import {
   getPossibleMoves
 } from '../utils/PositionHelper';
 
+import {
+  fetchQuestions,
+} from '../../ServerCalls/ServerCalls'
+
 const MAP_SIZE = 5;
 
 // ========================
@@ -79,8 +83,54 @@ export function useSoilGame() {
     setGameState((prev) => ({ ...prev, phase }));
   }, []);
 
+  //
+  const startGame = useCallback(async () => {
+    // TODO: (Not Sure If We Still Need This) Replace with actual API call to GET /api/soil-game/start
+    const fetchedQuests: Quest[] = await fetchQuestions();
+    const map = generateMap(fetchedQuests);
+    const startPos: Position = { x: 0, y: 0 };
+
+    const initialLog = [
+      'Welcome to the Roots:',
+      ...formatLocationInfo(startPos, map),
+    ];
+
+    setGameState((prev) => ({
+      ...prev,
+      phase: 'playing',
+      map,
+      quests: fetchedQuests,
+      playerPosition: startPos,
+      inventory: createEmptyInventory(),
+      terminalLog: initialLog,
+      questsCompleted: 0,
+    }));
+  }, []);
+
+  // ---- The follow commands are notes for later, do not use them ----
+  const handleCommand = useCallback((rawInput: string) => {
+    // TODO: Implement command handling logic
+    console.log('Command received:', rawInput);
+    setGameState((prev) => ({
+      ...prev,
+      terminalLog: [...prev.terminalLog, '', `> ${rawInput}`],
+    }));
+  }, []);
+
+  const completeGame = useCallback(async () => {
+    // TODO: Replace with actual POST /api/soil-game/complete
+    console.log(`Game complete! Quests completed: ${state.questsCompleted}`);
+    return {
+      success: true,
+      progress_added: state.questsCompleted * 25,
+      new_soil_level: state.questsCompleted * 25,
+    };
+  }, [state.questsCompleted]);
+
   return {
     state,
     setPhase,
+    startGame,
+    // TODO: Add additional commands here
   };
 }
