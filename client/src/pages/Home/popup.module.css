@@ -23,3 +23,12 @@
     position:relative;
     z-index:1001;
 }
+
+.arrow {
+    position: relative;
+    top: -17rem;
+    left: 8rem;
+    width: 4rem;
+    height: 4rem;
+    cursor: pointer;
+}

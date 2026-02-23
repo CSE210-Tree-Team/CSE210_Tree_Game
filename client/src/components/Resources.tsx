@@ -13,44 +13,31 @@ export interface ResourceItemProps {
     label: string;
 }
 
-export const ResourceItem = ({ type, value, label }: ResourceItemProps) => {
-    const getIcon = () => {
-        switch (type) {
-            case "water":
-                return RESOURCE_ICONS.WATER;
-            case "earth":
-                return RESOURCE_ICONS.EARTH;
-            case "sun":
-                return RESOURCE_ICONS.SUN;
-        }
-    };
-    const getBarClass = () => {
-        switch (type) {
-            case "water":
-                return styles.waterBar;
-            case "earth":
-                return styles.earthBar;
-            case "sun":
-                return styles.sunBar;
-        }
-    };
+const RESOURCE_CONFIG = {
+    water: { icon: RESOURCE_ICONS.WATER, barClass: styles.waterBar },
+    earth: { icon: RESOURCE_ICONS.EARTH, barClass: styles.earthBar },
+    sun: { icon: RESOURCE_ICONS.SUN, barClass: styles.sunBar },
+};
 
+export const ResourceItem = ({ type, value, label }: ResourceItemProps) => {
+    const config = RESOURCE_CONFIG[type];
+    
     return (
         <div className={styles.resourceItem}>
             <img
-                src={getIcon()}
+                src={config.icon}
                 alt={`${label} Resource Icon`}
                 className={styles.resourceIcon}
             />
             <div className={styles.resourceRight}>
                 <div className={styles.resourceLabelRow}>
                     <span className={styles.resourceLabel}>{label}</span>
-                    <span className={styles.resourceValue}>{value}%</span>
+                    <span className={styles.resourceValue}>{Math.min(100, Math.max(0, value))}%</span>
                 </div>
                 <div className={styles.progressBarContainer}>
                     <div
-                        className={`${styles.progressBar} ${getBarClass()}`}
-                        style={{ width: `${value}%` }}
+                        className={`${styles.progressBar} ${config.barClass}`}
+                        style={{ width: `${Math.min(100, Math.max(0, value))}%` }}
                     ></div>
                 </div>
             </div>

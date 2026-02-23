@@ -1,3 +1,9 @@
+/**
+ * Add tutorial component here. 
+ * This component will be rendered as a popup when the user first visits the page.
+ * It should provide a brief overview of the game mechanics and how to play.
+ */
+
 import { Popup } from "../../components/Popup"
 import { useState } from "react"
 import styles from "./popup.module.css"
@@ -29,6 +35,12 @@ function Tutorial({ onClose }: TutorialProps) {
 
             {currentPage === "end" && (
                 <div className={styles.overlay}>
+                    <img
+                        src="./assets/arrow_green.svg"
+                        alt="Back"
+                        className={styles.arrow}
+                        onClick={() => setCurrentPage("tutorial")}
+                    />
                     <Popup
                         variant="grass"
                         screen="end"

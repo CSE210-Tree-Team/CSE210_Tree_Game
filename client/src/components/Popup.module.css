@@ -29,7 +29,7 @@
     color: var(--color-darkGreen);
 }
 
-h2 {
+.popup h2 {
   font-family: "Handjet";
   font-size: 3rem;
   margin: 0;

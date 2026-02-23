@@ -56,7 +56,10 @@ export const Homepage = () => {
     const { user, logout, getAccessTokenSilently } = useAuth0();
     const [userInfo, setUserInfo] = useState<UserInfo | null>(null);
     const navigate = useNavigate();
-    const [showTutorial, setShowTutorial] = useState(true);
+    const [showTutorial, setShowTutorial] = useState<boolean>(() => {
+        const hasSeenTutorial = sessionStorage.getItem('hasSeenTutorial');
+        return !hasSeenTutorial; // Show tutorial if user hasn't seen it before
+    });
 
 
     useEffect(() => {
@@ -91,8 +94,10 @@ export const Homepage = () => {
         }
     }, [user, getAccessTokenSilently]);
 
-    const handleLogout = () =>
+    const handleLogout = () => {
+        sessionStorage.removeItem('hasSeenTutorial');
         logout({ logoutParams: { returnTo: window.location.origin } });
+    }
 
     const handleSoilGame = () => {
         navigate('/soil');
@@ -104,9 +109,9 @@ export const Homepage = () => {
 
     const handleCloseTutorial = () => {
         setShowTutorial(false);
+        sessionStorage.setItem('hasSeenTutorial', 'true');
     }
 
-    
 
     return (
         <div className={styles.homepageWrapper}>
@@ -129,7 +134,7 @@ export const Homepage = () => {
                     Logout
                     </button>
 
-                    <button className={`${buttonStyles.button} ${buttonStyles.grass} ${styles.buttonSingle} ${styles.buttonSetting}`} onClick={() => (window.location.href = "/")}>
+                    <button className={`${buttonStyles.button} ${buttonStyles.grass} ${styles.buttonSingle} ${styles.buttonSetting}`} onClick={() => navigate("/")}>
                     Settings
                     </button>
                 </div>
