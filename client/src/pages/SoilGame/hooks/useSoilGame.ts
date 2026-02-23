@@ -86,10 +86,19 @@ export function useSoilGame() {
   //
   const startGame = useCallback(async () => {
     // TODO: (Not Sure If We Still Need This) Replace with actual API call to GET /api/soil-game/start
-    const fetchedQuests: Quest[] = await fetchQuestions();
+
+    // Fetch questions from server
+    const fetchedQuestions = await fetchQuestions("earth");
+
+    // Extend questions field to include game logic fields
+    const fetchedQuests: Quest[] = fetchedQuestions.map((q) => ({
+      ...q,
+      submitted: {},
+      completed: false,
+    }));
+
     const map = generateMap(fetchedQuests);
     const startPos: Position = { x: 0, y: 0 };
-
     const initialLog = [
       'Welcome to the Roots:',
       ...formatLocationInfo(startPos, map),
@@ -117,6 +126,41 @@ export function useSoilGame() {
     }));
   }, []);
 
+  const movePlayer = useCallback((direction: Direction) => {
+    setGameState((prev) => {
+      if (prev.phase !== 'playing') return prev;
+
+      const nextPosition = getNextPosition(prev.playerPosition, direction);
+
+      // Check boundaries
+      if (nextPosition == null) {
+        return {
+          ...prev,
+          terminalLog: [
+            ...prev.terminalLog,
+            '',
+            `You cannot move ${DIRECTION_LABELS[direction]}.`,
+          ],
+        };
+      }
+
+      const node = getNodeAt(prev.map, nextPosition);
+
+      const locationInfo = formatLocationInfo(nextPosition, prev.map);
+
+      return {
+        ...prev,
+        playerPosition: nextPosition,
+        terminalLog: [
+          ...prev.terminalLog,
+          '',
+          `You move ${DIRECTION_LABELS[direction]}.`,
+          ...locationInfo,
+        ],
+      };
+    });
+  }, []); 
+
   const completeGame = useCallback(async () => {
     // TODO: Replace with actual POST /api/soil-game/complete
     console.log(`Game complete! Quests completed: ${state.questsCompleted}`);
@@ -131,6 +175,7 @@ export function useSoilGame() {
     state,
     setPhase,
     startGame,
+    handleCommand
     // TODO: Add additional commands here
   };
 }

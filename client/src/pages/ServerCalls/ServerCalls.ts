@@ -1,3 +1,5 @@
+import { testEarthQuestions } from "./MockQuestions";
+
 // Types:
 interface QuestionChoice {
     text: string;
@@ -41,7 +43,7 @@ export interface EarthQuestion extends BaseQuestion {
     resourceType: "earth";
     moleculeName: string;
     moleculeFormula: string;
-    required: Record<string, number>;
+    required: Record<string, number>; // e.g. { Nitrogen: 1, Hydrogen: 3 }
 }
 
 export type Question = WaterQuestion | EarthQuestion;
@@ -72,30 +74,40 @@ export async function fetchQuestions<T extends ResourceType>(
     difficulty?: number
 ): Promise<QuestionMap[T][]> {
 
-    const response = await fetch('/api/get-questions', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-            numQuestions,
-            resourceType,
-            questionType,
-            difficulty,
-        }),
-    });
+    try {
+        const response = await fetch('/api/get-questions', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                numQuestions,
+                resourceType,
+                questionType,
+                difficulty,
+            }),
+        });
 
-    if (!response.ok) {
-        throw new Error('Failed to fetch questions');
+        if (!response.ok) {
+            throw new Error('Failed to fetch questions');
+        }
+
+        const data: GetQuestionsResponse<QuestionMap[T]> = await response.json();
+        
+        if (!data.success) {
+            throw new Error('Server returned unsuccessful response');
+        }
+
+        return data.questions as QuestionMap[T][];
+    } catch (error) {
+        // Fallback for earth questions only
+        if (resourceType === "earth") {
+            console.warn("Using fallback Earth questions");
+            return testEarthQuestions as QuestionMap[T][];
+        }
+
+        throw error; // Still throw for water
     }
-
-    const data: GetQuestionsResponse<QuestionMap[T]> = await response.json();
-    
-    if (!data.success) {
-        throw new Error('Server returned unsuccessful response');
-    }
-
-    return data.questions as QuestionMap[T][];
 }
 
 /**

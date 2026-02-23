@@ -1,3 +1,5 @@
+import { type EarthQuestion } from "../../ServerCalls/ServerCalls";
+
 export type ElementType = 'Nitrogen' | 'Hydrogen' | 'Carbon' | 'Oxygen';
 
 // Ordered finite states the game can take
@@ -36,13 +38,7 @@ export interface Node {
  * required: Element-Value pairs representing the required amount of each element
  * submitted: The number of each element the player has submitted so far
  */
-export interface Quest {
-  id: number;
-  moleculeName: string;
-  moleculeFormula: string;
-
-  /** TODO: Consider changing to ElementType, either should work */
-  required: Record<string, number>; // e.g. { Nitrogen: 1, Hydrogen: 3 }
+export interface Quest extends EarthQuestion{
   submitted: Record<string, number>; // elements submitted so far
   completed: boolean;
 }
