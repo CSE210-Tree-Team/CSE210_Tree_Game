@@ -10,11 +10,21 @@ from Database.getItemsFromDatabase import get_person, get_tree, get_question, ge
 from Database.addItemsToDatabase import add_account, generate_tree, add_question, update_last_login, apply_passive_decay, update_stat
 from constants import ROLE_STUDENT, PASSIVE_DECAY_RATE
 from dataRecords import Tree, Event
+from email.message import EmailMessage
+import smtplib
 
 
 ############################################
 #               App Setup                  #
 ############################################
+
+# For Sending Messages
+CARRIERS = {
+    "att": "@mms.att.net",
+    "tmobile": "@tmomail.net",
+    "verizon": "@vtext.com",
+    "sprint": "@messaging.sprintpcs.com"
+}
 
 load_dotenv()
 app = FastAPI()
@@ -52,6 +62,16 @@ async def startup_event():
     """Start the passive decay background task when the app starts."""
     global decay_task
     decay_task = asyncio.create_task(run_passive_decay_loop())
+
+    DUMMY_EVENT = {
+        "eventType": "Decay",
+        "resourceAffected": "Water",
+        "description": "Your tree lost some water due to evaporation.",
+        "percentChange": -5,
+        "conditions": "Passive decay applied every hour."
+    }
+    send_email("adrian.s.rosing@gmail.com", DUMMY_EVENT)
+    
     print("Passive decay background task started")
 
 @app.on_event("shutdown")
@@ -123,6 +143,38 @@ def create_account(username: str, user_data: dict):
         print(f"Error creating account: {e}")
         raise HTTPException(status_code=500, detail="Failed to create account")
 
+def send_email(target_user, event):
+    event_str = f"Event Type: {event['eventType']}, Resource Affected: {event['resourceAffected']}, Description: {event['description']}, Stat Changes: {event['percentChange']}%, Conditions Met: {event['conditions']}"
+    print(f"Preparing to send email to {target_user} with message: {event_str}")
+    try:
+        # TODO: Implement Events more in-depth if we have time.
+        # Access Stuff
+        # phone_email = f"{userInfo[3]}" + CARRIERS[userInfo[4]]
+        message = f"Your tree just experienced the following event: {event_str}"
+
+        # TODO: Update email once we have a domain.
+        # Email server configuration
+        sender_email = "potplugtesting@gmail.com"  # Normal Email - pass is Testing123~
+        password = "pwrplsmoecjduvnr"  # App Password
+    except:
+        print("Failed to find user.")
+        return {"User Not Found."}
+
+    # Sends Message
+    try:
+        email_msg = EmailMessage()
+        email_msg["From"] = sender_email
+        email_msg["To"] = target_user
+        email_msg["Subject"] = "Tree Event Update"
+        email_msg.set_content(message)
+
+        with smtplib.SMTP("smtp.gmail.com", 587) as server:
+            server.starttls()
+            server.login(sender_email, password)
+            server.send_message(email_msg)
+        print("Email sent successfully!")
+    except Exception as e:
+        print(f"Error sending email: {e}")
 
 ##########################################
 #             Dependencies               #
@@ -176,16 +228,6 @@ def default_page():
 @app.get("/manageAccount")
 def manage_account(account=Depends(get_current_user)):
     return {"message": f"Manage account page for {account['displayName']}"}
-
-# @app.get("/soilGame")
-# def soil_game(student=Depends(student_required)):
-#     return {"message": f"Soil Game page for {student['displayName']}"}
-
-# @app.get("/rainGame")
-# def tree_game(student=Depends(student_required)):
-#     return {"message": f"Rain Game page for {student['displayName']}"}
-
-
 
 ############################################
 #               API Endpoints              #
