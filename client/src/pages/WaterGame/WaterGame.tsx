@@ -8,11 +8,21 @@ based on that state. The component also includes navigation functionality to
 return to the home page or move between screens using buttons and a back arrow.
 */
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 
 import { Popup } from "../../components/Popup";
 import Bucket from "./components/Bucket";
+import { Raindrop } from "./components/Raindrop";
+import type { RaindropData } from "./types";
+import {
+  SAMPLE_ANSWERS,
+  RAINDROP_FALL_SPEED,
+  RAINDROP_HEIGHT,
+  RAINDROP_WIDTH,
+  SPAWN_INTERVAL_MS,
+  BUCKET_WIDTH,
+} from "./constants";
 
 import styles from "./WaterGame.module.css";
 
@@ -23,22 +33,30 @@ export const WaterGame = () => {
   const navigate = useNavigate();
   const [bucketX, setBucketX] = useState(0);
   const containerRef = useRef<HTMLDivElement>(null);
+  const gameScreenRef = useRef<HTMLDivElement>(null);
 
+  const [raindrops, setRaindrops] = useState<RaindropData[]>([]);
+  const nextRaindropId = useRef(0);
+  const answerQueueRef = useRef([...SAMPLE_ANSWERS]);
+
+  // Sets the bucket's initial horizontal position to the center of the container
+  // when the game screen mounts
   useEffect(() => {
     if (screen !== "game") return;
     if (!containerRef.current) return;
 
     const containerWidth = containerRef.current.offsetWidth;
-    setBucketX(containerWidth / 2 - 140 / 2);
+    setBucketX(containerWidth / 2 - BUCKET_WIDTH / 2);
   }, [screen]);
 
+  // Listens for left and right arrow key presses and moves the bucket
+  // horizontally, clamping its position within the container bounds
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (!containerRef.current) return;
 
       const containerWidth = containerRef.current.offsetWidth;
-      const bucketWidth = 140;
-      const maxRight = Math.max(containerWidth - bucketWidth, 0);
+      const maxRight = Math.max(containerWidth - BUCKET_WIDTH, 0);
 
       if (e.key === "ArrowLeft") {
         setBucketX((prev) => Math.max(prev - 20, 0));
@@ -50,6 +68,71 @@ export const WaterGame = () => {
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, []);
+
+  // Resets game state and transitions to the game screen
+  const startGame = () => {
+    setRaindrops([]);
+    answerQueueRef.current = [...SAMPLE_ANSWERS];
+    nextRaindropId.current = 0;
+    setScreen("game");
+  };
+
+  // Pulls the next answer from the queue and spawns a raindrop at a random
+  // horizontal position along the top of the container
+  const spawnRaindrop = useCallback(() => {
+    if (!containerRef.current) return;
+
+    const queue = answerQueueRef.current;
+    if (queue.length === 0) return;
+
+    const nextAnswer = queue.shift()!;
+    const containerWidth = containerRef.current.offsetWidth;
+
+    const minX = BUCKET_WIDTH - RAINDROP_WIDTH;
+    const maxX = containerWidth - (BUCKET_WIDTH - RAINDROP_WIDTH);
+
+    setRaindrops((prev) => [
+      ...prev,
+      {
+        id: nextRaindropId.current++,
+        x: Math.random() * (maxX - minX),
+        y: 0,
+        velocity: RAINDROP_FALL_SPEED,
+        answer: nextAnswer.text,
+        isCorrect: nextAnswer.isCorrect,
+      },
+    ]);
+  }, []);
+
+  // Spawns a new raindrop at a fixed interval while the game screen is active
+  useEffect(() => {
+    if (screen !== "game") return;
+
+    const interval = setInterval(spawnRaindrop, SPAWN_INTERVAL_MS);
+    return () => clearInterval(interval);
+  }, [screen, spawnRaindrop]);
+
+  // Moves all raindrops downward on each tick and removes any that have
+  // fallen past the bottom of the game screen
+  useEffect(() => {
+    if (screen !== "game") return;
+    if (!gameScreenRef.current) return;
+
+    const floorY = gameScreenRef.current.offsetHeight - RAINDROP_HEIGHT;
+
+    const interval = setInterval(() => {
+      setRaindrops((prev) =>
+        prev
+          .map((drop) => ({
+            ...drop,
+            y: drop.y + RAINDROP_FALL_SPEED,
+          }))
+          .filter((drop) => drop.y < floorY),
+      );
+    }, 16);
+
+    return () => clearInterval(interval);
+  }, [screen]);
 
   return (
     <div className={styles.gameContainer}>
@@ -89,7 +172,7 @@ export const WaterGame = () => {
             header="How To Play"
             buttonText="I'm Ready"
             onClick={() => {
-              setScreen("game");
+              startGame();
             }}
             textList={[
               "A question will appear at the top of the screen",
@@ -102,7 +185,11 @@ export const WaterGame = () => {
         </div>
       )}
       {screen === "game" && (
-        <div data-testid="water-game" className={styles.gameScreen}>
+        <div
+          data-testid="water-game"
+          className={styles.gameScreen}
+          ref={gameScreenRef}
+        >
           <span data-testid="question" className={styles.question}>
             <p className={styles.questionText}>
               What is the chemical formula for water?
@@ -112,9 +199,20 @@ export const WaterGame = () => {
             onClick={() => {
               setScreen("end");
             }}
+            style={{ position: "absolute", right: "16px", top: "16px" }}
           >
             End Game
           </button>
+          {raindrops.map((drop) => (
+            <Raindrop
+              id={drop.id}
+              key={drop.id}
+              x={drop.x}
+              y={drop.y}
+              answer={drop.answer}
+            />
+          ))}
+
           <div
             data-testid="bucket-container"
             className={styles.bucketContainer}

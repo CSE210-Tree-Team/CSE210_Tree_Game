@@ -10,8 +10,8 @@ that its horizontal position is determined by the left property.
 
 import { test, expect } from "vitest";
 import { render, screen } from "@testing-library/react";
-import Bucket from "../components/Bucket";
-import styles from "../components/Bucket.module.css";
+import Bucket from "../Bucket";
+import styles from "../Bucket.module.css";
 
 test("renders the bucket image with correct styling", () => {
   render(<Bucket x={0} />);
