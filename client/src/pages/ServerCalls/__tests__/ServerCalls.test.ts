@@ -10,7 +10,7 @@ describe("fetchQuestions", () => {
     {
       questionID: "1",
       difficulty: 1,
-      resourceType: "water",
+      resourceType: "Water",
       text: "What is H2O?",
       type: "mcq",
       choices: [
@@ -24,7 +24,7 @@ describe("fetchQuestions", () => {
     {
       questionID: "2",
       difficulty: 2,
-      resourceType: "earth",
+      resourceType: "Earth",
       moleculeName: "Water",
       moleculeFormula: "H2O",
       required: { H: 2, O: 1 },
@@ -43,17 +43,17 @@ describe("fetchQuestions", () => {
       }),
     } as any);
 
-    const result = await fetchQuestions("water");
+    const result = await fetchQuestions("Water");
 
     expect(fetchMock).toHaveBeenCalledWith(
       "/api/get-questions",
       expect.objectContaining({
         method: "POST",
-      })
+      }),
     );
 
     expect(result).toEqual(mockWaterQuestions);
-    expect(result[0].resourceType).toBe("water");
+    expect(result[0].resourceType).toBe("Water");
     expect(result[0]).toHaveProperty("choices");
   });
 
@@ -69,10 +69,10 @@ describe("fetchQuestions", () => {
       }),
     } as any);
 
-    const result = await fetchQuestions("earth");
+    const result = await fetchQuestions("Earth");
 
     expect(result).toEqual(mockEarthQuestions);
-    expect(result[0].resourceType).toBe("earth");
+    expect(result[0].resourceType).toBe("Earth");
     expect(result[0]).toHaveProperty("moleculeFormula");
   });
 
@@ -82,8 +82,8 @@ describe("fetchQuestions", () => {
       status: 500,
     } as any);
 
-    await expect(fetchQuestions("water")).rejects.toThrow(
-      "Failed to fetch questions"
+    await expect(fetchQuestions("Water")).rejects.toThrow(
+      "Failed to fetch questions",
     );
   });
 
@@ -97,8 +97,8 @@ describe("fetchQuestions", () => {
       }),
     } as any);
 
-    await expect(fetchQuestions("water")).rejects.toThrow(
-      "Server returned unsuccessful response"
+    await expect(fetchQuestions("Water")).rejects.toThrow(
+      "Server returned unsuccessful response",
     );
   });
 
@@ -114,18 +114,18 @@ describe("fetchQuestions", () => {
       }),
     } as any);
 
-    await fetchQuestions("water", 5, "mcq", 2);
+    await fetchQuestions("Water", 5, "mcq", 2);
 
     expect(fetchMock).toHaveBeenCalledWith(
       "/api/get-questions",
       expect.objectContaining({
         body: JSON.stringify({
           numQuestions: 5,
-          resourceType: "water",
+          resourceType: "Water",
           questionType: "mcq",
           difficulty: 2,
         }),
-      })
+      }),
     );
   });
 });
@@ -152,16 +152,16 @@ describe("pushGameResults", () => {
       "/api/update-stat",
       expect.objectContaining({
         method: "POST",
-      })
+      }),
     );
 
     expect(result).toBe(true);
   });
 
   it("throws if invalid gameType is provided", async () => {
-    await expect(
-      pushGameResults(10, "invalid" as any)
-    ).rejects.toThrow("Invalid gameType");
+    await expect(pushGameResults(10, "invalid" as any)).rejects.toThrow(
+      "Invalid gameType",
+    );
   });
 
   it("throws if response is not ok", async () => {
@@ -171,7 +171,7 @@ describe("pushGameResults", () => {
     } as any);
 
     await expect(pushGameResults(10, "water")).rejects.toThrow(
-      "Failed to update stat"
+      "Failed to update stat",
     );
   });
 
