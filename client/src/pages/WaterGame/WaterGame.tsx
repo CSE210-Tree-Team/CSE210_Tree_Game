@@ -11,12 +11,13 @@ return to the home page or move between screens using buttons and a back arrow.
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 
+import { useWaterGameQuestions } from "./hooks/useWaterGameQuestions";
+import { questionToRaindropAnswers } from "./utils";
 import { Popup } from "../../components/Popup";
 import Bucket from "./components/Bucket";
 import { Raindrop } from "./components/Raindrop";
-import type { RaindropData } from "./types";
+import type { RaindropData, RaindropAnswer } from "./types";
 import {
-  SAMPLE_ANSWERS,
   RAINDROP_FALL_SPEED,
   RAINDROP_HEIGHT,
   RAINDROP_WIDTH,
@@ -37,7 +38,9 @@ export const WaterGame = () => {
 
   const [raindrops, setRaindrops] = useState<RaindropData[]>([]);
   const nextRaindropId = useRef(0);
-  const answerQueueRef = useRef([...SAMPLE_ANSWERS]);
+  const answerQueueRef = useRef<RaindropAnswer[]>([]);
+  const { questions, isLoading, error } = useWaterGameQuestions();
+  const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
 
   // Sets the bucket's initial horizontal position to the center of the container
   // when the game screen mounts
@@ -71,9 +74,15 @@ export const WaterGame = () => {
 
   // Resets game state and transitions to the game screen
   const startGame = () => {
+    if (questions.length === 0) {
+      return;
+    }
+    console.log(questions);
+    const answers = questionToRaindropAnswers(questions[0]);
     setRaindrops([]);
-    answerQueueRef.current = [...SAMPLE_ANSWERS];
+    answerQueueRef.current = answers;
     nextRaindropId.current = 0;
+    setCurrentQuestionIndex(0);
     setScreen("game");
   };
 
@@ -134,6 +143,9 @@ export const WaterGame = () => {
     return () => clearInterval(interval);
   }, [screen]);
 
+  if (isLoading) return <div>Loading...</div>;
+  if (error) return <div>{error}</div>;
+
   return (
     <div className={styles.gameContainer}>
       {screen === "start" && (
@@ -170,10 +182,8 @@ export const WaterGame = () => {
             variant="water"
             screen="tutorial"
             header="How To Play"
-            buttonText="I'm Ready"
-            onClick={() => {
-              startGame();
-            }}
+            buttonText={isLoading ? "Loading..." : "I'm Ready"}
+            onClick={() => startGame()}
             textList={[
               "A question will appear at the top of the screen",
               "Raindrops will fall, each with a possible answer",
@@ -192,7 +202,7 @@ export const WaterGame = () => {
         >
           <span data-testid="question" className={styles.question}>
             <p className={styles.questionText}>
-              What is the chemical formula for water?
+              {questions[currentQuestionIndex]?.text}
             </p>
           </span>
           <button

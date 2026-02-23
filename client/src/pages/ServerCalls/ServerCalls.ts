@@ -1,60 +1,60 @@
 // Types:
 interface QuestionChoice {
-    text: string;
-    isCorrect: boolean;
+  text: string;
+  isCorrect: boolean;
 }
 
 /**
- * TODO: 
+ * TODO:
  * Question is formatted wrong for Soilminigame
  * 1) explicitly define resourceType as "earth" and "water"
  * 2) Abstract a BaseQuestion to only house the common fields
- * 3) Extend BaseQuestion with the earth and water minigame extensions 
+ * 3) Extend BaseQuestion with the earth and water minigame extensions
  *      (these contain the updated question and answer fields)
- * 4) Have AI rewrite some tests for this implementation 
+ * 4) Have AI rewrite some tests for this implementation
  *      (half of the current tests should become invalid due to the wrong soil game question format)
  * 5) Ensure the backend follows the naming convention used here
  */
 
 // Used to determine what questions to filter by
-type ResourceType = "earth" | "water";
+type ResourceType = "Earth" | "Water";
 
 type QuestionMap = {
-    water: WaterQuestion;
-    earth: EarthQuestion;
+  Water: WaterQuestion;
+  Earth: EarthQuestion;
 };
 
 export interface BaseQuestion {
-    questionID: string;
-    difficulty: number;
-    resourceType: ResourceType;
+  questionID: string;
+  difficulty: number;
+  resourceType: ResourceType;
 }
 
 export interface WaterQuestion extends BaseQuestion {
-    resourceType: "water";
-    text: string;
-    type: string;
-    choices: QuestionChoice[];
+  resourceType: "Water";
+  text: string;
+  type: string;
+  choices: QuestionChoice[];
 }
 
 export interface EarthQuestion extends BaseQuestion {
-    resourceType: "earth";
-    moleculeName: string;
-    moleculeFormula: string;
-    required: Record<string, number>;
+  resourceType: "Earth";
+  moleculeName: string;
+  moleculeFormula: string;
+  required: Record<string, number>;
 }
 
 export type Question = WaterQuestion | EarthQuestion;
 
 interface GetQuestionsResponse<T> {
-    success: boolean;
-    count: number;
-    questions: T[];
+  success: boolean;
+  count: number;
+  questions: T[];
 }
 
 interface UpdateStatResponse {
-    success: boolean;
-    message: string;
+  success: boolean;
+  message: string;
 }
 
 /**
@@ -66,36 +66,35 @@ interface UpdateStatResponse {
  * @returns Array of questions
  */
 export async function fetchQuestions<T extends ResourceType>(
-    resourceType: T,
-    numQuestions?: number, 
-    questionType?: string, 
-    difficulty?: number
+  resourceType: T,
+  numQuestions?: number,
+  questionType?: string,
+  difficulty?: number,
 ): Promise<QuestionMap[T][]> {
+  const response = await fetch("/api/get-questions", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      numQuestions,
+      resourceType,
+      questionType,
+      difficulty,
+    }),
+  });
 
-    const response = await fetch('/api/get-questions', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-            numQuestions,
-            resourceType,
-            questionType,
-            difficulty,
-        }),
-    });
+  if (!response.ok) {
+    throw new Error("Failed to fetch questions");
+  }
 
-    if (!response.ok) {
-        throw new Error('Failed to fetch questions');
-    }
+  const data: GetQuestionsResponse<QuestionMap[T]> = await response.json();
 
-    const data: GetQuestionsResponse<QuestionMap[T]> = await response.json();
-    
-    if (!data.success) {
-        throw new Error('Server returned unsuccessful response');
-    }
+  if (!data.success) {
+    throw new Error("Server returned unsuccessful response");
+  }
 
-    return data.questions as QuestionMap[T][];
+  return data.questions as QuestionMap[T][];
 }
 
 /**
@@ -104,29 +103,34 @@ export async function fetchQuestions<T extends ResourceType>(
  * @param gameType - Resource type to update: "water", "earth", or "sun"
  * @returns Promise<boolean> - true if update was successful
  */
-export async function pushGameResults(progress: number, gameType: string): Promise<boolean> {
-    const statName = gameType.toLowerCase();
-    
-    if (!['water', 'earth', 'sun'].includes(statName)) {
-        throw new Error(`Invalid gameType: ${gameType}. Must be "water", "earth", or "sun"`);
-    }
+export async function pushGameResults(
+  progress: number,
+  gameType: string,
+): Promise<boolean> {
+  const statName = gameType.toLowerCase();
 
-    const response = await fetch('/api/update-stat', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-            stat_name: statName,
-            value: progress,
-        }),
-    });
+  if (!["water", "earth", "sun"].includes(statName)) {
+    throw new Error(
+      `Invalid gameType: ${gameType}. Must be "water", "earth", or "sun"`,
+    );
+  }
 
-    if (!response.ok) {
-        throw new Error(`Failed to update stat: ${response.statusText}`);
-    }
+  const response = await fetch("/api/update-stat", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      stat_name: statName,
+      value: progress,
+    }),
+  });
 
-    const data: UpdateStatResponse = await response.json();
-    
-    return data.success;
+  if (!response.ok) {
+    throw new Error(`Failed to update stat: ${response.statusText}`);
+  }
+
+  const data: UpdateStatResponse = await response.json();
+
+  return data.success;
 }

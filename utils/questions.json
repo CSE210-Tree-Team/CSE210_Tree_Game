@@ -1,44 +1,75 @@
 [
-    {
-        "text": "What is the powerhouse of the cell?",
-        "question_type": "MCQ",
-        "resource_type": "Sun",
-        "choices": ["The mitochondria", "The nucleus", "The ribosome", "The endoplasmic reticulum"],
-        "correct_choices": [0]
-    },
-    {
-        "text": "Which process do plants use to make food?",
-        "question_type": "MCQ",
-        "resource_type": "Sun",
-        "choices": ["Respiration", "Photosynthesis", "Digestion", "Fermentation"],
-        "correct_choices": [1]
-    },
-    {
-        "text": "What is H2O?",
-        "question_type": "MCQ",
-        "resource_type": "Water",
-        "choices": ["Hydrogen Peroxide", "Water", "Hydrochloric Acid", "Heavy Water"],
-        "correct_choices": [1]
-    },
-    {
-        "text": "Which of these are renewable energy sources?",
-        "question_type": "MultiSelect",
-        "resource_type": "Sun",
-        "choices": ["Solar", "Coal", "Wind", "Natural Gas"],
-        "correct_choices": [0, 2]
-    },
-    {
-        "text": "What are the main components of soil?",
-        "question_type": "MultiSelect",
-        "resource_type": "Earth",
-        "choices": ["Minerals", "Organic matter", "Water", "Air"],
-        "correct_choices": [0, 1, 2, 3]
-    },
-    {
-        "text": "Which of the following elements appears in water?",
-        "question_type": "MultiSelect",
-        "resource_type": "Water",
-        "choices": ["Hydrogen", "Oxygen", "Carbon", "Nitrogen"],
-        "correct_choices": [0, 1]
-    }
+  {
+    "text": "What is the powerhouse of the cell?",
+    "question_type": "MCQ",
+    "resource_type": "Sun",
+    "choices": [
+      "The mitochondria",
+      "The nucleus",
+      "The ribosome",
+      "The endoplasmic reticulum"
+    ],
+    "correct_choices": [0]
+  },
+  {
+    "text": "Which process do plants use to make food?",
+    "question_type": "MCQ",
+    "resource_type": "Sun",
+    "choices": ["Respiration", "Photosynthesis", "Digestion", "Fermentation"],
+    "correct_choices": [1]
+  },
+  {
+    "text": "What is H2O?",
+    "question_type": "MCQ",
+    "resource_type": "Water",
+    "choices": [
+      "Hydrogen Peroxide",
+      "Water",
+      "Hydrochloric Acid",
+      "Heavy Water"
+    ],
+    "correct_choices": [1]
+  },
+  {
+    "text": "Which of these are renewable energy sources?",
+    "question_type": "MultiSelect",
+    "resource_type": "Sun",
+    "choices": ["Solar", "Coal", "Wind", "Natural Gas"],
+    "correct_choices": [0, 2]
+  },
+  {
+    "text": "What are the main components of soil?",
+    "question_type": "MultiSelect",
+    "resource_type": "Earth",
+    "choices": ["Minerals", "Organic matter", "Water", "Air"],
+    "correct_choices": [0, 1, 2, 3]
+  },
+  {
+    "text": "Which of the following elements appears in water?",
+    "question_type": "MultiSelect",
+    "resource_type": "Water",
+    "choices": ["Hydrogen", "Oxygen", "Carbon", "Nitrogen"],
+    "correct_choices": [0, 1]
+  },
+  {
+    "text": "What is the chemical formula for water?",
+    "question_type": "MCQ",
+    "resource_type": "Water",
+    "choices": ["CO2", "H2O", "NaCl", "HO"],
+    "correct_choices": [1]
+  },
+  {
+    "text": "What percentage of the earth is covered by water?",
+    "question_type": "MCQ",
+    "resource_type": "Water",
+    "choices": ["30", "50", "70", "100"],
+    "correct_choices": [2]
+  },
+  {
+    "text": "Which one of these is NOT a state of water?",
+    "question_type": "MCQ",
+    "resource_type": "Water",
+    "choices": ["Ice", "Liquid", "Gas", "Rock"],
+    "correct_choices": [3]
+  }
 ]
