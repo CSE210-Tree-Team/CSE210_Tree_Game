@@ -116,7 +116,6 @@ export const Homepage = () => {
     return (
         <div className={styles.homepageWrapper}>
             {showTutorial && (<Tutorial onClose={handleCloseTutorial} />)}
-            <div className={styles.gameConatiner}>
                     <h1 className={`${fontStyles.title} ${styles.helloTitle}`}>
                         Hello, {userInfo?.user.displayName || 'User'}
                     </h1>
@@ -138,7 +137,6 @@ export const Homepage = () => {
                     Settings
                     </button>
                 </div>
-            </div>
 
             <br></br>
 
