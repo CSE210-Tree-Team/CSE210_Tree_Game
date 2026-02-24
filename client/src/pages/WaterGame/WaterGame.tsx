@@ -97,10 +97,9 @@ export const WaterGame = () => {
 
   // Resets game state and transitions to the game screen
   const startGame = () => {
-    if (questions.length === 0) {
-      return;
-    }
-    const answers = questionToRaindropAnswers(questions[0]);
+    if (questions.length === 0) return;
+
+    const answers = shuffleArray(questionToRaindropAnswers(questions[0])); // shuffle here too
     setRaindrops([]);
     answerQueueRef.current = answers;
     nextRaindropId.current = 0;
@@ -210,12 +209,6 @@ export const WaterGame = () => {
     return () => clearInterval(interval);
   }, [screen, handleAnswer, moveToNextQuestion]);
 
-  useEffect(() => {
-    console.log("correctCount:", correctCount);
-    console.log("incorrectCount:", incorrectCount);
-    console.log("current question index:", currentQuestionIndex);
-  }, [correctCount, incorrectCount, currentQuestionIndex]);
-
   if (isLoading) return <div>Loading...</div>;
   if (error) return <div>{error}</div>;
 
@@ -278,14 +271,6 @@ export const WaterGame = () => {
               {questions[currentQuestionIndex]?.text}
             </p>
           </span>
-          <button
-            onClick={() => {
-              setScreen("end");
-            }}
-            style={{ position: "absolute", right: "16px", top: "16px" }}
-          >
-            End Game
-          </button>
           {raindrops.map((drop) => (
             <Raindrop
               id={drop.id}
@@ -310,7 +295,7 @@ export const WaterGame = () => {
           <Popup
             variant="water"
             screen="end"
-            header="Time's Up"
+            header="Game Over"
             buttonText="Go Back to Home"
             onClick={async () => {
               try {
@@ -327,7 +312,7 @@ export const WaterGame = () => {
             textList={[
               `Number of correctly answered questions: ${correctCount}`,
               `Number of incorrectly answered questions: ${incorrectCount}`,
-              `Total number of points earned: ${correctCount}`,
+              `Total number of points earned: ${Math.ceil((correctCount / questions.length) * 100)}`,
             ]}
           />
         </div>

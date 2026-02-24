@@ -7,10 +7,11 @@ application. These tests verify that the different screens (start, tutorial,
 game, end) render correctly and that navigation between them works as expected.
 */
 
-import { render, screen } from "@testing-library/react";
+import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { MemoryRouter } from "react-router-dom";
 import { vi, beforeEach, afterEach } from "vitest";
+
 import { WaterGame } from "../WaterGame";
 import type { WaterQuestion } from "../../ServerCalls/ServerCalls";
 import * as ServerCalls from "../../ServerCalls/ServerCalls";
@@ -133,3 +134,42 @@ test("renders tutorial header and instructions", async () => {
   const items = screen.getAllByRole("listitem");
   expect(items).toHaveLength(5);
 });
+
+test("renders results screen and game results", async () => {
+  vi.spyOn(Math, "random").mockReturnValue(0.4125);
+  Object.defineProperty(HTMLElement.prototype, "offsetHeight", {
+    configurable: true,
+    value: 200,
+  });
+  Object.defineProperty(HTMLElement.prototype, "offsetWidth", {
+    configurable: true,
+    value: 800,
+  });
+
+  const user = userEvent.setup();
+  render(
+    <MemoryRouter>
+      <WaterGame />
+    </MemoryRouter>,
+  );
+
+  await screen.findByTestId("water-start");
+  await user.click(screen.getByRole("button", { name: /play/i }));
+  await user.click(screen.getByRole("button", { name: /i'm ready/i }));
+
+  // Wait for the game to end after the only question is answered
+  await waitFor(
+    () => {
+      expect(screen.getByTestId("water-end")).toBeInTheDocument();
+    },
+    { timeout: 5000 },
+  );
+
+  expect(screen.getByText(/game over/i)).toBeInTheDocument();
+
+  const list = screen.getByRole("list");
+  expect(list).toBeInTheDocument();
+
+  const items = screen.getAllByRole("listitem");
+  expect(items).toHaveLength(3);
+}, 10000);

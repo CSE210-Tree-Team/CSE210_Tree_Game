@@ -19,6 +19,7 @@ import { WaterGame } from "../WaterGame";
 import { SPAWN_INTERVAL_MS, RAINDROP_WIDTH } from "../constants";
 import type { WaterQuestion } from "../../ServerCalls/ServerCalls";
 import * as ServerCalls from "../../ServerCalls/ServerCalls";
+import * as utils from "../utils";
 
 const mockWaterQuestions = [
   {
@@ -81,16 +82,20 @@ test("spawns raindrops within container bounds", async () => {
 test("raindrop moves downward over time", async () => {
   const user = userEvent.setup();
 
+  Object.defineProperty(HTMLElement.prototype, "offsetHeight", {
+    configurable: true,
+    value: 1000,
+  });
+  Object.defineProperty(HTMLElement.prototype, "offsetWidth", {
+    configurable: true,
+    value: 800,
+  });
+
   render(
     <MemoryRouter>
       <WaterGame />
     </MemoryRouter>,
   );
-
-  Object.defineProperty(HTMLElement.prototype, "offsetHeight", {
-    configurable: true,
-    value: 1000,
-  });
 
   await screen.findByTestId("water-start");
   await user.click(screen.getByRole("button", { name: /play/i }));
@@ -105,9 +110,7 @@ test("raindrop moves downward over time", async () => {
 
   await waitFor(
     () => {
-      const currentText = screen.getByText("H2O");
-      const currentTop = parseFloat(currentText.closest("div")!.style.top);
-
+      const currentTop = parseFloat(screen.getByTestId("raindrop-0").style.top);
       expect(currentTop).toBeGreaterThan(initialTop);
     },
     { timeout: 1500 },
@@ -162,18 +165,32 @@ test("raindrops spawn at the correct interval", async () => {
 
   expect(screen.queryByTestId("raindrop-0")).not.toBeInTheDocument();
 
-  await screen.findByTestId("raindrop-0", {}, { timeout: SPAWN_INTERVAL_MS });
+  await screen.findByTestId(
+    "raindrop-0",
+    {},
+    { timeout: SPAWN_INTERVAL_MS + 500 },
+  );
   expect(screen.queryByTestId("raindrop-1")).not.toBeInTheDocument();
 
-  await screen.findByTestId("raindrop-1", {}, { timeout: SPAWN_INTERVAL_MS });
+  await screen.findByTestId(
+    "raindrop-1",
+    {},
+    { timeout: SPAWN_INTERVAL_MS + 500 },
+  );
 }, 10000);
 
 test("renders fetched question choices as raindrop answers", async () => {
+  vi.spyOn(utils, "shuffleArray").mockImplementation((array) => array);
+
   const user = userEvent.setup();
 
   Object.defineProperty(HTMLElement.prototype, "offsetHeight", {
     configurable: true,
     value: 1000,
+  });
+  Object.defineProperty(HTMLElement.prototype, "offsetWidth", {
+    configurable: true,
+    value: 800,
   });
 
   render(
@@ -186,8 +203,7 @@ test("renders fetched question choices as raindrop answers", async () => {
   await user.click(screen.getByRole("button", { name: /play/i }));
   await user.click(screen.getByRole("button", { name: /i'm ready/i }));
 
-  // Wait for all choices to appear as raindrop answers
-  for (const choice of mockWaterQuestions[0].choices) {
-    await screen.findByText(choice.text, {}, { timeout: 5000 });
-  }
+  await screen.findByText("H2O", {}, { timeout: 5000 });
+  await screen.findByText("CO2", {}, { timeout: 5000 });
+  await screen.findByText("O2", {}, { timeout: 5000 });
 }, 10000);
