@@ -50,6 +50,31 @@ jobs:
         run: |
           python -m unittest tests.apiStatUnitTests -v
 
+
+
+  fullstack:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.12"
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Install client dependencies
+        run: npm ci
+        working-directory: client
+
+      - name: Run Full-Stack Question Quest Tests
+        run: python -m unittest fullstack_tests.fullStackQuestionQuestTests -v
+
   frontend:
     runs-on: ubuntu-latest
 

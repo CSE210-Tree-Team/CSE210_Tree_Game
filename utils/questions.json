@@ -28,17 +28,52 @@
         "correct_choices": [0, 2]
     },
     {
-        "text": "What are the main components of soil?",
-        "question_type": "MultiSelect",
-        "resource_type": "Earth",
-        "choices": ["Minerals", "Organic matter", "Water", "Air"],
-        "correct_choices": [0, 1, 2, 3]
-    },
-    {
         "text": "Which of the following elements appears in water?",
         "question_type": "MultiSelect",
         "resource_type": "Water",
         "choices": ["Hydrogen", "Oxygen", "Carbon", "Nitrogen"],
         "correct_choices": [0, 1]
+    },
+    {
+        "text": "Water/H2O",
+        "question_type": "MultiSelect",
+        "resource_type": "Earth",
+        "choices": ["2H", "O", "2Fe"],
+        "correct_choices": [0, 1]
+    },
+    {
+        "text": "Carbon Dioxide/CO2",
+        "question_type": "MultiSelect",
+        "resource_type": "Earth",
+        "choices": ["C", "2O", "H"],
+        "correct_choices": [0, 1]
+    },
+    {
+        "text": "Ammonia/NH3",
+        "question_type": "MultiSelect",
+        "resource_type": "Earth",
+        "choices": ["N", "3H", "O"],
+        "correct_choices": [0, 1]
+    },
+    {
+        "text": "Methane/CH4",
+        "question_type": "MultiSelect",
+        "resource_type": "Earth",
+        "choices": ["C", "4H", "O"],
+        "correct_choices": [0, 1]
+    },
+    {
+        "text": "Sodium Chloride/NaCl",
+        "question_type": "MultiSelect",
+        "resource_type": "Earth",
+        "choices": ["Na", "Cl", "2O"],
+        "correct_choices": [0, 1]
+    },
+    {
+        "text": "Glucose/C6H12O6",
+        "question_type": "MultiSelect",
+        "resource_type": "Earth",
+        "choices": ["6C", "12H", "6O", "2N"],
+        "correct_choices": [0, 1, 2]
     }
 ]

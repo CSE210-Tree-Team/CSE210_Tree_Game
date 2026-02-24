@@ -6,32 +6,49 @@ describe("fetchQuestions", () => {
     vi.restoreAllMocks();
   });
 
-  const mockWaterQuestions = [
+  const mockQuestions = [
     {
-      questionID: "1",
+      questionID: "q1",
       difficulty: 1,
-      resourceType: "water",
-      text: "What is H2O?",
-      type: "mcq",
+      resourceType: "Sun",
+      text: "What is the powerhouse of the cell?",
+      type: "MCQ",
       choices: [
+        { text: "The mitochondria", isCorrect: true },
+        { text: "The nucleus", isCorrect: false },
+        { text: "The ribosome", isCorrect: false },
+        { text: "The endoplasmic reticulum", isCorrect: false },
+      ],
+    },
+    {
+      questionID: "q2",
+      difficulty: 1,
+      resourceType: "Water",
+      text: "What is H2O?",
+      type: "MCQ",
+      choices: [
+        { text: "Hydrogen Peroxide", isCorrect: false },
         { text: "Water", isCorrect: true },
-        { text: "Oxygen", isCorrect: false },
+        { text: "Hydrochloric Acid", isCorrect: false },
+        { text: "Heavy Water", isCorrect: false },
+      ],
+    },
+    {
+      questionID: "q3",
+      difficulty: 1,
+      resourceType: "Earth",
+      text: "What are the main components of soil?",
+      type: "MultiSelect",
+      choices: [
+        { text: "Minerals", isCorrect: true },
+        { text: "Organic matter", isCorrect: true },
+        { text: "Water", isCorrect: true },
+        { text: "Air", isCorrect: true },
       ],
     },
   ];
 
-  const mockEarthQuestions = [
-    {
-      questionID: "2",
-      difficulty: 2,
-      resourceType: "earth",
-      moleculeName: "Water",
-      moleculeFormula: "H2O",
-      required: { H: 2, O: 1 },
-    },
-  ];
-
-  it("fetches water questions successfully", async () => {
+  it("fetches questions successfully", async () => {
     const fetchMock = vi.spyOn(globalThis, "fetch");
 
     fetchMock.mockResolvedValue({
@@ -39,11 +56,11 @@ describe("fetchQuestions", () => {
       json: async () => ({
         success: true,
         count: 1,
-        questions: mockWaterQuestions,
+        questions: mockQuestions,
       }),
     } as any);
 
-    const result = await fetchQuestions("water");
+    const result = await fetchQuestions();
 
     expect(fetchMock).toHaveBeenCalledWith(
       "/api/get-questions",
@@ -52,28 +69,9 @@ describe("fetchQuestions", () => {
       })
     );
 
-    expect(result).toEqual(mockWaterQuestions);
-    expect(result[0].resourceType).toBe("water");
+    expect(result).toEqual(mockQuestions);
+    expect(result[0].resourceType).toBe("Sun");
     expect(result[0]).toHaveProperty("choices");
-  });
-
-  it("fetches earth questions successfully", async () => {
-    const fetchMock = vi.spyOn(globalThis, "fetch");
-
-    fetchMock.mockResolvedValue({
-      ok: true,
-      json: async () => ({
-        success: true,
-        count: 1,
-        questions: mockEarthQuestions,
-      }),
-    } as any);
-
-    const result = await fetchQuestions("earth");
-
-    expect(result).toEqual(mockEarthQuestions);
-    expect(result[0].resourceType).toBe("earth");
-    expect(result[0]).toHaveProperty("moleculeFormula");
   });
 
   it("throws if response is not ok", async () => {
@@ -82,7 +80,7 @@ describe("fetchQuestions", () => {
       status: 500,
     } as any);
 
-    await expect(fetchQuestions("water")).rejects.toThrow(
+    await expect(fetchQuestions(undefined, "water")).rejects.toThrow(
       "Failed to fetch questions"
     );
   });
@@ -97,7 +95,7 @@ describe("fetchQuestions", () => {
       }),
     } as any);
 
-    await expect(fetchQuestions("water")).rejects.toThrow(
+    await expect(fetchQuestions(undefined, "water")).rejects.toThrow(
       "Server returned unsuccessful response"
     );
   });
@@ -114,15 +112,15 @@ describe("fetchQuestions", () => {
       }),
     } as any);
 
-    await fetchQuestions("water", 5, "mcq", 2);
+    await fetchQuestions(5, "Water", "MCQ", 2);
 
     expect(fetchMock).toHaveBeenCalledWith(
       "/api/get-questions",
       expect.objectContaining({
         body: JSON.stringify({
           numQuestions: 5,
-          resourceType: "water",
-          questionType: "mcq",
+          resourceType: "Water",
+          questionType: "MCQ",
           difficulty: 2,
         }),
       })
