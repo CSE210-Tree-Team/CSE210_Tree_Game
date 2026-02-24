@@ -26,7 +26,6 @@ export const useWaterGameQuestions = (): UseWaterGameQuestionsResult => {
     const loadQuestions = async () => {
       try {
         const fetched = await fetchQuestions("Water", NUM_QUESTIONS, "MCQ");
-        console.log("fetched questions:", fetched);
         setQuestions(fetched);
       } catch {
         setError("Failed to load questions. Please try again.");

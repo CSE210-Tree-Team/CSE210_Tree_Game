@@ -11,4 +11,5 @@ export const RAINDROP_HEIGHT = 128; // 8rem
 export const RAINDROP_FALL_SPEED = 1.2;
 export const SPAWN_INTERVAL_MS = 1750;
 export const BUCKET_WIDTH = 140;
+export const BUCKET_HEIGHT = 140;
 export const NUM_QUESTIONS = 3;

@@ -12,7 +12,9 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 
 import { useWaterGameQuestions } from "./hooks/useWaterGameQuestions";
-import { questionToRaindropAnswers } from "./utils";
+import { pushGameResults } from "../ServerCalls/ServerCalls";
+
+import { questionToRaindropAnswers, shuffleArray } from "./utils";
 import { Popup } from "../../components/Popup";
 import Bucket from "./components/Bucket";
 import { Raindrop } from "./components/Raindrop";
@@ -23,6 +25,7 @@ import {
   RAINDROP_WIDTH,
   SPAWN_INTERVAL_MS,
   BUCKET_WIDTH,
+  BUCKET_HEIGHT,
 } from "./constants";
 
 import styles from "./WaterGame.module.css";
@@ -33,14 +36,34 @@ export const WaterGame = () => {
   );
   const navigate = useNavigate();
   const [bucketX, setBucketX] = useState(0);
+  const bucketXRef = useRef(bucketX);
+
   const containerRef = useRef<HTMLDivElement>(null);
   const gameScreenRef = useRef<HTMLDivElement>(null);
 
   const [raindrops, setRaindrops] = useState<RaindropData[]>([]);
   const nextRaindropId = useRef(0);
+  const caughtRaindropIds = useRef<Set<number>>(new Set());
+
   const answerQueueRef = useRef<RaindropAnswer[]>([]);
   const { questions, isLoading, error } = useWaterGameQuestions();
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
+
+  const [correctCount, setCorrectCount] = useState(0);
+  const [incorrectCount, setIncorrectCount] = useState(0);
+
+  const handleAnswer = useCallback((isCorrect: boolean) => {
+    if (isCorrect) {
+      setCorrectCount((prev) => prev + 1);
+    } else {
+      setIncorrectCount((prev) => prev + 1);
+    }
+  }, []);
+
+  // Keep the ref in sync with the state
+  useEffect(() => {
+    bucketXRef.current = bucketX;
+  }, [bucketX]);
 
   // Sets the bucket's initial horizontal position to the center of the container
   // when the game screen mounts
@@ -77,12 +100,14 @@ export const WaterGame = () => {
     if (questions.length === 0) {
       return;
     }
-    console.log(questions);
     const answers = questionToRaindropAnswers(questions[0]);
     setRaindrops([]);
     answerQueueRef.current = answers;
     nextRaindropId.current = 0;
     setCurrentQuestionIndex(0);
+    setCorrectCount(0);
+    setIncorrectCount(0);
+    caughtRaindropIds.current = new Set();
     setScreen("game");
   };
 
@@ -91,9 +116,15 @@ export const WaterGame = () => {
   const spawnRaindrop = useCallback(() => {
     if (!containerRef.current) return;
 
-    const queue = answerQueueRef.current;
-    if (queue.length === 0) return;
+    // Refill queue with shuffled choices if empty
+    if (answerQueueRef.current.length === 0) {
+      if (questions.length === 0) return;
+      answerQueueRef.current = shuffleArray(
+        questionToRaindropAnswers(questions[currentQuestionIndex]),
+      );
+    }
 
+    const queue = answerQueueRef.current;
     const nextAnswer = queue.shift()!;
     const containerWidth = containerRef.current.offsetWidth;
 
@@ -111,7 +142,7 @@ export const WaterGame = () => {
         isCorrect: nextAnswer.isCorrect,
       },
     ]);
-  }, []);
+  }, [currentQuestionIndex, questions]);
 
   // Spawns a new raindrop at a fixed interval while the game screen is active
   useEffect(() => {
@@ -121,13 +152,31 @@ export const WaterGame = () => {
     return () => clearInterval(interval);
   }, [screen, spawnRaindrop]);
 
+  // Clears current raindrops and loads the next question's choices into the queue
+  const moveToNextQuestion = useCallback(() => {
+    const nextIndex = currentQuestionIndex + 1;
+
+    if (nextIndex >= questions.length) {
+      setScreen("end");
+      return;
+    }
+
+    setCurrentQuestionIndex(nextIndex);
+    console.log(currentQuestionIndex);
+    answerQueueRef.current = questionToRaindropAnswers(questions[nextIndex]);
+    setRaindrops([]);
+  }, [currentQuestionIndex, questions]);
+
   // Moves all raindrops downward on each tick and removes any that have
   // fallen past the bottom of the game screen
+  // Moves all raindrops downward on each tick, checks for bucket collision,
+  // and removes any that have fallen past the bottom of the game screen
   useEffect(() => {
     if (screen !== "game") return;
     if (!gameScreenRef.current) return;
 
     const floorY = gameScreenRef.current.offsetHeight - RAINDROP_HEIGHT;
+    const bucketTop = gameScreenRef.current.offsetHeight - BUCKET_HEIGHT;
 
     const interval = setInterval(() => {
       setRaindrops((prev) =>
@@ -136,12 +185,36 @@ export const WaterGame = () => {
             ...drop,
             y: drop.y + RAINDROP_FALL_SPEED,
           }))
-          .filter((drop) => drop.y < floorY),
+          .filter((drop) => {
+            const raindropRight = drop.x + RAINDROP_WIDTH;
+            const bucketRight = bucketXRef.current + BUCKET_WIDTH; // use ref
+
+            const horizontalOverlap =
+              drop.x < bucketRight && raindropRight > bucketXRef.current;
+            const verticalOverlap = drop.y + RAINDROP_HEIGHT >= bucketTop;
+
+            if (horizontalOverlap && verticalOverlap) {
+              if (!caughtRaindropIds.current.has(drop.id)) {
+                caughtRaindropIds.current.add(drop.id);
+                handleAnswer(drop.isCorrect);
+                moveToNextQuestion();
+              }
+              return false;
+            }
+
+            return drop.y < floorY;
+          }),
       );
-    }, 16);
+    }, 16); // bucketX removed from dependencies
 
     return () => clearInterval(interval);
-  }, [screen]);
+  }, [screen, handleAnswer, moveToNextQuestion]);
+
+  useEffect(() => {
+    console.log("correctCount:", correctCount);
+    console.log("incorrectCount:", incorrectCount);
+    console.log("current question index:", currentQuestionIndex);
+  }, [correctCount, incorrectCount, currentQuestionIndex]);
 
   if (isLoading) return <div>Loading...</div>;
   if (error) return <div>{error}</div>;
@@ -239,11 +312,22 @@ export const WaterGame = () => {
             screen="end"
             header="Time's Up"
             buttonText="Go Back to Home"
-            onClick={() => (window.location.href = "/")}
+            onClick={async () => {
+              try {
+                await pushGameResults(
+                  (correctCount / questions.length) * 100,
+                  "water",
+                );
+              } catch {
+                console.error("Failed to update water resource.");
+              } finally {
+                window.location.href = "/";
+              }
+            }}
             textList={[
-              "Number of correctly answered questions: 7",
-              "Number of incorrectly answered questions: 3",
-              "Total number of points earned: 7",
+              `Number of correctly answered questions: ${correctCount}`,
+              `Number of incorrectly answered questions: ${incorrectCount}`,
+              `Total number of points earned: ${correctCount}`,
             ]}
           />
         </div>
