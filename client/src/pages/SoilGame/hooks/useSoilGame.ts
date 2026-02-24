@@ -88,7 +88,7 @@ export function useSoilGame() {
     // TODO: (Not Sure If We Still Need This) Replace with actual API call to GET /api/soil-game/start
 
     // Fetch questions from server
-    const fetchedQuestions = await fetchQuestions("earth");
+    const fetchedQuestions = await fetchQuestions("Earth");
 
     // Extend questions field to include game logic fields
     const fetchedQuests: Quest[] = fetchedQuestions.map((q) => ({

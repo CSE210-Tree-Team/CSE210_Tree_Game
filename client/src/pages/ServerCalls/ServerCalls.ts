@@ -19,11 +19,11 @@ interface QuestionChoice {
  */
 
 // Used to determine what questions to filter by
-type ResourceType = "earth" | "water";
+type ResourceType = "Earth" | "Water";
 
 type QuestionMap = {
-    water: WaterQuestion;
-    earth: EarthQuestion;
+    Water: WaterQuestion;
+    Earth: EarthQuestion;
 };
 
 export interface BaseQuestion {
@@ -33,14 +33,14 @@ export interface BaseQuestion {
 }
 
 export interface WaterQuestion extends BaseQuestion {
-    resourceType: "water";
+    resourceType: "Water";
     text: string;
     type: string;
     choices: QuestionChoice[];
 }
 
 export interface EarthQuestion extends BaseQuestion {
-    resourceType: "earth";
+    resourceType: "Earth";
     moleculeName: string;
     moleculeFormula: string;
     required: Record<string, number>; // e.g. { Nitrogen: 1, Hydrogen: 3 }
@@ -89,6 +89,7 @@ export async function fetchQuestions<T extends ResourceType>(
         });
 
         if (!response.ok) {
+            console.log(resourceType);
             throw new Error('Failed to fetch questions');
         }
 
@@ -101,7 +102,7 @@ export async function fetchQuestions<T extends ResourceType>(
         return data.questions as QuestionMap[T][];
     } catch (error) {
         // Fallback for earth questions only
-        if (resourceType === "earth") {
+        if (resourceType === "Earth") {
             console.warn("Using fallback Earth questions");
             return testEarthQuestions as QuestionMap[T][];
         }
