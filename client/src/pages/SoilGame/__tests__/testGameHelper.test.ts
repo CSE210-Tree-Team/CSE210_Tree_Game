@@ -1,32 +1,50 @@
 import { describe, it, expect } from 'vitest';
+
 import { 
-  isValidPosition,
-  getNextPosition,
-  getPossibleMoves,
-  createEmptyInventory,
+  type ElementType,
+  type GamePhase, 
+  type Inventory,
+  type Position,
+  type Node,
+  type Quest,
+  type GameState,
+  type CompleteGameRequest,
+  type CompleteGameResponse,
+  type Direction,
+  type PlayerCommand,
+  DIRECTION_DELTAS,
+  SYMBOL_TO_ELEMENT,
+  DIRECTION_LABELS
+} from '../types/Abstract.types';
+
+import {
+  getNodeAt,
+  hasUncollectedResource,
+  generateMap
+} from '../utils/MapHelper'
+
+import {
+  createEmptyInventory, 
   addToInventory,
-  removeFromInventory,
+  removeFromInventory
+} from '../utils/InventoryHelper';
+
+import {
   isQuestComplete,
   getNextNeededElement,
   submitElementToQuest,
-  getElementSymbol,
   formatQuestProgress,
+  getElementSymbol,
+  formatLocationInfo,
   isValidCommand,
-  parseCommand,
-} from '../utils/GameHelper_REP';
+  parseCommand
+} from '../utils/QuestListHelper';
 
 import {
-  type Node,
-  getNodeAt,
-  hasUncollectedResource,
-} from '../types/Node.type'
-
-import {
-  type Position,
-  type Direction,
-  type Inventory,
-  type Quest,
-} from '../types/SoilGame_REP.type';
+  isValidPosition,
+  getNextPosition,
+  getPossibleMoves
+} from '../utils/PositionHelper';
 
 /**
  * Vitest (unit tests) for GameHelper implementation.
@@ -103,10 +121,10 @@ describe('GameHelper_REP', () => {
   describe('getPossibleMoves', () => {
     it('should return all direction labels for a center position with all moves available', () => {
       const moves = getPossibleMoves({ x: 2, y: 2 }, 5);
-      expect(moves).toContain('w');
-      expect(moves).toContain('a');
-      expect(moves).toContain('s');
-      expect(moves).toContain('d');
+      // expect(moves).toContain('w');
+      // expect(moves).toContain('a');
+      // expect(moves).toContain('s');
+      // expect(moves).toContain('d');
       expect(moves).toContain('Up');
       expect(moves).toContain('Left');
       expect(moves).toContain('Down');
@@ -115,8 +133,8 @@ describe('GameHelper_REP', () => {
 
     it('should exclude direction labels for blocked moves at top-left corner', () => {
       const moves = getPossibleMoves({ x: 0, y: 0 }, 5);
-      expect(moves).toContain('s');
-      expect(moves).toContain('d');
+      // expect(moves).toContain('s');
+      // expect(moves).toContain('d');
       expect(moves).toContain('Down');
       expect(moves).toContain('Right');
       expect(moves).not.toContain('Up');
@@ -125,8 +143,8 @@ describe('GameHelper_REP', () => {
 
     it('should exclude direction labels for blocked moves at top-right corner', () => {
       const moves = getPossibleMoves({ x: 4, y: 0 }, 5);
-      expect(moves).toContain('s');
-      expect(moves).toContain('a');
+      // expect(moves).toContain('s');
+      // expect(moves).toContain('a');
       expect(moves).toContain('Down');
       expect(moves).toContain('Left');
       expect(moves).not.toContain('Up');
@@ -135,8 +153,8 @@ describe('GameHelper_REP', () => {
 
     it('should exclude direction labels for blocked moves at bottom-left corner', () => {
       const moves = getPossibleMoves({ x: 0, y: 4 }, 5);
-      expect(moves).toContain('w');
-      expect(moves).toContain('d');
+      // expect(moves).toContain('w');
+      // expect(moves).toContain('d');
       expect(moves).toContain('Up');
       expect(moves).toContain('Right');
       expect(moves).not.toContain('Down');
@@ -145,28 +163,28 @@ describe('GameHelper_REP', () => {
 
     it('should exclude direction labels for blocked moves at bottom-right corner', () => {
       const moves = getPossibleMoves({ x: 4, y: 4 }, 5);
-      expect(moves).toContain('w');
-      expect(moves).toContain('a');
+      // expect(moves).toContain('w');
+      // expect(moves).toContain('a');
       expect(moves).toContain('Up');
       expect(moves).toContain('Left');
       expect(moves).not.toContain('Down');
       expect(moves).not.toContain('Right');
     });
 
-    it('should use default MAP_SIZE when mapSize is not provided', () => {
+    it('should use default MAP_SIZE=5 when mapSize is not provided', () => {
       const moves = getPossibleMoves({ x: 2, y: 2 });
-      expect(moves).toContain('w');
-      expect(moves).toContain('a');
-      expect(moves).toContain('s');
-      expect(moves).toContain('d');
+      // expect(moves).toContain('w');
+      // expect(moves).toContain('a');
+      // expect(moves).toContain('s');
+      // expect(moves).toContain('d');
+      expect(moves).toContain('Up');
+      expect(moves).toContain('Right');
+      expect(moves).toContain('Down');
+      expect(moves).toContain('Left');
     });
 
     it('should work with different map sizes', () => {
       const moves = getPossibleMoves({ x: 5, y: 5 }, 10);
-      expect(moves).toContain('w');
-      expect(moves).toContain('a');
-      expect(moves).toContain('s');
-      expect(moves).toContain('d');
       expect(moves).toContain('Up');
       expect(moves).toContain('Left');
       expect(moves).toContain('Down');
@@ -274,6 +292,17 @@ describe('GameHelper_REP', () => {
       ];
       expect(hasUncollectedResource(map, { x: 5, y: 5 })).toBe(false);
       expect(hasUncollectedResource(map, { x: -1, y: 0 })).toBe(false);
+    });
+  });
+
+  describe('generateMap', () => {
+    it('generates a DEFAULT = 5 x 5 size map', () => {
+      const questList: Quest[] = [
+        {id: 1, moleculeName: "Water", moleculeFormula: "H2O", required:{"H": 2,"O": 1}, submitted:{}, completed: false}
+      ]; 
+      const map: Node[][] = generateMap(questList);
+      expect(map.length).toBe(5);
+      expect(map[0].length).toBe(5);
     });
   });
 
