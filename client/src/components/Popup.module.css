@@ -23,7 +23,13 @@
   color: var(--color-brown);
 }
 
-h2 {
+.grass {
+    border: 0.5rem solid var(--color-darkGreen);
+    background-color: var(--color-bgGreen);
+    color: var(--color-darkGreen);
+}
+
+.popup h2 {
   font-family: "Handjet";
   font-size: 3rem;
   margin: 0;
@@ -53,6 +59,8 @@ h2 {
     color: var(--color-lightGreen);
     -webkit-text-stroke-color: var(--color-darkGreen);
 }
+
+
 
 .text {
   /* color: var(--color-blue2); */
