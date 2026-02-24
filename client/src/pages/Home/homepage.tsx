@@ -8,6 +8,7 @@ import { ResourceBoard } from "../../components/ResourceBoard"
 import styles from "../../components/homepage.module.css"
 import fontStyles from "../../components/Popup.module.css"
 import buttonStyles from "../../components/Button.module.css"
+import Tutorial from "./Tutorial"
 interface UserInfo {
     success: boolean;
     user: {
@@ -54,8 +55,11 @@ const userInfoMock: UserInfo = {
 export const Homepage = () => {
     const { user, logout, getAccessTokenSilently } = useAuth0();
     const [userInfo, setUserInfo] = useState<UserInfo | null>(null);
-    //const [showResources, setShowResources] = useState(false);
     const navigate = useNavigate();
+    const [showTutorial, setShowTutorial] = useState<boolean>(() => {
+        const hasSeenTutorial = sessionStorage.getItem('hasSeenTutorial');
+        return !hasSeenTutorial; // Show tutorial if user hasn't seen it before
+    });
 
 
     useEffect(() => {
@@ -90,8 +94,10 @@ export const Homepage = () => {
         }
     }, [user, getAccessTokenSilently]);
 
-    const handleLogout = () =>
+    const handleLogout = () => {
+        sessionStorage.removeItem('hasSeenTutorial');
         logout({ logoutParams: { returnTo: window.location.origin } });
+    }
 
     const handleSoilGame = () => {
         navigate('/soil');
@@ -101,16 +107,18 @@ export const Homepage = () => {
         navigate('/water');
     };
 
-    
+    const handleCloseTutorial = () => {
+        setShowTutorial(false);
+        sessionStorage.setItem('hasSeenTutorial', 'true');
+    }
+
 
     return (
         <div className={styles.homepageWrapper}>
-            <div className={styles.gameConatiner}>
-                <div className={fontStyles.grass}>
+            {showTutorial && (<Tutorial onClose={handleCloseTutorial} />)}
                     <h1 className={`${fontStyles.title} ${styles.helloTitle}`}>
                         Hello, {userInfo?.user.displayName || 'User'}
                     </h1>
-                </div>
                 <ResourceBoard resources={userInfo?.tree.resourceLevels || userInfoMock.tree.resourceLevels} />
 
                 <div className={styles.treeEarthContainer}>
@@ -125,11 +133,10 @@ export const Homepage = () => {
                     Logout
                     </button>
 
-                    <button className={`${buttonStyles.button} ${buttonStyles.grass} ${styles.buttonSingle} ${styles.buttonSetting}`} onClick={() => (window.location.href = "/")}>
+                    <button className={`${buttonStyles.button} ${buttonStyles.grass} ${styles.buttonSingle} ${styles.buttonSetting}`} onClick={() => navigate("/")}>
                     Settings
                     </button>
                 </div>
-            </div>
 
             <br></br>
 

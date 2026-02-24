@@ -1,11 +1,22 @@
 ﻿import { type Resources } from "./Resources";
 import styles from "./homepage.module.css"
-import fontStyles from "./Popup.module.css"
-import { RESOURCE_BOARD_BG, RESOURCE_ICONS } from "./constant";
+import { RESOURCE_BOARD_BG} from "./constant";
+import { ResourceItem, type ResourceType } from "./Resources";
 
 interface ResourceBoardProps {
     resources: Resources;
 }
+
+interface ResourceConfig {
+    type: ResourceType;
+    label: string;
+}
+
+const resourceConfigs: ResourceConfig[] = [
+    { type: "water", label: "Water"},
+    { type: "earth", label: "Earth"},
+    { type: "sun", label: "Sun"},
+];
 
 export const ResourceBoard = ({ resources }: ResourceBoardProps) => {
     return (
@@ -16,74 +27,15 @@ export const ResourceBoard = ({ resources }: ResourceBoardProps) => {
                 className={ styles.resourceBoardBg}
             />
             <div className={styles.resourceBoardContent}>
-                <h3 className={` ${fontStyles.text} ${styles.resourceBoardTitle}`}>Growth Progress</h3>
-
-                {/* Water */}
-                <div className={styles.resourceItem}>
-                    <img
-                        src={RESOURCE_ICONS.WATER}
-                        alt="Water Resource Icon"
-                        className={ styles.resourceIcon}
+                <h3 className={`${styles.resourceBoardTitle}`}>Growth Progress</h3>
+                {resourceConfigs.map((config) => (
+                    <ResourceItem
+                        type={config.type}
+                        value={resources[config.type]}
+                        label={ config.label}
                     />
-                    <div className={styles.resourceRight}>
-                        <span className={` ${fontStyles.text} ${styles.resourceLabel}`}>Water</span>
-                        <div className={styles.progressBarWrapper}>
-                        <div className={styles.progressBarContainer}>
-                            <div
-                                className={`${styles.progressBar} ${styles.waterBar}`}
-                                style={{ width: `${resources.water}%` }}
-                            ></div>
-                            </div>
-                        </div>
-                    </div>
-                    <span className={styles.resourceValue}>{resources.water}%</span>
-                </div>
-
-
-                { /* Earth */}
-                <div className={styles.resourceItem}>
-                    <img
-                        src={RESOURCE_ICONS.EARTH}
-                        alt="Earth Resource Icon"
-                        className={styles.resourceIcon}
-                    />
-                    <div className={styles.resourceRight}>
-                        <span className={styles.resourceLabel}>Earth</span>
-                        <div className={styles.progressBarWrapper}>
-                            <div className={styles.progressBarContainer}>
-                                <div
-                                    className={`${styles.progressBar} ${styles.earthBar}`}
-                                    style={{ width: `${resources.earth}%` }}
-                                ></div>
-                            </div>
-                        </div>
-                    </div>
-                    <span className={styles.resourceValue}>{resources.earth}%</span>
-                </div>
-
-                { /* Sun */}
-                <div className={styles.resourceItem}>
-                    <img
-                        src={RESOURCE_ICONS.SUN}
-                        alt="Sun Resource Icon"
-                        className={styles.resourceIcon}
-                    />
-                    <div className={styles.resourceRight}>
-                        <span className={styles.resourceLabel}>Sun</span>
-                        <div className={styles.progressBarWrapper}>
-                            <div className={styles.progressBarContainer}>
-                                <div
-                                    className={`${styles.progressBar} ${styles.sunBar}`}
-                                    style={{ width: `${resources.sun}%` }}
-                                ></div>
-                            </div>
-                        </div>
-                    </div>
-                    <span className={styles.resourceValue}>{resources.sun}%</span>
-                </div>
-
+                ))}
             </div>
-
         </div>
     );
 };
