@@ -1,3 +1,12 @@
+/*
+Unit Tests for the checkCollision Function
+
+This module contains unit tests for the checkCollision function, which determines
+whether a falling raindrop has collided with the bucket. Tests cover full overlap,
+partial overlaps from both sides, misses to the left and right, vertical boundary
+conditions, and exact edge cases at the bucket's boundaries.
+*/
+
 import { describe, it, expect } from "vitest";
 import { checkCollision } from "../collision";
 import { BUCKET_WIDTH } from "../constants";

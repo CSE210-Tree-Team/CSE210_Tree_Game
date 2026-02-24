@@ -1,11 +1,17 @@
 /*
 WaterGame Page
 
-This module defines the WaterGame page, which manages the different screens 
-(start, tutorial, game, end) and handles navigation between them. It uses 
-React state to track the current screen and renders the appropriate content 
-based on that state. The component also includes navigation functionality to 
-return to the home page or move between screens using buttons and a back arrow.
+This module defines the WaterGame page, which manages the different screens
+(start, tutorial, game, end) and handles navigation between them. It uses
+React state to track the current screen and renders the appropriate content
+based on that state.
+
+The game presents the player with a series of water-related multiple choice
+questions. Raindrop answers fall from the top of the screen and the player
+must move a bucket left and right using the arrow keys to catch the correct
+answer. The game tracks correct and incorrect answers and displays the results
+on the end screen, where the player's score is pushed to the server to update
+the water resource level.
 */
 
 import { useState, useEffect, useRef, useCallback } from "react";

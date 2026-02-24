@@ -1,10 +1,11 @@
 /*
-Integration tests for the WaterGame component
+Game Screen Integration Tests for the WaterGame Component
 
-This module contains integration tests for the WaterGame component, 
-which is a key part of the client-side application. These tests verify 
-that the components on the game screen (bucket, question, raindrop) render 
-and function correctly.
+This module contains integration tests for the game screen of the WaterGame
+component. These tests verify that the game screen components (question
+container, bucket, raindrops) render correctly, that the bucket moves
+correctly in response to arrow key presses, and that the end screen displays
+the correct results after the player catches a correct or incorrect raindrop.
 */
 
 import { render, screen, waitFor } from "@testing-library/react";
