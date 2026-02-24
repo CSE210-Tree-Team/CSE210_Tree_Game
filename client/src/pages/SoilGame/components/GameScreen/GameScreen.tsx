@@ -1,4 +1,4 @@
-import type { GameState } from '../../types/SoilGame_REP.type';
+import type { GameState } from '../../types/Abstract.types';
 import { Terminal } from '../Terminal/Terminal';
 import { Sidebar } from '../Sidebar/Sidebar';
 import styles from './GameScreen.module.css';
