@@ -13,17 +13,46 @@ import { test, expect } from "vitest";
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { MemoryRouter } from "react-router-dom";
+import { vi, beforeEach, afterEach } from "vitest";
+
 import { WaterGame } from "../WaterGame";
 import { SPAWN_INTERVAL_MS, RAINDROP_WIDTH } from "../constants";
+import type { WaterQuestion } from "../../ServerCalls/ServerCalls";
+import * as ServerCalls from "../../ServerCalls/ServerCalls";
+
+const mockWaterQuestions = [
+  {
+    questionID: "1",
+    difficulty: 1,
+    resourceType: "Water",
+    text: "What is the chemical formula for water?",
+    type: "MCQ",
+    choices: [
+      { text: "H2O", isCorrect: true },
+      { text: "CO2", isCorrect: false },
+      { text: "O2", isCorrect: false },
+    ],
+  },
+];
+
+beforeEach(() => {
+  vi.spyOn(ServerCalls, "fetchQuestions").mockResolvedValue(
+    mockWaterQuestions as WaterQuestion[],
+  );
+  Object.defineProperty(HTMLElement.prototype, "offsetWidth", {
+    configurable: true,
+    value: 800,
+  });
+});
+
+afterEach(() => {
+  vi.restoreAllMocks();
+});
 
 test("spawns raindrops within container bounds", async () => {
   Object.defineProperty(HTMLElement.prototype, "offsetHeight", {
     configurable: true,
     value: 1000,
-  });
-  Object.defineProperty(HTMLElement.prototype, "offsetWidth", {
-    configurable: true,
-    value: 800,
   });
 
   const user = userEvent.setup();
@@ -34,6 +63,7 @@ test("spawns raindrops within container bounds", async () => {
     </MemoryRouter>,
   );
 
+  await screen.findByTestId("water-start");
   await user.click(screen.getByRole("button", { name: /play/i }));
   await user.click(screen.getByRole("button", { name: /i'm ready/i }));
 
@@ -61,11 +91,8 @@ test("raindrop moves downward over time", async () => {
     configurable: true,
     value: 1000,
   });
-  Object.defineProperty(HTMLElement.prototype, "offsetWidth", {
-    configurable: true,
-    value: 800,
-  });
 
+  await screen.findByTestId("water-start");
   await user.click(screen.getByRole("button", { name: /play/i }));
   await user.click(screen.getByRole("button", { name: /i'm ready/i }));
 
@@ -92,10 +119,6 @@ test("raindrop disappears once it hits the bottom", async () => {
     configurable: true,
     value: 200,
   });
-  Object.defineProperty(HTMLElement.prototype, "offsetWidth", {
-    configurable: true,
-    value: 800,
-  });
 
   const user = userEvent.setup();
 
@@ -105,6 +128,7 @@ test("raindrop disappears once it hits the bottom", async () => {
     </MemoryRouter>,
   );
 
+  await screen.findByTestId("water-start");
   await user.click(screen.getByRole("button", { name: /play/i }));
   await user.click(screen.getByRole("button", { name: /i'm ready/i }));
 
@@ -123,10 +147,6 @@ test("raindrops spawn at the correct interval", async () => {
     configurable: true,
     value: 1000,
   });
-  Object.defineProperty(HTMLElement.prototype, "offsetWidth", {
-    configurable: true,
-    value: 800,
-  });
 
   const user = userEvent.setup();
 
@@ -136,6 +156,7 @@ test("raindrops spawn at the correct interval", async () => {
     </MemoryRouter>,
   );
 
+  await screen.findByTestId("water-start");
   await user.click(screen.getByRole("button", { name: /play/i }));
   await user.click(screen.getByRole("button", { name: /i'm ready/i }));
 
@@ -145,4 +166,28 @@ test("raindrops spawn at the correct interval", async () => {
   expect(screen.queryByTestId("raindrop-1")).not.toBeInTheDocument();
 
   await screen.findByTestId("raindrop-1", {}, { timeout: SPAWN_INTERVAL_MS });
+}, 10000);
+
+test("renders fetched question choices as raindrop answers", async () => {
+  const user = userEvent.setup();
+
+  Object.defineProperty(HTMLElement.prototype, "offsetHeight", {
+    configurable: true,
+    value: 1000,
+  });
+
+  render(
+    <MemoryRouter>
+      <WaterGame />
+    </MemoryRouter>,
+  );
+
+  await screen.findByTestId("water-start");
+  await user.click(screen.getByRole("button", { name: /play/i }));
+  await user.click(screen.getByRole("button", { name: /i'm ready/i }));
+
+  // Wait for all choices to appear as raindrop answers
+  for (const choice of mockWaterQuestions[0].choices) {
+    await screen.findByText(choice.text, {}, { timeout: 5000 });
+  }
 }, 10000);
