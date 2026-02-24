@@ -1,3 +1,11 @@
+/*
+useWaterGameQuestions Hook
+
+A custom React hook that fetches water game questions from the server
+and manages the loading and error states during the fetch lifecycle.
+Returns the fetched questions, a loading flag, and an error message if the fetch fails.
+*/
+
 import { useState, useEffect } from "react";
 import { fetchQuestions } from "../../ServerCalls/ServerCalls";
 import type { WaterQuestion } from "../../ServerCalls/ServerCalls";

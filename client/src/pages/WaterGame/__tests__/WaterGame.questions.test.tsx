@@ -1,10 +1,11 @@
 /*
-Integration tests for the WaterGame component
+Integration tests for the question in WaterGame component
 
-This module contains integration tests for the WaterGame component, 
-which is a key part of the client-side application. These tests verify 
-that the different screens (start, tutorial, game, end) render correctly 
-and that navigation between them works as expected.
+This module contains integration tests for the question 
+within the WaterGame, which is essential for displaying the correct
+questions to the users. These tests verify the correct questions are 
+rendered, and that the question displayed switches once the previous 
+has been answered.
 */
 
 import { render, screen, waitFor } from "@testing-library/react";

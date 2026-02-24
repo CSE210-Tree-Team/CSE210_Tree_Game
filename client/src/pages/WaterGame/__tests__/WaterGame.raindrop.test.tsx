@@ -5,8 +5,8 @@ This module contains integration tests for the Raindrop component,
 within the WaterGame, which is essential for tracking the player's
 progress throughout the minigame. These tests verify the raindrop
 animations are as expected: render within horizontal bounds, move
-downward over time, spawn at a specified interval, and disappears
-once it hits the floor.
+downward over time, spawn at a specified interval, disappears
+once it hits the floor, and renders corresponding answer choices.
 */
 
 import { test, expect } from "vitest";
