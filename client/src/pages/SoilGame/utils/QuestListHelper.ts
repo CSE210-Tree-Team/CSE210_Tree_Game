@@ -8,7 +8,6 @@ import {
 } from '../types/Abstract.types';
 
 // TODO: Potentially disconnect this to remove dependencies
-import { removeFromInventory } from './InventoryHelper';
 
 
 // ========================
@@ -36,44 +35,41 @@ export function getNextNeededElement(quest: Quest): { element: ElementType; rema
 }
 
 /** 
- * @param quest: Quest object to update
- * @param inventory: Current inventory state
- * @description Reads through quest requirements and 
- *              autosubmits the next element that pertains to
- *              the quest
- * TODO: REMOVE THIS FUNCTION. We want the player to select the 
- *       element they wish to submit and the quest that the element 
- *       pertains to, not this!
- * @returns 
+ * Checks if the inventory has enough resources to complete the quest.
+ * If so, returns the updated quest and inventory.
+ * Otherwise returns null.
  */
-export function submitElementToQuest(
+export function checkAndCompleteQuest(
 	quest: Quest,
 	inventory: Inventory
-): { updatedQuest: Quest; updatedInventory: Inventory; elementUsed: ElementType } | null {
+): { updatedQuest: Quest; updatedInventory: Inventory } | null {
 	if (quest.completed) return null;
 
-	// Find the next element this quest needs that the player has
-	for (const [element, required] of Object.entries(quest.required)) {
-		const submitted = quest.submitted[element] || 0;
-		const elementType = element as ElementType;
+	const newInventory = { ...inventory };
+	const newSubmitted = { ...quest.submitted };
 
-		if (submitted < required && inventory[elementType] > 0) {
-			const updatedQuest: Quest = {
-				...quest,
-				submitted: {
-					...quest.submitted,
-					[element]: submitted + 1,
-				},
-			};
-			updatedQuest.completed = isQuestComplete(updatedQuest);
+	// Check if we have enough of EVERYTHING required
+	for (const [element, requiredCount] of Object.entries(quest.required)) {
+		const symbol = element; // The key in quest.required is the symbol (e.g. "H")
+		const elementName = SYMBOL_TO_ELEMENT[symbol] || symbol; // The key in inventory is the element name (e.g. "Hydrogen")
 
-			const updatedInventory = removeFromInventory(inventory, elementType)!;
-
-			return { updatedQuest, updatedInventory, elementUsed: elementType };
+		const currentInInventory = inventory[elementName] || 0;
+		if (currentInInventory < requiredCount) {
+			return null; // Not enough of this resource
 		}
+
+		// Prepare the updates
+		newInventory[elementName] -= requiredCount;
+		newSubmitted[symbol] = requiredCount;
 	}
 
-	return null;
+	const updatedQuest: Quest = {
+		...quest,
+		submitted: newSubmitted,
+		completed: true,
+	};
+
+	return { updatedQuest, updatedInventory: newInventory };
 }
 
 // ========================
