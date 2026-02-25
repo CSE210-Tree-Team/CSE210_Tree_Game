@@ -42,6 +42,8 @@ export const Earth = ({ earth, onClick }: EarthProps) => {
                 alt={`Earth-${getEarthHealthStatus()}`}
                 className={styles.earthImage}
                 onClick={onClick}
+                loading="eager"
+                decoding="async"
             ></img>
         </div>
     );

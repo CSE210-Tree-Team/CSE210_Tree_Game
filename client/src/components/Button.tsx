@@ -17,7 +17,7 @@ The Button component accepts the following props:
 import styles from "./Button.module.css";
 
 export type ButtonProps = {
-  variant: "water" | "soil";
+  variant: "water" | "soil" | "grass";
   disabled?: boolean;
   onClick?: () => void;
   className?: string;

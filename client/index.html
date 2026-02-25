@@ -1,11 +1,22 @@
 <!doctype html>
 <html lang="en">
-  <head>
+<head>
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>treegame</title>
-  </head>
+    <!-- Preload pic resources -->
+    <link rel="preload" href="/assets/bg.svg" as="image" type="image/svg+xml" />
+    <link rel="preload" href="/assets/tree_healthy.svg" as="image" type="image/svg+xml" />
+    <link rel="preload" href="/assets/tree_withered.svg" as="image" type="image/svg+xml" />
+    <link rel="preload" href="/assets/tree_unhealthy.svg" as="image" type="image/svg+xml" />
+    <link rel="preload" href="/assets/soil_healthy.svg" as="image" type="image/svg+xml" />
+    <link rel="preload" href="/assets/soil_unhealthy.svg" as="image" type="image/svg+xml" />
+    <link rel="preload" href="/assets/soil_withered.svg" as="image" type="image/svg+xml" />
+    <link rel="preload" href="/assets/water_can.svg" as="image" type="image/svg+xml" />
+    <link rel="preload" href="/assets/board2.svg" as="image" type="image/svg+xml" />
+
+</head>
   <body>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>

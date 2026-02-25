@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { render, screen, waitFor } from '../../test/test-utils'
+import { render, screen, waitFor } from '../../../test/test-utils'
 import userEvent from '@testing-library/user-event'
-import { Homepage } from '../Home/homepage'
+import { Homepage } from '../homepage'
 
 // Mock Auth0
 vi.mock('@auth0/auth0-react', () => ({
