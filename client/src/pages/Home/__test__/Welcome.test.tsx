@@ -1,7 +1,7 @@
 import { describe, it, expect, vi } from 'vitest'
-import { render, screen } from '../../test/test-utils'
+import { render, screen } from '../../../test/test-utils'
 import userEvent from '@testing-library/user-event'
-import { Welcome } from '../Home/Welcome'
+import { Welcome } from '../Welcome'
 
 // Mock useNavigate
 const mockNavigate = vi.fn()
