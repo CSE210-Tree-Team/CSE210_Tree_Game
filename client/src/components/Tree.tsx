@@ -43,6 +43,8 @@ export const Tree = ({ water }: TreeProps) => {
                 src={getTreeImage()}
                 alt={`Tree-${getTreeHealthStatus()}`}
                 className={styles.treeImage}
+                loading="eager"
+                decoding="async"
             />
         </div>
     );

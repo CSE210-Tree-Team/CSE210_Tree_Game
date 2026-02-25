@@ -107,11 +107,25 @@ export function getElementSymbol(element: ElementType): string {
 
 /** Format the location info block for terminal */
 export function formatLocationInfo(pos: Position, map: Node[][]): string[] {
-	// TODO: This is a placeholder
-	return [
-		'formatLocationInfo not implemented yet',
-		'Decide on how to represent ElementTypes and Symbols'
-	];
+  const node = map[pos.y][pos.x];
+  const info: string[] = [`Coordinates: [X: ${pos.x}, Y: ${pos.y}]`];
+  if (node.resources && Object.keys(node.resources).length > 0) {
+    if (node.collected) {
+      info.push('Status: Area cleared.');
+    } else {
+      info.push('Sensors detecting resources:');
+      // Loop through resources like { Nitrogen: 2, Oxygen: 1 }
+      Object.entries(node.resources).forEach(([element, count]) => {
+        if (count > 0) {
+          info.push(`  - ${element}: ${count} units`);
+        }
+      });
+      info.push('Type "collect" to gather these items.');
+    }
+  } else {
+    info.push('Status: No resources detected in this sector.');
+  }
+  return info;
 }
 
 // ========================

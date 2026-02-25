@@ -1,8 +1,8 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 
-import { 
+import {
   type ElementType,
-  type GamePhase, 
+  type GamePhase,
   type Inventory,
   type Position,
   type Node,
@@ -116,16 +116,6 @@ export function useSoilGame() {
     }));
   }, []);
 
-  // ---- The follow commands are notes for later, do not use them ----
-  const handleCommand = useCallback((rawInput: string) => {
-    // TODO: Implement command handling logic
-    console.log('Command received:', rawInput);
-    setGameState((prev) => ({
-      ...prev,
-      terminalLog: [...prev.terminalLog, '', `> ${rawInput}`],
-    }));
-  }, []);
-
   const movePlayer = useCallback((direction: Direction) => {
     setGameState((prev) => {
       if (prev.phase !== 'playing') return prev;
@@ -144,7 +134,6 @@ export function useSoilGame() {
         };
       }
 
-      const node = getNodeAt(prev.map, nextPosition);
 
       const locationInfo = formatLocationInfo(nextPosition, prev.map);
 
@@ -159,7 +148,35 @@ export function useSoilGame() {
         ],
       };
     });
-  }, []); 
+  }, []);
+
+  // ---- The follow commands are notes for later, do not use them ----
+  const handleCommand = useCallback((rawInput: string) => {
+    const logUserCommand = `> ${rawInput}`;
+    // 1. Validate using the helper
+    if (!isValidCommand(rawInput)) {
+      setGameState(prev => ({
+        ...prev,
+        terminalLog: [...prev.terminalLog, '', logUserCommand, `Unknown command: "${rawInput}". Look at the bottom-right for valid commands.`]
+      }));
+      return;
+    }
+    // 2. Parse and Route
+    const cmd = parseCommand(rawInput);
+
+    setGameState(prev => ({
+      ...prev,
+      terminalLog: [...prev.terminalLog, '', logUserCommand]
+    }));
+    if (['w', 'a', 's', 'd'].includes(cmd)) {
+      movePlayer(cmd as Direction);
+    }
+    // will add collect and quest shit later. 
+
+
+  }, [movePlayer]);
+
+
 
   const completeGame = useCallback(async () => {
     // TODO: Replace with actual POST /api/soil-game/complete
@@ -170,6 +187,21 @@ export function useSoilGame() {
       new_soil_level: state.questsCompleted * 25,
     };
   }, [state.questsCompleted]);
+
+  useEffect(() => {
+    if (state.map.length > 0) {
+      const debugGrid = state.map.map((row, y) =>
+        row.map((node, x) => {
+          if (x === state.playerPosition.x && y === state.playerPosition.y) return "🏃";
+          if (node.collected) return "✅";
+          if (!node.resources) return "·";
+          return "📦";
+        })
+      );
+      console.log(`--- Soil Map Matrix [Player @ ${state.playerPosition.x}, ${state.playerPosition.y}] ---`);
+      console.table(debugGrid);
+    }
+  }, [state.map, state.playerPosition]);
 
   return {
     state,

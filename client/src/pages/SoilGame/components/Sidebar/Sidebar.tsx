@@ -1,5 +1,5 @@
 import styles from './Sidebar.module.css';
-import type { Inventory, Quest } from '../../types/SoilGame_REP.type';
+import type { Inventory, Quest } from '../../types/Abstract.types';
 import { CommandsSection } from './CommandsSection';
 import { InventorySection } from './InventorySection';
 import { QuestSection } from './QuestSection';

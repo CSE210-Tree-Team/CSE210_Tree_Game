@@ -20,7 +20,7 @@ import styles from "./Popup.module.css";
 import { Button } from "./Button";
 
 export type PopupProps = {
-  variant: "soil" | "water";
+  variant: "soil" | "water" | "grass";
   screen: "start" | "tutorial" | "end";
   header: string;
   buttonText?: string;
