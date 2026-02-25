@@ -7,7 +7,7 @@ and inline color/weight styles for zero vs non-zero counts.
 
 import { render, screen } from "@testing-library/react";
 import { InventorySection } from "../components/Sidebar/InventorySection";
-import type { Inventory } from "../types/SoilGame_REP.type";
+import type { Inventory } from "../types/Abstract.types";
 
 
 const emptyInventory: Inventory = {

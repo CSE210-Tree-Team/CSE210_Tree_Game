@@ -1,8 +1,8 @@
 import { describe, it, expect } from 'vitest';
 
-import { 
+import {
   type ElementType,
-  type GamePhase, 
+  type GamePhase,
   type Inventory,
   type Position,
   type Node,
@@ -24,7 +24,7 @@ import {
 } from '../utils/MapHelper'
 
 import {
-  createEmptyInventory, 
+  createEmptyInventory,
   addToInventory,
   removeFromInventory
 } from '../utils/InventoryHelper';
@@ -298,8 +298,8 @@ describe('GameHelper_REP', () => {
   describe('generateMap', () => {
     it('generates a DEFAULT = 5 x 5 size map', () => {
       const questList: Quest[] = [
-        {id: 1, moleculeName: "Water", moleculeFormula: "H2O", required:{"H": 2,"O": 1}, submitted:{}, completed: false}
-      ]; 
+        { id: 1, moleculeName: "Water", moleculeFormula: "H2O", required: { "H": 2, "O": 1 }, submitted: {}, completed: false }
+      ];
       const map: Node[][] = generateMap(questList);
       expect(map.length).toBe(5);
       expect(map[0].length).toBe(5);
@@ -308,7 +308,7 @@ describe('GameHelper_REP', () => {
 
   describe('createEmptyInventory', () => {
     it('creates an inventory with all counts zero', () => {
-      const inv = createEmptyInventory();
+      const inv = createEmptyInventory(['Nitrogen', 'Hydrogen', 'Carbon', 'Oxygen']);
       expect(inv.Nitrogen).toBe(0);
       expect(inv.Hydrogen).toBe(0);
       expect(inv.Carbon).toBe(0);
@@ -318,7 +318,7 @@ describe('GameHelper_REP', () => {
 
   describe('addToInventory', () => {
     it('increments the specified element by one', () => {
-      const inv = createEmptyInventory();
+      const inv = createEmptyInventory(['Nitrogen', 'Hydrogen', 'Carbon', 'Oxygen']);
       const updated = addToInventory(inv, 'Hydrogen');
       expect(updated.Hydrogen).toBe(1);
       expect(updated.Nitrogen).toBe(0);
@@ -329,7 +329,7 @@ describe('GameHelper_REP', () => {
 
   describe('removeFromInventory', () => {
     it('decrements the specified element when enough is available', () => {
-      const inv = createEmptyInventory();
+      const inv = createEmptyInventory(['Nitrogen', 'Hydrogen', 'Carbon', 'Oxygen']);
       const withItem = addToInventory(inv, 'Carbon'); // Carbon = 1
       const after = removeFromInventory(withItem, 'Carbon');
       expect(after).not.toBeNull();
@@ -337,12 +337,12 @@ describe('GameHelper_REP', () => {
     });
 
     it('returns null when trying to remove more than available', () => {
-      const inv = createEmptyInventory();
+      const inv = createEmptyInventory(['Nitrogen', 'Hydrogen', 'Carbon', 'Oxygen']);
       expect(removeFromInventory(inv, 'Nitrogen')).toBeNull();
     });
 
     it('supports removing a custom amount when sufficient', () => {
-      let inv = createEmptyInventory();
+      let inv = createEmptyInventory(['Nitrogen', 'Hydrogen', 'Carbon', 'Oxygen']);
       inv = addToInventory(inv, 'Oxygen');
       inv = addToInventory(inv, 'Oxygen'); // Oxygen = 2
       const after = removeFromInventory(inv, 'Oxygen', 2);
@@ -391,7 +391,7 @@ describe('GameHelper_REP', () => {
 
     it('returns null when no required elements are available in inventory', () => {
       const quest: Quest = { id: 6, moleculeName: 'None', moleculeFormula: '', required: { Oxygen: 1 }, submitted: { Oxygen: 0 }, completed: false };
-      const inventory = createEmptyInventory();
+      const inventory = createEmptyInventory(['Nitrogen', 'Hydrogen', 'Carbon', 'Oxygen']);
       expect(submitElementToQuest(quest, inventory)).toBeNull();
     });
   });
