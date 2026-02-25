@@ -298,7 +298,7 @@ describe('GameHelper_REP', () => {
   describe('generateMap', () => {
     it('generates a DEFAULT = 5 x 5 size map', () => {
       const questList: Quest[] = [
-        { id: 1, moleculeName: "Water", moleculeFormula: "H2O", required: { "H": 2, "O": 1 }, submitted: {}, completed: false }
+        { moleculeName: "Water", moleculeFormula: "H2O", required: { "H": 2, "O": 1 }, submitted: {}, completed: false }
       ];
       const map: Node[][] = generateMap(questList);
       expect(map.length).toBe(5);
@@ -353,19 +353,19 @@ describe('GameHelper_REP', () => {
 
   describe('isQuestComplete', () => {
     it('returns true when all required elements are submitted', () => {
-      const quest: Quest = { id: 1, moleculeName: 'Water', moleculeFormula: 'H2O', required: { Hydrogen: 2 }, submitted: { Hydrogen: 2 }, completed: false };
+      const quest: Quest = { moleculeName: 'Water', moleculeFormula: 'H2O', required: { Hydrogen: 2 }, submitted: { Hydrogen: 2 }, completed: false };
       expect(isQuestComplete(quest)).toBe(true);
     });
 
     it('returns false when requirements are not met', () => {
-      const quest: Quest = { id: 2, moleculeName: 'Ammonia', moleculeFormula: 'NH3', required: { Nitrogen: 1, Hydrogen: 3 }, submitted: { Nitrogen: 1, Hydrogen: 2 }, completed: false };
+      const quest: Quest = { moleculeName: 'Ammonia', moleculeFormula: 'NH3', required: { Nitrogen: 1, Hydrogen: 3 }, submitted: { Nitrogen: 1, Hydrogen: 2 }, completed: false };
       expect(isQuestComplete(quest)).toBe(false);
     });
   });
 
   describe('getNextNeededElement', () => {
     it('returns the next needed element and remaining count', () => {
-      const quest: Quest = { id: 3, moleculeName: 'Test', moleculeFormula: '', required: { Nitrogen: 1, Hydrogen: 2 }, submitted: { Nitrogen: 0, Hydrogen: 1 }, completed: false };
+      const quest: Quest = { moleculeName: 'Test', moleculeFormula: '', required: { Nitrogen: 1, Hydrogen: 2 }, submitted: { Nitrogen: 0, Hydrogen: 1 }, completed: false };
       const next = getNextNeededElement(quest);
       expect(next).not.toBeNull();
       expect(next?.element).toBe('Nitrogen');
@@ -373,14 +373,14 @@ describe('GameHelper_REP', () => {
     });
 
     it('returns null when quest is complete', () => {
-      const quest: Quest = { id: 4, moleculeName: 'Done', moleculeFormula: '', required: { Carbon: 1 }, submitted: { Carbon: 1 }, completed: true };
+      const quest: Quest = { moleculeName: 'Done', moleculeFormula: '', required: { Carbon: 1 }, submitted: { Carbon: 1 }, completed: true };
       expect(getNextNeededElement(quest)).toBeNull();
     });
   });
 
   describe('submitElementToQuest', () => {
     it('submits the next available element from inventory to the quest', () => {
-      const quest: Quest = { id: 5, moleculeName: 'Make', moleculeFormula: '', required: { Nitrogen: 1, Hydrogen: 1 }, submitted: { Nitrogen: 0, Hydrogen: 0 }, completed: false };
+      const quest: Quest = { moleculeName: 'Make', moleculeFormula: '', required: { Nitrogen: 1, Hydrogen: 1 }, submitted: { Nitrogen: 0, Hydrogen: 0 }, completed: false };
       const inventory = { Nitrogen: 1, Hydrogen: 0, Carbon: 0, Oxygen: 0 } as Inventory;
       const result = submitElementToQuest(quest, inventory);
       expect(result).not.toBeNull();
@@ -390,7 +390,7 @@ describe('GameHelper_REP', () => {
     });
 
     it('returns null when no required elements are available in inventory', () => {
-      const quest: Quest = { id: 6, moleculeName: 'None', moleculeFormula: '', required: { Oxygen: 1 }, submitted: { Oxygen: 0 }, completed: false };
+      const quest: Quest = { moleculeName: 'None', moleculeFormula: '', required: { Oxygen: 1 }, submitted: { Oxygen: 0 }, completed: false };
       const inventory = createEmptyInventory(['Nitrogen', 'Hydrogen', 'Carbon', 'Oxygen']);
       expect(submitElementToQuest(quest, inventory)).toBeNull();
     });
@@ -412,7 +412,7 @@ describe('GameHelper_REP', () => {
   // describe('formatLocationInfo', () => {});
   describe('formatQuestProgress', () => {
     it('formats quest progress as submitted/required pairs', () => {
-      const quest: Quest = { id: 7, moleculeName: 'X', moleculeFormula: '', required: { Nitrogen: 1, Hydrogen: 2 }, submitted: { Nitrogen: 1, Hydrogen: 1 }, completed: false };
+      const quest: Quest = { moleculeName: 'X', moleculeFormula: '', required: { Nitrogen: 1, Hydrogen: 2 }, submitted: { Nitrogen: 1, Hydrogen: 1 }, completed: false };
       const formatted = formatQuestProgress(quest);
       expect(formatted).toBe('1/1 Nitrogen, 1/2 Hydrogen');
     });

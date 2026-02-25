@@ -30,7 +30,6 @@ export interface Node {
 
 /**
  * @interface 
- * id: Unique identifier for each quest
  * moleculeName: Full name of the molecule to construct
  * moleculeFormula: The chemical formula of the molecule to construct
  * required: Element-Value pairs representing the required amount of each element
