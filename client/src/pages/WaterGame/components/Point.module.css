@@ -1,0 +1,34 @@
+.point {
+  display: flex;
+  width: 72px;
+  height: 72px;
+  justify-content: center;
+  align-items: center;
+  position: absolute;
+}
+
+.pointText {
+  text-align: center;
+  text-shadow: 0 4px 4px rgba(0, 0, 0, 0.25);
+  font-family: Handjet;
+  font-size: 64px;
+  font-weight: 700;
+}
+
+.correct {
+  color: var(--color-success);
+  text-shadow:
+    -2px -2px 0 #0e7600,
+    2px -2px 0 #0e7600,
+    -2px 2px 0 #0e7600,
+    2px 2px 0 #0e7600;
+}
+
+.incorrect {
+  color: var(--color-incorrect);
+  text-shadow:
+    -2px -2px 0 #760000,
+    2px -2px 0 #760000,
+    -2px 2px 0 #760000,
+    2px 2px 0 #760000;
+}

@@ -5,3 +5,5 @@ export const SPAWN_INTERVAL_MS = 1750;
 export const BUCKET_WIDTH = 140;
 export const BUCKET_HEIGHT = 140;
 export const NUM_QUESTIONS = 3;
+export const NUM_POINTS = 10;
+export const INCORRECT = "X";

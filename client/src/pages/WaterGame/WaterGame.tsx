@@ -20,11 +20,13 @@ import { useNavigate } from "react-router-dom";
 import { useWaterGameQuestions } from "./hooks/useWaterGameQuestions";
 import { pushGameResults } from "../ServerCalls/ServerCalls";
 import { checkCollision } from "./collision";
-
 import { questionToRaindropAnswers, shuffleArray } from "./utils";
+
 import { Popup } from "../../components/Popup";
 import Bucket from "./components/Bucket";
 import { Raindrop } from "./components/Raindrop";
+import { Point } from "./components/Point";
+
 import type { RaindropData, RaindropAnswer } from "./types";
 import {
   RAINDROP_FALL_SPEED,
@@ -244,6 +246,7 @@ export const WaterGame = () => {
             className={styles.arrow}
             onClick={() => navigate("/")}
           />
+          <Point id={0} x={40} y={40} variant="incorrect" />
           <Popup
             variant="water"
             screen="start"
