@@ -34,15 +34,15 @@ import {
 } from '../utils/InventoryHelper';
 
 import {
-  isQuestComplete,
-  getNextNeededElement,
-  submitElementToQuest,
+  checkAndCompleteQuest,
   formatQuestProgress,
   getElementSymbol,
   formatLocationInfo,
   isValidCommand,
   parseCommand
 } from '../utils/QuestListHelper';
+
+import { pushGameResults } from '../../ServerCalls/ServerCalls';
 
 import {
   isValidPosition,
@@ -252,23 +252,73 @@ export function useSoilGame() {
       movePlayer(cmd as Direction);
     } else if (cmd === 'c') {
       collectResources();
+    } else if (['1', '2', '3'].includes(cmd)) {
+      const questIndex = parseInt(cmd) - 1;
+      setGameState((prev) => {
+        if (prev.phase !== 'playing') return prev;
+        const quest = prev.quests[questIndex];
+        if (!quest) return prev;
+
+        if (quest.completed) {
+          return {
+            ...prev,
+            terminalLog: [...prev.terminalLog, '', 'You have already completed this quest!']
+          };
+        }
+
+        const result = checkAndCompleteQuest(quest, prev.inventory);
+        if (result) {
+          const newQuests = [...prev.quests];
+          newQuests[questIndex] = result.updatedQuest;
+          const newQuestsCompleted = prev.questsCompleted + 1;
+
+          let nextLog = [...prev.terminalLog, '', 'GOOD job you completed a quest!'];
+
+          return {
+            ...prev,
+            inventory: result.updatedInventory,
+            quests: newQuests,
+            questsCompleted: newQuestsCompleted,
+            terminalLog: nextLog
+          };
+        } else {
+          return {
+            ...prev,
+            terminalLog: [...prev.terminalLog, '', 'Incorrect formula. keep searching.']
+          };
+        }
+      });
     }
-    // will add collect and quest shit later. 
-
-
-  }, [movePlayer]);
+  }, [movePlayer, collectResources]);
 
 
 
   const completeGame = useCallback(async () => {
-    // TODO: Replace with actual POST /api/soil-game/complete
-    console.log(`Game complete! Quests completed: ${state.questsCompleted}`);
+    const totalProgress = state.questsCompleted * 25;
+    const success = await pushGameResults(totalProgress, 'earth');
+
+    if (success) {
+      console.log('Database updated successfully!');
+      setGameState(prev => ({
+        ...prev,
+        phase: 'complete',
+        terminalLog: [...prev.terminalLog, '', 'Database updated successfully!']
+      }));
+    }
+
     return {
-      success: true,
-      progress_added: state.questsCompleted * 25,
-      new_soil_level: state.questsCompleted * 25,
+      success,
+      progress_added: totalProgress,
+      new_soil_level: totalProgress, // This would normally come from the response if it returned it
     };
   }, [state.questsCompleted]);
+
+  // Check for game completion
+  useEffect(() => {
+    if (state.phase === 'playing' && state.questsCompleted === SOIL_QUESTION_COUNT) {
+      completeGame();
+    }
+  }, [state.questsCompleted, state.phase, completeGame]);
 
   useEffect(() => {
     if (state.map.length > 0) {
@@ -291,6 +341,5 @@ export function useSoilGame() {
     startGame,
     handleCommand,
     collectResources
-    // TODO: Add additional commands here
   };
 }

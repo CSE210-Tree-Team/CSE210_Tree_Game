@@ -32,7 +32,7 @@ import {
 import {
   isQuestComplete,
   getNextNeededElement,
-  submitElementToQuest,
+  checkAndCompleteQuest,
   formatQuestProgress,
   getElementSymbol,
   formatLocationInfo,
@@ -378,21 +378,23 @@ describe('GameHelper_REP', () => {
     });
   });
 
-  describe('submitElementToQuest', () => {
-    it('submits the next available element from inventory to the quest', () => {
-      const quest: Quest = { moleculeName: 'Make', moleculeFormula: '', required: { Nitrogen: 1, Hydrogen: 1 }, submitted: { Nitrogen: 0, Hydrogen: 0 }, completed: false };
-      const inventory = { Nitrogen: 1, Hydrogen: 0, Carbon: 0, Oxygen: 0 } as Inventory;
-      const result = submitElementToQuest(quest, inventory);
+  describe('checkAndCompleteQuest', () => {
+    it('successfully completes a quest when elements are exactly sufficient', () => {
+      const quest: Quest = { moleculeName: 'Water', moleculeFormula: 'H2O', required: { H: 2, O: 1 }, submitted: { H: 0, O: 0 }, completed: false };
+      const inventory = { Hydrogen: 2, Oxygen: 1, Carbon: 0, Nitrogen: 0 } as Inventory;
+      const result = checkAndCompleteQuest(quest, inventory);
+
       expect(result).not.toBeNull();
-      expect(result?.elementUsed).toBe('Nitrogen');
-      expect(result?.updatedInventory.Nitrogen).toBe(0);
-      expect(result?.updatedQuest.submitted.Nitrogen).toBe(1);
+      expect(result?.updatedQuest.completed).toBe(true);
+      expect(result?.updatedInventory.Hydrogen).toBe(0);
+      expect(result?.updatedInventory.Oxygen).toBe(0);
     });
 
-    it('returns null when no required elements are available in inventory', () => {
-      const quest: Quest = { moleculeName: 'None', moleculeFormula: '', required: { Oxygen: 1 }, submitted: { Oxygen: 0 }, completed: false };
-      const inventory = createEmptyInventory(['Nitrogen', 'Hydrogen', 'Carbon', 'Oxygen']);
-      expect(submitElementToQuest(quest, inventory)).toBeNull();
+    it('returns null when items are insufficient', () => {
+      const quest: Quest = { moleculeName: 'Water', moleculeFormula: 'H2O', required: { H: 2, O: 1 }, submitted: { H: 0, O: 0 }, completed: false };
+      const inventory = { Hydrogen: 1, Oxygen: 1 } as Inventory;
+      const result = checkAndCompleteQuest(quest, inventory);
+      expect(result).toBeNull();
     });
   });
 
