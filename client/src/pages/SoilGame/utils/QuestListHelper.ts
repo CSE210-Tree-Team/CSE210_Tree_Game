@@ -1,9 +1,10 @@
 import {
 	type Node,
-  type Position,
-  type Inventory,
-  type Quest,
-  type ElementType,
+	type Position,
+	type Inventory,
+	type Quest,
+	type ElementType,
+	SYMBOL_TO_ELEMENT,
 } from '../types/Abstract.types';
 
 // TODO: Potentially disconnect this to remove dependencies
@@ -90,42 +91,35 @@ export function formatQuestProgress(quest: Quest): string {
 }
 
 /** Get chemical symbol for an element 
- * TODO: BAD, we need to remove hardcoding here
- *       also abstract to SoilGame.types.ts
  */
 export function getElementSymbol(element: ElementType): string {
-
-	// TODO: BAD, we need to remove hardcoding here
-	const symbols: Record<ElementType, string> = {
-		Nitrogen: 'N',
-		Hydrogen: 'H',
-		Carbon: 'C',
-		Oxygen: 'O',
-	};
-	return symbols[element];
+	for (const [symbol, name] of Object.entries(SYMBOL_TO_ELEMENT)) {
+		if (name === element) return symbol;
+	}
+	return element; // Fallback to element name/symbol itself
 }
 
 /** Format the location info block for terminal */
 export function formatLocationInfo(pos: Position, map: Node[][]): string[] {
-  const node = map[pos.y][pos.x];
-  const info: string[] = [`Coordinates: [X: ${pos.x}, Y: ${pos.y}]`];
-  if (node.resources && Object.keys(node.resources).length > 0) {
-    if (node.collected) {
-      info.push('Status: Area cleared.');
-    } else {
-      info.push('Sensors detecting resources:');
-      // Loop through resources like { Nitrogen: 2, Oxygen: 1 }
-      Object.entries(node.resources).forEach(([element, count]) => {
-        if (count > 0) {
-          info.push(`  - ${element}: ${count} units`);
-        }
-      });
-      info.push('Type "collect" to gather these items.');
-    }
-  } else {
-    info.push('Status: No resources detected in this sector.');
-  }
-  return info;
+	const node = map[pos.y][pos.x];
+	const info: string[] = [`Coordinates: [X: ${pos.x}, Y: ${pos.y}]`];
+	if (node.resources && Object.keys(node.resources).length > 0) {
+		if (node.collected) {
+			info.push('Status: Area cleared.');
+		} else {
+			info.push('Sensors detecting resources:');
+			// Loop through resources like { Nitrogen: 2, Oxygen: 1 }
+			Object.entries(node.resources).forEach(([element, count]) => {
+				if (count > 0) {
+					info.push(`  - ${element}: ${count} units`);
+				}
+			});
+			info.push('Type "collect" to gather these items.');
+		}
+	} else {
+		info.push('Status: No resources detected in this sector.');
+	}
+	return info;
 }
 
 // ========================
@@ -134,8 +128,8 @@ export function formatLocationInfo(pos: Position, map: Node[][]): string[] {
 
 /** Check if a string is a valid player command */
 export function isValidCommand(input: string): boolean {
-  const normalized = input.toLowerCase().trim();
-  return ['w', 'a', 's', 'd', 'c', 'collect', '1', '2', '3', '4'].includes(normalized);
+	const normalized = input.toLowerCase().trim();
+	return ['w', 'a', 's', 'd', 'c', 'collect', '1', '2', '3', '4'].includes(normalized);
 }
 
 /** 
@@ -144,7 +138,7 @@ export function isValidCommand(input: string): boolean {
  * TODO: Rename to a more descriptive function name
  */
 export function parseCommand(input: string): string {
-  const normalized = input.toLowerCase().trim();
-  if (normalized === 'collect') return 'c';
-  return normalized;
+	const normalized = input.toLowerCase().trim();
+	if (normalized === 'collect') return 'c';
+	return normalized;
 }

@@ -1,8 +1,8 @@
 import { describe, it, expect } from 'vitest';
 
-import { 
+import {
   type ElementType,
-  type GamePhase, 
+  type GamePhase,
   type Inventory,
   type Position,
   type Node,
@@ -80,7 +80,7 @@ describe('SoilGame_REP.type exports', () => {
   });
 
   it('can create Quest, Inventory and GameState shapes', () => {
-    const quest: Quest = { id: 1, moleculeName: 'Test', moleculeFormula: 'T', required: { Nitrogen: 1 }, submitted: { Nitrogen: 0 }, completed: false };
+    const quest: Quest = { moleculeName: 'Test', moleculeFormula: 'T', required: { Nitrogen: 1 }, submitted: { Nitrogen: 0 }, completed: false };
     const inv: Inventory = { Nitrogen: 0, Hydrogen: 0, Carbon: 0, Oxygen: 0 };
     const state: GameState = {
       phase: 'playing',
@@ -94,7 +94,7 @@ describe('SoilGame_REP.type exports', () => {
     };
     expect(state.phase).toBe('playing');
     expect(state.mapSize).toBe(1);
-    expect(state.quests[0].id).toBe(1);
+    expect(state.quests[0].moleculeName).toBe('Test');
   });
 
   it('CompleteGameRequest/Response shapes are usable', () => {

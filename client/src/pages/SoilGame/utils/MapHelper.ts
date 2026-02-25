@@ -1,10 +1,10 @@
 
-import { 
+import {
   type Node,
   type ElementType,
   type Position,
   type Quest,
-  SYMBOL_TO_ELEMENT, 
+  SYMBOL_TO_ELEMENT,
 } from "../types/Abstract.types";
 
 import { isValidPosition } from "./PositionHelper";
@@ -52,21 +52,18 @@ export function generateMap(quests: Quest[], size: number = MAP_SIZE): Node[][] 
   // Uses input list of elements to propagate requiredElements
   for (const quest of quests) {
     for (const [symbol, count] of Object.entries(quest.required)) {
-      const element = SYMBOL_TO_ELEMENT[symbol];
-      if (!element) {
-        throw new Error(`Unknown element symbol "${symbol}" in quest ${quest.moleculeName}`);
-      }
+      const element = SYMBOL_TO_ELEMENT[symbol] || symbol;
       for (let i = 0; i < count; i++) {
-        requiredElements.push(element as ElementType);
+        requiredElements.push(element);
       }
     }
   }
 
   // Initialize random Nodes with the resources needed to complete the game
   for (let i = requiredElements.length - 1; i >= 0; i--) {
-    const currNode = map[randomInt(0, size-1)][randomInt(0, size-1)]
+    const currNode = map[randomInt(0, size - 1)][randomInt(0, size - 1)]
     if (currNode.resources === null) {
-      currNode.resources = {[requiredElements[i]]: 1} as Record<ElementType, number>;
+      currNode.resources = { [requiredElements[i]]: 1 } as Record<ElementType, number>;
     } else {
       currNode.resources[requiredElements[i]] = (currNode.resources[requiredElements[i]] ?? 0) + 1;;
     }

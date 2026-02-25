@@ -70,7 +70,7 @@ function createInitialState(): GameState {
     mapSize: MAP_SIZE,
     quests: [],
     playerPosition: { x: 0, y: 0 },
-    inventory: { Nitrogen: 0, Hydrogen: 0, Carbon: 0, Oxygen: 0 }, // hard coded for now but later need to get it from the backend
+    inventory: {},
     terminalLog: [],
     questsCompleted: 0,
   };
@@ -103,6 +103,15 @@ export function useSoilGame() {
       throw new Error("Some questions failed to parse into quests");
     }
 
+    // Extract all unique elements needed for quests
+    const uniqueElements = new Set<string>();
+    fetchedQuests.forEach(quest => {
+      Object.keys(quest.required).forEach(symbol => {
+        const elementName = SYMBOL_TO_ELEMENT[symbol] || symbol;
+        uniqueElements.add(elementName);
+      });
+    });
+
     const map = generateMap(fetchedQuests);
     const startPos: Position = { x: 0, y: 0 };
     const initialLog = [
@@ -116,7 +125,7 @@ export function useSoilGame() {
       map,
       quests: fetchedQuests,
       playerPosition: startPos,
-      inventory: createEmptyInventory(),
+      inventory: createEmptyInventory(Array.from(uniqueElements)),
       terminalLog: initialLog,
       questsCompleted: 0,
     }));
@@ -156,6 +165,71 @@ export function useSoilGame() {
     });
   }, []);
 
+  /**
+   * Collect all resources at the current player position
+   */
+  const collectResources = useCallback(() => {
+    setGameState((prev) => {
+      if (prev.phase !== 'playing') return prev;
+
+      const node = getNodeAt(prev.map, prev.playerPosition);
+      if (!node || !node.resources || node.collected) {
+        return {
+          ...prev,
+          terminalLog: [
+            ...prev.terminalLog,
+            '',
+            'There are no resources to collect here.',
+          ],
+        };
+      }
+
+      // Add ALL resources from the node to the inventory
+      let newInventory = { ...prev.inventory };
+      const collectedItems: string[] = [];
+
+      Object.entries(node.resources).forEach(([element, amount]) => {
+        if (amount > 0) {
+          newInventory = addToInventory(newInventory, element, amount);
+          collectedItems.push(`${amount} ${element}`);
+        }
+      });
+
+      // If for some reason there were 0 entries but resources existed
+      if (collectedItems.length === 0) {
+        return {
+          ...prev,
+          terminalLog: [
+            ...prev.terminalLog,
+            '',
+            'Area is empty.',
+          ],
+        };
+      }
+
+      // Mark the node as collected across the entire map
+      const newMap = prev.map.map((row) =>
+        row.map((n) =>
+          n.x === node.x && n.y === node.y ? { ...n, collected: true } : n
+        )
+      );
+
+      const collectionMessage = `Gathered: ${collectedItems.join(', ')}.`;
+
+      return {
+        ...prev,
+        inventory: newInventory,
+        map: newMap,
+        terminalLog: [
+          ...prev.terminalLog,
+          '',
+          collectionMessage,
+          'Area cleared.',
+        ],
+      };
+    });
+  }, []);
+
   // ---- The follow commands are notes for later, do not use them ----
   const handleCommand = useCallback((rawInput: string) => {
     const logUserCommand = `> ${rawInput}`;
@@ -176,6 +250,8 @@ export function useSoilGame() {
     }));
     if (['w', 'a', 's', 'd'].includes(cmd)) {
       movePlayer(cmd as Direction);
+    } else if (cmd === 'c') {
+      collectResources();
     }
     // will add collect and quest shit later. 
 
@@ -213,7 +289,8 @@ export function useSoilGame() {
     state,
     setPhase,
     startGame,
-    handleCommand
+    handleCommand,
+    collectResources
     // TODO: Add additional commands here
   };
 }
