@@ -18,6 +18,10 @@ import {
 } from '../types/Abstract.types';
 
 import {
+  SOIL_QUESTION_COUNT
+} from '../SoilGameQuestionManager';
+
+import {
   getNodeAt,
   hasUncollectedResource,
   generateMap
@@ -47,10 +51,13 @@ import {
 } from '../utils/PositionHelper';
 
 import {
-  fetchQuestions,
-} from '../../ServerCalls/ServerCalls'
+  fetchSoilQuestions,
+} from '../SoilGameQuestionManager';
+import { toSoilQuest } from '../utils/QuestionAdapter'
 
 const MAP_SIZE = 5;
+
+const isValidQuest = (quest: Quest | null): quest is Quest => quest != null;
 
 // ========================
 // Initial State
@@ -88,14 +95,13 @@ export function useSoilGame() {
     // TODO: (Not Sure If We Still Need This) Replace with actual API call to GET /api/soil-game/start
 
     // Fetch questions from server
-    const fetchedQuestions = await fetchQuestions("Earth");
+    const fetchedQuestions = await fetchSoilQuestions();
 
-    // Extend questions field to include game logic fields
-    const fetchedQuests: Quest[] = fetchedQuestions.map((q) => ({
-      ...q,
-      submitted: {},
-      completed: false,
-    }));
+    const parsedQuests = fetchedQuestions.map((question) => toSoilQuest(question));
+    const fetchedQuests: Quest[] = parsedQuests.filter(isValidQuest);
+    if (fetchedQuests.length !== SOIL_QUESTION_COUNT) {
+      throw new Error("Some questions failed to parse into quests");
+    }
 
     const map = generateMap(fetchedQuests);
     const startPos: Position = { x: 0, y: 0 };

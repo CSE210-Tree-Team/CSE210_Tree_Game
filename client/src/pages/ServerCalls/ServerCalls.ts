@@ -1,57 +1,38 @@
-import { testEarthQuestions } from "./MockQuestions";
+/**
+ * This file contains functions for making API calls to the server related to fetching questions and pushing game results.
+ * It defines the expected request and response formats for these API calls.
+ * 
+ * fetchQuestions: Fetches a list of questions from the server based on specified filters (number of questions, resource type, question type, difficulty).
+ * pushGameResults: Sends the player's game progress to the server to update the corresponding resource levels.
+ * 
+ * The question and response formats are defined as TypeScript interfaces.
+ * 
+ * Reference constants.py for valid resource types and question types.
+ * Reference main.py for API endpoint implementations and expected request/response handling.
+ * 
+ * Example usage:
+ * const questions = await fetchQuestions(5, "earth", "MultiSelect", 1);
+ * const success = await pushGameResults(10, "earth");
+ */
 
-// Types:
 interface QuestionChoice {
     text: string;
     isCorrect: boolean;
 }
 
-/**
- * TODO: 
- * Question is formatted wrong for Soilminigame
- * 1) explicitly define resourceType as "earth" and "water"
- * 2) Abstract a BaseQuestion to only house the common fields
- * 3) Extend BaseQuestion with the earth and water minigame extensions 
- *      (these contain the updated question and answer fields)
- * 4) Have AI rewrite some tests for this implementation 
- *      (half of the current tests should become invalid due to the wrong soil game question format)
- * 5) Ensure the backend follows the naming convention used here
- */
-
-// Used to determine what questions to filter by
-type ResourceType = "Earth" | "Water";
-
-type QuestionMap = {
-    Water: WaterQuestion;
-    Earth: EarthQuestion;
-};
-
-export interface BaseQuestion {
+export interface Question {
     questionID: string;
-    difficulty: number;
-    resourceType: ResourceType;
-}
-
-export interface WaterQuestion extends BaseQuestion {
-    resourceType: "Water";
     text: string;
     type: string;
+    difficulty: number;
+    resourceType: string;
     choices: QuestionChoice[];
 }
 
-export interface EarthQuestion extends BaseQuestion {
-    resourceType: "Earth";
-    moleculeName: string;
-    moleculeFormula: string;
-    required: Record<string, number>; // e.g. { Nitrogen: 1, Hydrogen: 3 }
-}
-
-export type Question = WaterQuestion | EarthQuestion;
-
-interface GetQuestionsResponse<T> {
+interface GetQuestionsResponse {
     success: boolean;
     count: number;
-    questions: T[];
+    questions: Question[];
 }
 
 interface UpdateStatResponse {
@@ -67,48 +48,36 @@ interface UpdateStatResponse {
  * @param difficulty - Filter by difficulty level (not implemented yet)
  * @returns Array of questions
  */
-export async function fetchQuestions<T extends ResourceType>(
-    resourceType: T,
-    numQuestions?: number, 
-    questionType?: string, 
+export async function fetchQuestions(
+    numQuestions?: number,
+    resourceType?: string,
+    questionType?: string,
     difficulty?: number
-): Promise<QuestionMap[T][]> {
+): Promise<Question[]> {
+    const response = await fetch('/api/get-questions', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            numQuestions,
+            resourceType,
+            questionType,
+            difficulty,
+        }),
+    });
 
-    try {
-        const response = await fetch('/api/get-questions', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                numQuestions,
-                resourceType,
-                questionType,
-                difficulty,
-            }),
-        });
-
-        if (!response.ok) {
-            console.log(resourceType);
-            throw new Error('Failed to fetch questions');
-        }
-
-        const data: GetQuestionsResponse<QuestionMap[T]> = await response.json();
-        
-        if (!data.success) {
-            throw new Error('Server returned unsuccessful response');
-        }
-
-        return data.questions as QuestionMap[T][];
-    } catch (error) {
-        // Fallback for earth questions only
-        if (resourceType === "Earth") {
-            console.warn("Using fallback Earth questions");
-            return testEarthQuestions as QuestionMap[T][];
-        }
-
-        throw error; // Still throw for water
+    if (!response.ok) {
+        throw new Error('Failed to fetch questions');
     }
+
+    const data: GetQuestionsResponse = await response.json();
+
+    if (!data.success) {
+        throw new Error('Server returned unsuccessful response');
+    }
+
+    return data.questions;
 }
 
 /**
