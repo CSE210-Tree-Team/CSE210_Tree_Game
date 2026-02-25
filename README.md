@@ -8,7 +8,9 @@
    - VITE_AUTH0_CLIENT_ID =
    - AUTH0_CLIENT_SECRET =
    - MIDDLEWARE_SECRET_KEY =
-3. Create the database: `python -m Database.createDatabase`
+3. Create the database:
+   - From repo root: `python -m server.Database.createDatabase`
+   - Or from `server/`: `python -m Database.createDatabase`
 4. Now set up the frontend and backend (instructions below).
 5. Once completed, you can acess the webpage at: http://localhost:5173/.
 
@@ -36,8 +38,8 @@ python main.py
 
 ## Database:
 
-To create the database, run `python -m Database.createDatabase`  
-To fill with test data, run `python -m Database.generateTestData`  
+To create the database, run `python -m server.Database.createDatabase` (or from `server/`: `python -m Database.createDatabase`)  
+To fill with test data, run `python -m server.Database.generateTestData` (or from `server/`: `python -m Database.generateTestData`)  
 To view current state of the database, run `python -m Database.printDatabase`. You may want to redirect the output into a text file.
 
 For getting organized dictionaries from the database, please reference `Database/getItemsFromDatabase.py`. When calling these functions, use the username. Similarily, please reference `Database/addItemsToDatabase.py` for any function calls that will update the database.

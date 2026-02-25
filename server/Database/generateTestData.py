@@ -24,8 +24,18 @@ import uuid
 import random
 import datetime
 import os
-from Database import createDatabase
-from constants import DB_NAME
+
+# Support running from repo root (`python -m server.Database.generateTestData`)
+# and from the `server/` directory (`python -m Database.generateTestData`).
+try:
+    from . import createDatabase
+    from ..constants import DB_NAME
+except ImportError:  # pragma: no cover
+    import sys
+
+    sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+    from Database import createDatabase  # type: ignore
+    from constants import DB_NAME  # type: ignore
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 DB_PATH = os.path.join(BASE_DIR, DB_NAME)
@@ -109,7 +119,18 @@ def add_questions(conn, cursor):
                 cursor.execute("INSERT INTO QuestionChoice (choiceID, questionID, text, isCorrect) VALUES (?, ?, ?, ?)",
                                (generate_uuid(), q_id, choice_text, is_correct))
 
-def generate_data(db_path=DB_PATH):
+def generate_data(db_path=DB_PATH, reset: bool = True):
+    """
+    Generate test data in the database.
+
+    Args:
+        db_path: Path to the sqlite database file.
+        reset: If True (default), delete the existing DB file first so generation is repeatable.
+    """
+    # For a test-data script, default to a clean slate so reruns don't hit UNIQUE constraints.
+    if reset and os.path.exists(db_path):
+        os.remove(db_path)
+
     # Ensure schema exists first
     createDatabase.create_schema(db_path=db_path)
     
