@@ -7,3 +7,5 @@ export const BUCKET_HEIGHT = 140;
 export const NUM_QUESTIONS = 3;
 export const NUM_POINTS = 10;
 export const INCORRECT = "X";
+export const POINT_DURATION_MS = 2000;
+export const POINT_WIDTH = 72;

@@ -19,6 +19,7 @@ import type { RaindropAnswer } from "../types";
 import type { WaterQuestion } from "../../ServerCalls/ServerCalls";
 import * as ServerCalls from "../../ServerCalls/ServerCalls";
 import * as utils from "../utils";
+import { INCORRECT, NUM_POINTS } from "../constants";
 
 const mockWaterQuestions = [
   {
@@ -198,7 +199,6 @@ test("displays correct results on end screen after catching a correct raindrop",
   await user.click(screen.getByRole("button", { name: /play/i }));
   await user.click(screen.getByRole("button", { name: /i'm ready/i }));
 
-  // Wait for game to end after raindrop is caught
   await waitFor(
     () => {
       expect(screen.getByTestId("water-end")).toBeInTheDocument();
@@ -206,7 +206,6 @@ test("displays correct results on end screen after catching a correct raindrop",
     { timeout: 5000 },
   );
 
-  // H2O is the correct answer so correctCount should be 1
   expect(
     screen.getByText(/number of correctly answered questions: 1/i),
   ).toBeInTheDocument();
@@ -264,3 +263,192 @@ test("displays correct results on end screen after catching an incorrect raindro
     screen.getByText(/total number of points earned: 0/i),
   ).toBeInTheDocument();
 }, 10000);
+
+// Checks that a correct point indicator appears when the bucket catches a correct raindrop
+test("displays correct point indicator when bucket catches correct raindrop", async () => {
+  vi.spyOn(ServerCalls, "fetchQuestions").mockResolvedValue([
+    {
+      questionID: "1",
+      difficulty: 1,
+      resourceType: "Water",
+      text: "What is the chemical formula for water?",
+      type: "MCQ",
+      choices: [
+        { text: "H2O", isCorrect: true },
+        { text: "CO2", isCorrect: false },
+        { text: "O2", isCorrect: false },
+      ],
+    },
+    {
+      questionID: "2",
+      difficulty: 1,
+      resourceType: "Water",
+      text: "What percentage of the earth is covered in water?",
+      type: "MCQ",
+      choices: [
+        { text: "70", isCorrect: true },
+        { text: "30", isCorrect: false },
+        { text: "50", isCorrect: false },
+      ],
+    },
+  ] as WaterQuestion[]);
+
+  vi.spyOn(utils, "shuffleArray").mockImplementation((array) => {
+    const incorrect = (array as RaindropAnswer[]).filter((a) => !a.isCorrect);
+    const correct = (array as RaindropAnswer[]).filter((a) => a.isCorrect);
+    return [...correct, ...incorrect];
+  });
+
+  vi.spyOn(Math, "random").mockReturnValue(0.4125);
+
+  Object.defineProperty(HTMLElement.prototype, "offsetHeight", {
+    configurable: true,
+    value: 200,
+  });
+  Object.defineProperty(HTMLElement.prototype, "offsetWidth", {
+    configurable: true,
+    value: 800,
+  });
+
+  const user = userEvent.setup();
+  render(
+    <MemoryRouter>
+      <WaterGame />
+    </MemoryRouter>,
+  );
+
+  await screen.findByTestId("water-start");
+  await user.click(screen.getByRole("button", { name: /play/i }));
+  await user.click(screen.getByRole("button", { name: /i'm ready/i }));
+
+  // Wait for correct point indicator to appear
+  const point = await screen.findByTestId("point-0", {}, { timeout: 5000 });
+  expect(point.textContent?.trim()).toContain(`+${NUM_POINTS}`);
+}, 10000);
+
+// Checks that an incorrect point indicator appears when the bucket catches an incorrect raindrop
+test("displays incorrect point indicator when bucket catches incorrect raindrop", async () => {
+  vi.spyOn(ServerCalls, "fetchQuestions").mockResolvedValue([
+    {
+      questionID: "1",
+      difficulty: 1,
+      resourceType: "Water",
+      text: "What is the chemical formula for water?",
+      type: "MCQ",
+      choices: [
+        { text: "H2O", isCorrect: true },
+        { text: "CO2", isCorrect: false },
+        { text: "O2", isCorrect: false },
+      ],
+    },
+    {
+      questionID: "2",
+      difficulty: 1,
+      resourceType: "Water",
+      text: "What percentage of the earth is covered in water?",
+      type: "MCQ",
+      choices: [
+        { text: "70", isCorrect: true },
+        { text: "30", isCorrect: false },
+        { text: "50", isCorrect: false },
+      ],
+    },
+  ] as WaterQuestion[]);
+
+  vi.spyOn(utils, "shuffleArray").mockImplementation((array) => {
+    const incorrect = (array as RaindropAnswer[]).filter((a) => !a.isCorrect);
+    const correct = (array as RaindropAnswer[]).filter((a) => a.isCorrect);
+    return [...incorrect, ...correct];
+  });
+
+  vi.spyOn(Math, "random").mockReturnValue(0.4125);
+
+  Object.defineProperty(HTMLElement.prototype, "offsetHeight", {
+    configurable: true,
+    value: 200,
+  });
+  Object.defineProperty(HTMLElement.prototype, "offsetWidth", {
+    configurable: true,
+    value: 800,
+  });
+
+  const user = userEvent.setup();
+  render(
+    <MemoryRouter>
+      <WaterGame />
+    </MemoryRouter>,
+  );
+
+  await screen.findByTestId("water-start");
+  await user.click(screen.getByRole("button", { name: /play/i }));
+  await user.click(screen.getByRole("button", { name: /i'm ready/i }));
+
+  // Wait for incorrect point indicator to appear
+  const point = await screen.findByTestId("point-0", {}, { timeout: 5000 });
+  expect(point.textContent?.trim()).toContain(INCORRECT);
+}, 10000);
+
+// Checks that the point indicator disappears after POINT_DURATION_MS
+test("point indicator disappears after duration", async () => {
+  vi.spyOn(ServerCalls, "fetchQuestions").mockResolvedValue([
+    {
+      questionID: "1",
+      difficulty: 1,
+      resourceType: "Water",
+      text: "What is the chemical formula for water?",
+      type: "MCQ",
+      choices: [
+        { text: "H2O", isCorrect: true },
+        { text: "CO2", isCorrect: false },
+        { text: "O2", isCorrect: false },
+      ],
+    },
+    {
+      questionID: "2",
+      difficulty: 1,
+      resourceType: "Water",
+      text: "What percentage of the earth is covered in water?",
+      type: "MCQ",
+      choices: [
+        { text: "70", isCorrect: true },
+        { text: "30", isCorrect: false },
+        { text: "50", isCorrect: false },
+      ],
+    },
+  ] as WaterQuestion[]);
+  vi.spyOn(utils, "shuffleArray").mockImplementation((array) => {
+    const incorrect = (array as RaindropAnswer[]).filter((a) => !a.isCorrect);
+    const correct = (array as RaindropAnswer[]).filter((a) => a.isCorrect);
+    return [...correct, ...incorrect];
+  });
+  vi.spyOn(Math, "random").mockReturnValue(0.4125);
+
+  Object.defineProperty(HTMLElement.prototype, "offsetHeight", {
+    configurable: true,
+    value: 200,
+  });
+  Object.defineProperty(HTMLElement.prototype, "offsetWidth", {
+    configurable: true,
+    value: 800,
+  });
+
+  const user = userEvent.setup();
+  render(
+    <MemoryRouter>
+      <WaterGame />
+    </MemoryRouter>,
+  );
+
+  await screen.findByTestId("water-start");
+  await user.click(screen.getByRole("button", { name: /play/i }));
+  await user.click(screen.getByRole("button", { name: /i'm ready/i }));
+
+  await screen.findByTestId("point-0", {}, { timeout: 5000 });
+
+  await waitFor(
+    () => {
+      expect(screen.queryByTestId("point-0")).not.toBeInTheDocument();
+    },
+    { timeout: 5000 },
+  );
+}, 15000);

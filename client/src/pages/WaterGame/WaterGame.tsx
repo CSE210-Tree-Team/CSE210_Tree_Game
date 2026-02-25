@@ -27,7 +27,7 @@ import Bucket from "./components/Bucket";
 import { Raindrop } from "./components/Raindrop";
 import { Point } from "./components/Point";
 
-import type { RaindropData, RaindropAnswer } from "./types";
+import type { RaindropData, RaindropAnswer, PointData } from "./types";
 import {
   RAINDROP_FALL_SPEED,
   RAINDROP_HEIGHT,
@@ -35,6 +35,8 @@ import {
   SPAWN_INTERVAL_MS,
   BUCKET_WIDTH,
   BUCKET_HEIGHT,
+  POINT_DURATION_MS,
+  POINT_WIDTH,
 } from "./constants";
 
 import styles from "./WaterGame.module.css";
@@ -54,6 +56,9 @@ export const WaterGame = () => {
   const [raindrops, setRaindrops] = useState<RaindropData[]>([]);
   const nextRaindropId = useRef(0);
   const caughtRaindropIds = useRef<Set<number>>(new Set());
+
+  const [points, setPoints] = useState<PointData[]>([]);
+  const nextPointId = useRef(0);
 
   const answerQueueRef = useRef<RaindropAnswer[]>([]);
   const { questions, isLoading, error } = useWaterGameQuestions();
@@ -116,6 +121,8 @@ export const WaterGame = () => {
     setCurrentQuestionIndex(0);
     setCorrectCount(0);
     setIncorrectCount(0);
+    setPoints([]);
+    nextPointId.current = 0;
     caughtRaindropIds.current = new Set();
     setScreen("game");
   };
@@ -172,6 +179,30 @@ export const WaterGame = () => {
     ]);
   }, [currentQuestionIndex, questions]);
 
+  // Spawns a point indicator above the bucket and removes it after POINT_DURATION_MS
+  const spawnPoint = useCallback((isCorrect: boolean) => {
+    const id = nextPointId.current++;
+    const padding = gameScreenRef.current
+      ? parseFloat(getComputedStyle(gameScreenRef.current).paddingBottom)
+      : 0;
+
+    setPoints((prev) => [
+      ...prev,
+      {
+        id,
+        x: bucketXRef.current + (BUCKET_WIDTH / 2 - POINT_WIDTH / 2) + padding,
+        y: gameScreenRef.current
+          ? gameScreenRef.current.offsetHeight - BUCKET_HEIGHT - 72 - padding
+          : 0,
+        variant: isCorrect ? "correct" : "incorrect",
+      },
+    ]);
+
+    setTimeout(() => {
+      setPoints((prev) => prev.filter((p) => p.id !== id));
+    }, POINT_DURATION_MS);
+  }, []);
+
   // Spawns a new raindrop at a fixed interval while the game screen is active
   useEffect(() => {
     if (screen !== "game") return;
@@ -220,6 +251,7 @@ export const WaterGame = () => {
               if (!caughtRaindropIds.current.has(drop.id)) {
                 caughtRaindropIds.current.add(drop.id);
                 handleAnswer(drop.isCorrect);
+                spawnPoint(drop.isCorrect);
                 moveToNextQuestion();
               }
               return false;
@@ -231,7 +263,7 @@ export const WaterGame = () => {
     }, 16);
 
     return () => clearInterval(interval);
-  }, [screen, handleAnswer, moveToNextQuestion]);
+  }, [screen, handleAnswer, moveToNextQuestion, spawnPoint]);
 
   if (isLoading) return <div>Loading...</div>;
   if (error) return <div>{error}</div>;
@@ -246,7 +278,6 @@ export const WaterGame = () => {
             className={styles.arrow}
             onClick={() => navigate("/")}
           />
-          <Point id={0} x={40} y={40} variant="incorrect" />
           <Popup
             variant="water"
             screen="start"
@@ -296,6 +327,15 @@ export const WaterGame = () => {
               {questions[currentQuestionIndex]?.text}
             </p>
           </span>
+          {points.map((point) => (
+            <Point
+              key={point.id}
+              id={point.id}
+              x={point.x}
+              y={point.y}
+              variant={point.variant}
+            />
+          ))}
           {raindrops.map((drop) => (
             <Raindrop
               id={drop.id}
