@@ -1,10 +1,10 @@
-export type ElementType = 'Nitrogen' | 'Hydrogen' | 'Carbon' | 'Oxygen';
+export type ElementType = string;
 
 // Ordered finite states the game can take
 export type GamePhase = 'loading' | 'title' | 'tutorial' | 'playing' | 'complete';
 
 // Inventory is a count of each element
-export type Inventory = Record<ElementType, number>;
+export type Inventory = Record<string, number>;
 
 // Literally just a tuple representing a position on the map lmao 
 export interface Position {
@@ -24,7 +24,7 @@ export interface Node {
   y: number;
 
   // CHANGED
-  resources: Record<ElementType, number> | null;
+  resources: Record<string, number> | null;
   collected: boolean;
 }
 
@@ -95,11 +95,18 @@ export const DIRECTION_DELTAS: Record<Direction, { dx: number; dy: number }> = {
   d: { dx: 1, dy: 0 },   // right
 };
 
-export const SYMBOL_TO_ELEMENT: Record<string, ElementType> = {
+export const SYMBOL_TO_ELEMENT: Record<string, string> = {
   H: 'Hydrogen',
   O: 'Oxygen',
   C: 'Carbon',
   N: 'Nitrogen',
+  Cl: 'Chlorine',
+  Na: 'Sodium',
+  P: 'Phosphorus',
+  K: 'Potassium',
+  S: 'Sulfur',
+  Ca: 'Calcium',
+  Mg: 'Magnesium',
 };
 
 /** Direction labels for display */

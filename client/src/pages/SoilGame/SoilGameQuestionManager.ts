@@ -35,5 +35,5 @@ export const SOIL_QUESTION_TYPE = "MultiSelect";
 export async function fetchSoilQuestions(
   difficulty?: number
 ): Promise<SoilQuestion[]> {
-  return fetchQuestions(SOIL_QUESTION_COUNT, "earth", SOIL_QUESTION_TYPE, difficulty);
+  return fetchQuestions(SOIL_QUESTION_COUNT, "Earth", SOIL_QUESTION_TYPE, difficulty);
 }

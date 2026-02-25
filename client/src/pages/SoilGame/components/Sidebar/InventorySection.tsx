@@ -1,9 +1,9 @@
 import styles from './Sidebar.module.css';
-import type { Inventory, ElementType } from '../../types/SoilGame_REP.type';
-
-const ELEMENT_ORDER: ElementType[] = ['Nitrogen', 'Hydrogen', 'Carbon', 'Oxygen'];
+import type { Inventory } from '../../types/Abstract.types';
 
 export function InventorySection({ inventory }: { inventory: Inventory }) {
+    const sortedElements = Object.keys(inventory).sort();
+
     return (
         <div className={styles.section}>
             <h2 className={styles.heading}>
@@ -11,7 +11,7 @@ export function InventorySection({ inventory }: { inventory: Inventory }) {
                 INVENTORY
             </h2>
             <div className={styles.scrollableList}>
-                {ELEMENT_ORDER.map((element) => (
+                {sortedElements.map((element) => (
                     <div key={element} className={`${styles.text} ${styles.inventoryRow}`}>
                         <span>{element}</span>
                         <span style={{
