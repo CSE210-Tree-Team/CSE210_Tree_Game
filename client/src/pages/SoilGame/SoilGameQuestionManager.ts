@@ -82,4 +82,3 @@ export async function fetchSoilQuestions(
     console.warn("Falling back to dummy soil questions:");
     return mockQuestions;
   }
-}

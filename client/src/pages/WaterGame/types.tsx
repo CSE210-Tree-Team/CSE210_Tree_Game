@@ -1,3 +1,8 @@
+export type RaindropAnswer = {
+  text: string;
+  isCorrect: boolean;
+};
+
 export type RaindropData = {
   id: number;
   x: number;
