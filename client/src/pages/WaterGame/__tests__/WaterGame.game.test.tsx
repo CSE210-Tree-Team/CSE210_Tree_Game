@@ -1,20 +1,24 @@
 /*
-Integration tests for the WaterGame component
+Game Screen Integration Tests for the WaterGame Component
 
-This module contains integration tests for the WaterGame component, 
-which is a key part of the client-side application. These tests verify 
-that the components on the game screen (bucket, question, raindrop) render 
-and function correctly.
+This module contains integration tests for the game screen of the WaterGame
+component. These tests verify that the game screen components (question
+container, bucket, raindrops) render correctly, that the bucket moves
+correctly in response to arrow key presses, and that the end screen displays
+the correct results after the player catches a correct or incorrect raindrop.
 */
 
-import { render, screen } from "@testing-library/react";
+import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { MemoryRouter } from "react-router-dom";
 import { vi, beforeEach, afterEach } from "vitest";
+
 import { WaterGame } from "../WaterGame";
 import styles from "../WaterGame.module.css";
+import type { RaindropAnswer } from "../types";
 import type { WaterQuestion } from "../../ServerCalls/ServerCalls";
 import * as ServerCalls from "../../ServerCalls/ServerCalls";
+import * as utils from "../utils";
 
 const mockWaterQuestions = [
   {
@@ -164,3 +168,99 @@ test("bucket does not move past the right boundary", async () => {
 
   expect(bucket.style.left).toBe(`${maxRight}px`);
 });
+
+test("displays correct results on end screen after catching a correct raindrop", async () => {
+  vi.spyOn(utils, "shuffleArray").mockImplementation((array) => {
+    const incorrect = (array as RaindropAnswer[]).filter((a) => !a.isCorrect);
+    const correct = (array as RaindropAnswer[]).filter((a) => a.isCorrect);
+    return [...correct, ...incorrect];
+  });
+
+  vi.spyOn(Math, "random").mockReturnValue(0.4125);
+
+  Object.defineProperty(HTMLElement.prototype, "offsetHeight", {
+    configurable: true,
+    value: 200,
+  });
+  Object.defineProperty(HTMLElement.prototype, "offsetWidth", {
+    configurable: true,
+    value: 800,
+  });
+
+  const user = userEvent.setup();
+  render(
+    <MemoryRouter>
+      <WaterGame />
+    </MemoryRouter>,
+  );
+
+  await screen.findByTestId("water-start");
+  await user.click(screen.getByRole("button", { name: /play/i }));
+  await user.click(screen.getByRole("button", { name: /i'm ready/i }));
+
+  // Wait for game to end after raindrop is caught
+  await waitFor(
+    () => {
+      expect(screen.getByTestId("water-end")).toBeInTheDocument();
+    },
+    { timeout: 5000 },
+  );
+
+  // H2O is the correct answer so correctCount should be 1
+  expect(
+    screen.getByText(/number of correctly answered questions: 1/i),
+  ).toBeInTheDocument();
+  expect(
+    screen.getByText(/number of incorrectly answered questions: 0/i),
+  ).toBeInTheDocument();
+  expect(
+    screen.getByText(/total number of points earned: 100/i),
+  ).toBeInTheDocument();
+}, 10000);
+
+test("displays correct results on end screen after catching an incorrect raindrop", async () => {
+  vi.spyOn(utils, "shuffleArray").mockImplementation((array) => {
+    const incorrect = (array as RaindropAnswer[]).filter((a) => !a.isCorrect);
+    const correct = (array as RaindropAnswer[]).filter((a) => a.isCorrect);
+    return [...incorrect, ...correct];
+  });
+
+  vi.spyOn(Math, "random").mockReturnValue(0.4125); // raindrop spawns at bucket center
+
+  Object.defineProperty(HTMLElement.prototype, "offsetHeight", {
+    configurable: true,
+    value: 200,
+  });
+  Object.defineProperty(HTMLElement.prototype, "offsetWidth", {
+    configurable: true,
+    value: 800,
+  });
+
+  const user = userEvent.setup();
+  render(
+    <MemoryRouter>
+      <WaterGame />
+    </MemoryRouter>,
+  );
+
+  await screen.findByTestId("water-start");
+  await user.click(screen.getByRole("button", { name: /play/i }));
+  await user.click(screen.getByRole("button", { name: /i'm ready/i }));
+
+  await waitFor(
+    () => {
+      expect(screen.getByTestId("water-end")).toBeInTheDocument();
+    },
+    { timeout: 5000 },
+  );
+
+  expect(
+    screen.getByText(/number of correctly answered questions: 0/i),
+  ).toBeInTheDocument();
+  expect(
+    screen.getByText(/number of incorrectly answered questions: 1/i),
+  ).toBeInTheDocument();
+  expect(
+    screen.getByText(/total number of points earned: 0/i),
+  ).toBeInTheDocument();
+}, 10000);

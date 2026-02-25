@@ -29,6 +29,19 @@ const mockWaterQuestions = [
       { text: "O2", isCorrect: false },
     ],
   },
+  {
+    questionID: "2",
+    difficulty: 1,
+    resourceType: "Water",
+    text: "What percentage of the earth is covered in water?",
+    type: "MCQ",
+    choices: [
+      { text: "30", isCorrect: false },
+      { text: "50", isCorrect: false },
+      { text: "70", isCorrect: true },
+      { text: "100", isCorrect: false },
+    ],
+  },
 ];
 
 beforeEach(() => {
@@ -81,4 +94,34 @@ test("shows loading indicator while questions are being fetched", async () => {
   expect(screen.getByTestId("water-start")).toBeInTheDocument();
 });
 
-// TODO: Add tests for updated text when move onto next question
+test("question text updates after bucket catching raindrop", async () => {
+  vi.spyOn(Math, "random").mockReturnValue(0.4125);
+  Object.defineProperty(HTMLElement.prototype, "offsetHeight", {
+    configurable: true,
+    value: 200,
+  });
+  Object.defineProperty(HTMLElement.prototype, "offsetWidth", {
+    configurable: true,
+    value: 800,
+  });
+
+  const user = userEvent.setup();
+  render(
+    <MemoryRouter>
+      <WaterGame />
+    </MemoryRouter>,
+  );
+
+  await screen.findByTestId("water-start");
+  await user.click(screen.getByRole("button", { name: /play/i }));
+  await user.click(screen.getByRole("button", { name: /i'm ready/i }));
+
+  expect(screen.getByText(mockWaterQuestions[0].text)).toBeInTheDocument();
+
+  await waitFor(
+    () => {
+      expect(screen.getByText(mockWaterQuestions[1].text)).toBeInTheDocument();
+    },
+    { timeout: 5000 },
+  );
+}, 10000);
