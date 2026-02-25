@@ -25,15 +25,61 @@ import { fetchQuestions, type Question } from "../ServerCalls/ServerCalls";
 
 export type SoilQuestion = Question;
 
-
 export const SOIL_QUESTION_COUNT = 3;
 export const SOIL_QUESTION_TYPE = "MultiSelect";
 
+const mockQuestions: SoilQuestion[] = [
+  {
+    questionID: "dummy-1",
+    text: "Water/H2O",
+    type: "MultiSelect",
+    difficulty: 1,
+    resourceType: "earth",
+    choices: [
+      { text: "2H", isCorrect: true },
+      { text: "1O", isCorrect: true },
+      { text: "2O", isCorrect: false },
+      { text: "1H", isCorrect: false },
+    ],
+  },
+  {
+    questionID: "dummy-2",
+    text: "Carbon Dioxide/CO2",
+    type: "MultiSelect",
+    difficulty: 1,
+    resourceType: "earth",
+    choices: [
+      { text: "1C", isCorrect: true },
+      { text: "2O", isCorrect: true },
+      { text: "2C", isCorrect: false },
+      { text: "1O", isCorrect: false },
+    ],
+  },
+  {
+    questionID: "dummy-3",
+    text: "Glucose/C6H12O6",
+    type: "MultiSelect",
+    difficulty: 1,
+    resourceType: "earth",
+    choices: [
+      { text: "6C", isCorrect: true },
+      { text: "12H", isCorrect: true },
+      { text: "6O", isCorrect: true },
+      { text: "6H", isCorrect: false },
+      { text: "12O", isCorrect: false },
+    ],
+  },
+];
 // Text: "Water/H2O"
 // Choices: "2H" - "Correct", "O" - "Correct", "2Fe" - "Incorrect"
 
 export async function fetchSoilQuestions(
   difficulty?: number
 ): Promise<SoilQuestion[]> {
-  return fetchQuestions(SOIL_QUESTION_COUNT, "Earth", SOIL_QUESTION_TYPE, difficulty);
+  try {
+    return await fetchQuestions(SOIL_QUESTION_COUNT, "earth", SOIL_QUESTION_TYPE, difficulty);
+  } catch (error) {
+    console.warn("Falling back to dummy soil questions:");
+    return mockQuestions;
+  }
 }
