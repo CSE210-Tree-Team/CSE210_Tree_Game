@@ -1,21 +1,18 @@
 import os
 import uvicorn
 import asyncio
-from contextlib import asynccontextmanager
 from fastapi import FastAPI, Request, Depends, HTTPException, status
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse, RedirectResponse, JSONResponse
 from starlette.middleware.sessions import SessionMiddleware
 from dotenv import load_dotenv
 from pydantic import BaseModel
-from Database.createDatabase import create_schema
 from Database.getItemsFromDatabase import (
     get_person,
     get_tree,
     get_question,
     get_questions,
     get_all_trees,
-    get_account_profile,
     get_student_details,
 )
 from Database.addItemsToDatabase import (
@@ -26,7 +23,6 @@ from Database.addItemsToDatabase import (
     apply_passive_decay,
     update_stat,
     update_account,
-    upsert_account_profile,
     add_student_details,
     upsert_student_details,
 )
@@ -40,7 +36,14 @@ from dataRecords import Tree, Event
 
 load_dotenv()
 MIDDLEWARE_SECRET_KEY = os.getenv("MIDDLEWARE_SECRET_KEY")
+app = FastAPI()
+app.add_middleware(SessionMiddleware, secret_key=MIDDLEWARE_SECRET_KEY)
 decay_task = None
+
+# --- Static File Serving ---
+frontend_path = os.path.join("..", "client", "dist")
+if os.path.exists(frontend_path):
+    app.mount("/assets", StaticFiles(directory=os.path.join(frontend_path, "assets")), name="static")
 
 # TODO: Need to fix log out process so that session is properly cleared.
 
@@ -63,31 +66,20 @@ async def run_passive_decay_loop():
             print(f"Error in passive decay loop: {e}")
             await asyncio.sleep(60)
 
-@asynccontextmanager
-async def lifespan(_: FastAPI):
-    """Initialize DB + background tasks for app lifecycle."""
+@app.on_event("startup")
+async def startup_event():
+    """Start the passive decay background task when the app starts."""
     global decay_task
-    try:
-        create_schema()
-    except Exception as e:
-        print(f"Error creating/upgrading database schema: {e}")
-
     decay_task = asyncio.create_task(run_passive_decay_loop())
     print("Passive decay background task started")
-    try:
-        yield
-    finally:
-        if decay_task:
-            decay_task.cancel()
-        print("Passive decay background task stopped")
 
-app = FastAPI(lifespan=lifespan)
-app.add_middleware(SessionMiddleware, secret_key=MIDDLEWARE_SECRET_KEY)
-
-# --- Static File Serving ---
-frontend_path = os.path.join("..", "client", "dist")
-if os.path.exists(frontend_path):
-    app.mount("/assets", StaticFiles(directory=os.path.join(frontend_path, "assets")), name="static")
+@app.on_event("shutdown")
+async def shutdown_event():
+    """Cancel the passive decay background task when the app shuts down."""
+    global decay_task
+    if decay_task:
+        decay_task.cancel()
+    print("Passive decay background task stopped")
 
 ############################################
 #               Helper Functions           #
