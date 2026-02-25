@@ -19,6 +19,7 @@ import { useNavigate } from "react-router-dom";
 
 import { useWaterGameQuestions } from "./hooks/useWaterGameQuestions";
 import { pushGameResults } from "../ServerCalls/ServerCalls";
+import { checkCollision } from "./collision";
 
 import { questionToRaindropAnswers, shuffleArray } from "./utils";
 import { Popup } from "../../components/Popup";
@@ -46,6 +47,7 @@ export const WaterGame = () => {
 
   const containerRef = useRef<HTMLDivElement>(null);
   const gameScreenRef = useRef<HTMLDivElement>(null);
+  const isPausedRef = useRef(false);
 
   const [raindrops, setRaindrops] = useState<RaindropData[]>([]);
   const nextRaindropId = useRef(0);
@@ -116,6 +118,25 @@ export const WaterGame = () => {
     setScreen("game");
   };
 
+  // Pauses the game when the tab is hidden and resumes when the tab is visible
+  useEffect(() => {
+    if (screen !== "game") return;
+
+    const handleVisibilityChange = () => {
+      if (document.hidden) {
+        // Tab is hidden - intervals will be cleared by their own cleanup
+        // Store that we were paused
+        isPausedRef.current = true;
+      } else {
+        isPausedRef.current = false;
+      }
+    };
+
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+    return () =>
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+  }, [screen]);
+
   // Pulls the next answer from the queue and spawns a raindrop at a random
   // horizontal position along the top of the container
   const spawnRaindrop = useCallback(() => {
@@ -153,7 +174,10 @@ export const WaterGame = () => {
   useEffect(() => {
     if (screen !== "game") return;
 
-    const interval = setInterval(spawnRaindrop, SPAWN_INTERVAL_MS);
+    const interval = setInterval(() => {
+      if (isPausedRef.current) return;
+      spawnRaindrop();
+    }, SPAWN_INTERVAL_MS);
     return () => clearInterval(interval);
   }, [screen, spawnRaindrop]);
 
@@ -172,8 +196,6 @@ export const WaterGame = () => {
     setRaindrops([]);
   }, [currentQuestionIndex, questions]);
 
-  // Moves all raindrops downward on each tick and removes any that have
-  // fallen past the bottom of the game screen
   // Moves all raindrops downward on each tick, checks for bucket collision,
   // and removes any that have fallen past the bottom of the game screen
   useEffect(() => {
@@ -184,6 +206,7 @@ export const WaterGame = () => {
     const bucketTop = gameScreenRef.current.offsetHeight - BUCKET_HEIGHT;
 
     const interval = setInterval(() => {
+      if (isPausedRef.current) return;
       setRaindrops((prev) =>
         prev
           .map((drop) => ({
@@ -191,14 +214,7 @@ export const WaterGame = () => {
             y: drop.y + RAINDROP_FALL_SPEED,
           }))
           .filter((drop) => {
-            const raindropRight = drop.x + RAINDROP_WIDTH;
-            const bucketRight = bucketXRef.current + BUCKET_WIDTH; // use ref
-
-            const horizontalOverlap =
-              drop.x < bucketRight && raindropRight > bucketXRef.current;
-            const verticalOverlap = drop.y + RAINDROP_HEIGHT >= bucketTop;
-
-            if (horizontalOverlap && verticalOverlap) {
+            if (checkCollision(drop.x, drop.y, bucketXRef.current, bucketTop)) {
               if (!caughtRaindropIds.current.has(drop.id)) {
                 caughtRaindropIds.current.add(drop.id);
                 handleAnswer(drop.isCorrect);
@@ -210,7 +226,7 @@ export const WaterGame = () => {
             return drop.y < floorY;
           }),
       );
-    }, 16); // bucketX removed from dependencies
+    }, 16);
 
     return () => clearInterval(interval);
   }, [screen, handleAnswer, moveToNextQuestion]);
