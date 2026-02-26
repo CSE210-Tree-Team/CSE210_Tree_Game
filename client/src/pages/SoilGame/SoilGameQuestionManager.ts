@@ -77,9 +77,9 @@ export async function fetchSoilQuestions(
   difficulty?: number
 ): Promise<SoilQuestion[]> {
   try {
-    return await fetchQuestions(SOIL_QUESTION_COUNT, "earth", SOIL_QUESTION_TYPE, difficulty);
+    return await fetchQuestions(SOIL_QUESTION_COUNT, "Earth", SOIL_QUESTION_TYPE, difficulty);
   } catch (error) {
-    console.warn("Falling back to dummy soil questions:");
+    console.log("Falling back to dummy soil questions:");
     return mockQuestions;
   }
 }
