@@ -165,7 +165,7 @@ test("renders results screen and game results", async () => {
     { timeout: 5000 },
   );
 
-  expect(screen.getByText(/game over/i)).toBeInTheDocument();
+  expect(screen.getByText(/good job/i)).toBeInTheDocument();
 
   const list = screen.getByRole("list");
   expect(list).toBeInTheDocument();

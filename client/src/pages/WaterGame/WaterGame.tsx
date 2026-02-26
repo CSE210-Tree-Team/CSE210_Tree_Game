@@ -307,11 +307,11 @@ export const WaterGame = () => {
             buttonText={isLoading ? "Loading..." : "I'm Ready"}
             onClick={() => startGame()}
             textList={[
-              "A question will appear at the top of the screen",
+              "Questions will appear at the top of the screen",
               "Raindrops will fall, each with a possible answer",
-              "Catch the correct answer to earn a point",
               "Move the bucket left and right using the arrow keys on your keyboard",
-              "Goal: Collect as many raindrops as you can to gather water for your tree!",
+              "Catch the correct answer to earn 10 points",
+              "Goal: Collect as many raindrops as you can!",
             ]}
           />
         </div>
@@ -326,6 +326,11 @@ export const WaterGame = () => {
             <p className={styles.questionText}>
               {questions[currentQuestionIndex]?.text}
             </p>
+          </span>
+          <span data-testid="point-count" className={styles.pointCount}>
+            <p
+              className={styles.pointCountText}
+            >{`${correctCount * 10} Points`}</p>
           </span>
           {points.map((point) => (
             <Point
@@ -360,14 +365,11 @@ export const WaterGame = () => {
           <Popup
             variant="water"
             screen="end"
-            header="Game Over"
+            header="Good Job!"
             buttonText="Go Back to Home"
             onClick={async () => {
               try {
-                await pushGameResults(
-                  (correctCount / questions.length) * 100,
-                  "water",
-                );
+                await pushGameResults(correctCount * 10, "water");
               } catch {
                 console.error("Failed to update water resource.");
               } finally {
@@ -377,7 +379,7 @@ export const WaterGame = () => {
             textList={[
               `Number of correctly answered questions: ${correctCount}`,
               `Number of incorrectly answered questions: ${incorrectCount}`,
-              `Total number of points earned: ${Math.ceil((correctCount / questions.length) * 100)}`,
+              `Total number of points earned: ${correctCount * 10}`,
             ]}
           />
         </div>
