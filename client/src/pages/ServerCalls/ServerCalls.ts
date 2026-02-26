@@ -76,8 +76,6 @@ export async function fetchQuestions(
     if (!data.success) {
         throw new Error('Server returned unsuccessful response');
     }
-    // print the questions to console for debugging
-    console.log('Fetched questionssssssss:', data.questions);
 
     return data.questions;
 }
