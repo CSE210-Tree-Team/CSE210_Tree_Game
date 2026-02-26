@@ -13,6 +13,16 @@ class Event:
     percentChange: int
     conditions: Optional[str]
 
+# Simple dummy event for testing/demo usage.
+DUMMY_EVENT = Event(
+    eventID="dummy-event-001",
+    eventType="Bonus",
+    resourceAffected="Water",
+    description="Test event for local development.",
+    percentChange=10,
+    conditions="None"
+)
+
 @dataclass
 class Tree:
     treeID: str

@@ -9,6 +9,15 @@ to avoid adding the same question multiple times.
 import json
 import os
 import sys
+
+REPO_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+if REPO_ROOT not in sys.path:
+    sys.path.insert(0, REPO_ROOT)
+    
+SERVER_ROOT = os.path.join(REPO_ROOT, "server")
+if SERVER_ROOT not in sys.path:
+    sys.path.insert(0, SERVER_ROOT)
+
 from server.Database.addItemsToDatabase import add_question
 
 QUESTIONS_FILE = os.path.join(os.path.dirname(__file__), "questions.json")
