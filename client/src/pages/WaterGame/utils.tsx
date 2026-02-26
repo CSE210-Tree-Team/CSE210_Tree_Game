@@ -1,9 +1,9 @@
-import type { WaterQuestion } from "../ServerCalls/ServerCalls";
+import type { Question } from "../ServerCalls/ServerCalls";
 import type { RaindropAnswer } from "./types";
 
 // Converts a WaterQuestion's choices into the RaindropAnswer format used by the game
 export const questionToRaindropAnswers = (
-  question: WaterQuestion,
+  question: Question,
 ): RaindropAnswer[] => {
   return question.choices.map((choice) => ({
     text: choice.text,

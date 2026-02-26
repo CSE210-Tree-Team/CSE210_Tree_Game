@@ -20,12 +20,14 @@ import { useNavigate } from "react-router-dom";
 import { useWaterGameQuestions } from "./hooks/useWaterGameQuestions";
 import { pushGameResults } from "../ServerCalls/ServerCalls";
 import { checkCollision } from "./collision";
-
 import { questionToRaindropAnswers, shuffleArray } from "./utils";
+
 import { Popup } from "../../components/Popup";
 import Bucket from "./components/Bucket";
 import { Raindrop } from "./components/Raindrop";
-import type { RaindropData, RaindropAnswer } from "./types";
+import { Point } from "./components/Point";
+
+import type { RaindropData, RaindropAnswer, PointData } from "./types";
 import {
   RAINDROP_FALL_SPEED,
   RAINDROP_HEIGHT,
@@ -33,6 +35,8 @@ import {
   SPAWN_INTERVAL_MS,
   BUCKET_WIDTH,
   BUCKET_HEIGHT,
+  POINT_DURATION_MS,
+  POINT_WIDTH,
 } from "./constants";
 
 import styles from "./WaterGame.module.css";
@@ -52,6 +56,9 @@ export const WaterGame = () => {
   const [raindrops, setRaindrops] = useState<RaindropData[]>([]);
   const nextRaindropId = useRef(0);
   const caughtRaindropIds = useRef<Set<number>>(new Set());
+
+  const [points, setPoints] = useState<PointData[]>([]);
+  const nextPointId = useRef(0);
 
   const answerQueueRef = useRef<RaindropAnswer[]>([]);
   const { questions, isLoading, error } = useWaterGameQuestions();
@@ -114,6 +121,8 @@ export const WaterGame = () => {
     setCurrentQuestionIndex(0);
     setCorrectCount(0);
     setIncorrectCount(0);
+    setPoints([]);
+    nextPointId.current = 0;
     caughtRaindropIds.current = new Set();
     setScreen("game");
   };
@@ -170,6 +179,30 @@ export const WaterGame = () => {
     ]);
   }, [currentQuestionIndex, questions]);
 
+  // Spawns a point indicator above the bucket and removes it after POINT_DURATION_MS
+  const spawnPoint = useCallback((isCorrect: boolean) => {
+    const id = nextPointId.current++;
+    const padding = gameScreenRef.current
+      ? parseFloat(getComputedStyle(gameScreenRef.current).paddingBottom)
+      : 0;
+
+    setPoints((prev) => [
+      ...prev,
+      {
+        id,
+        x: bucketXRef.current + (BUCKET_WIDTH / 2 - POINT_WIDTH / 2) + padding,
+        y: gameScreenRef.current
+          ? gameScreenRef.current.offsetHeight - BUCKET_HEIGHT - 72 - padding
+          : 0,
+        variant: isCorrect ? "correct" : "incorrect",
+      },
+    ]);
+
+    setTimeout(() => {
+      setPoints((prev) => prev.filter((p) => p.id !== id));
+    }, POINT_DURATION_MS);
+  }, []);
+
   // Spawns a new raindrop at a fixed interval while the game screen is active
   useEffect(() => {
     if (screen !== "game") return;
@@ -218,6 +251,7 @@ export const WaterGame = () => {
               if (!caughtRaindropIds.current.has(drop.id)) {
                 caughtRaindropIds.current.add(drop.id);
                 handleAnswer(drop.isCorrect);
+                spawnPoint(drop.isCorrect);
                 moveToNextQuestion();
               }
               return false;
@@ -229,7 +263,7 @@ export const WaterGame = () => {
     }, 16);
 
     return () => clearInterval(interval);
-  }, [screen, handleAnswer, moveToNextQuestion]);
+  }, [screen, handleAnswer, moveToNextQuestion, spawnPoint]);
 
   if (isLoading) return <div>Loading...</div>;
   if (error) return <div>{error}</div>;
@@ -273,11 +307,11 @@ export const WaterGame = () => {
             buttonText={isLoading ? "Loading..." : "I'm Ready"}
             onClick={() => startGame()}
             textList={[
-              "A question will appear at the top of the screen",
+              "Questions will appear at the top of the screen",
               "Raindrops will fall, each with a possible answer",
-              "Catch the correct answer to earn a point",
               "Move the bucket left and right using the arrow keys on your keyboard",
-              "Goal: Collect as many raindrops as you can to gather water for your tree!",
+              "Catch the correct answer to earn 10 points",
+              "Goal: Collect as many raindrops as you can!",
             ]}
           />
         </div>
@@ -293,6 +327,20 @@ export const WaterGame = () => {
               {questions[currentQuestionIndex]?.text}
             </p>
           </span>
+          <span data-testid="point-count" className={styles.pointCount}>
+            <p
+              className={styles.pointCountText}
+            >{`${correctCount * 10} Points`}</p>
+          </span>
+          {points.map((point) => (
+            <Point
+              key={point.id}
+              id={point.id}
+              x={point.x}
+              y={point.y}
+              variant={point.variant}
+            />
+          ))}
           {raindrops.map((drop) => (
             <Raindrop
               id={drop.id}
@@ -317,14 +365,11 @@ export const WaterGame = () => {
           <Popup
             variant="water"
             screen="end"
-            header="Game Over"
+            header="Good Job!"
             buttonText="Go Back to Home"
             onClick={async () => {
               try {
-                await pushGameResults(
-                  (correctCount / questions.length) * 100,
-                  "water",
-                );
+                await pushGameResults(correctCount * 10, "water");
               } catch {
                 console.error("Failed to update water resource.");
               } finally {
@@ -334,7 +379,7 @@ export const WaterGame = () => {
             textList={[
               `Number of correctly answered questions: ${correctCount}`,
               `Number of incorrectly answered questions: ${incorrectCount}`,
-              `Total number of points earned: ${Math.ceil((correctCount / questions.length) * 100)}`,
+              `Total number of points earned: ${correctCount * 10}`,
             ]}
           />
         </div>

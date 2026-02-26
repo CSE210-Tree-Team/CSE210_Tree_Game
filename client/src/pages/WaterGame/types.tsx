@@ -11,3 +11,10 @@ export type RaindropData = {
   answer: string;
   isCorrect: boolean;
 };
+
+export type PointData = {
+  id: number;
+  x: number;
+  y: number;
+  variant: "correct" | "incorrect";
+};
