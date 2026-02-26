@@ -15,7 +15,7 @@ interface ResourceConfig {
 const resourceConfigs: ResourceConfig[] = [
     { type: "water", label: "Water"},
     { type: "earth", label: "Earth"},
-    { type: "sun", label: "Sun"},
+    //{ type: "sun", label: "Sun"},
 ];
 
 export const ResourceBoard = ({ resources }: ResourceBoardProps) => {
@@ -30,6 +30,7 @@ export const ResourceBoard = ({ resources }: ResourceBoardProps) => {
                 <h3 className={`${styles.resourceBoardTitle}`}>Growth Progress</h3>
                 {resourceConfigs.map((config) => (
                     <ResourceItem
+                        key={config.type}
                         type={config.type}
                         value={resources[config.type]}
                         label={ config.label}
