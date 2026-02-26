@@ -233,7 +233,6 @@ export function useSoilGame() {
     });
   }, []);
 
-  // ---- The follow commands are notes for later, do not use them ----
   const handleCommand = useCallback((rawInput: string) => {
     const logUserCommand = `> ${rawInput}`;
     // 1. Validate using the helper
