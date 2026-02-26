@@ -63,6 +63,7 @@ export interface GameState {
   inventory: Inventory;
   terminalLog: string[];
   questsCompleted: number;
+  showCompletionPopup: boolean;
 }
 
 export interface CompleteGameRequest {

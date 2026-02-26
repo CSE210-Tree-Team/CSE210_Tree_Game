@@ -1,18 +1,20 @@
-import { useNavigate } from 'react-router-dom';
 import { useSoilGame } from './hooks/useSoilGame';
 import { TitleScreen } from './components/TitleScreen/TitleScreen';
 import { TutorialScreen } from './components/TutorialScreen/TutorialScreen';
 import { GameScreen } from './components/GameScreen/GameScreen';
-import { CompleteScreen } from './components/CompleteScreen/CompleteScreen';
+import { CompletionPopup } from './components/CompletionPopup/CompletionPopup';
 import styles from './SoilGame.module.css';
 
 export default function SoilMinigame() {
   const { state, setPhase, startGame, handleCommand } = useSoilGame();
-  //const navigate = useNavigate(); might need later for navigating back to main menu or other pages
 
   // Transition from Tutorial to Playing
   const handleReadyToPlay = () => {
     startGame(); // This initializes the map and switches phase to 'playing'
+  };
+
+  const handleRestart = () => {
+    setPhase('title');
   };
 
   return (
@@ -28,16 +30,13 @@ export default function SoilMinigame() {
       )}
 
       {/* 3. Main Gameplay Screen */}
-      {state.phase === 'playing' && (
+      {(state.phase === 'playing' || state.phase === 'complete') && (
         <GameScreen state={state} onCommand={handleCommand} />
       )}
 
-      {/* 4. Game Completion Screen */}
-      {state.phase === 'complete' && (
-        <CompleteScreen
-          onRestart={() => setPhase('title')}
-
-        />
+      {/* 4. Completion Popup Overlay */}
+      {state.showCompletionPopup && (
+        <CompletionPopup onRestart={handleRestart} />
       )}
 
       {/* 5. Loading State when user clicks on soil on the frontpage */}

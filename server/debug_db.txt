@@ -1,0 +1,345 @@
+Successfully connected to /Users/arcreactor/Desktop/CSE 210/CSE210_Tree_Game/server/Database/game_database.db
+
+==================== TABLE: Account ====================
+COLUMNS: ['username', 'email', 'passwordHash', 'displayName', 'accountReference', 'dateOfBirth', 'lastLogin']
+--------------------------------------------------------------------------------------------------------------
+   ('dhaivatpachchigar@gmail.com', 'dhaivatpachchigar@gmail.com', 'auth0', 'Dhaivat Pachchigar', 'dhaivatpachchigar', '2000-01-01', '2026-02-25T18:57:18.514427')
+
+
+==================== TABLE: AccountRole ====================
+COLUMNS: ['username', 'role']
+------------------------------
+   ('dhaivatpachchigar@gmail.com', 'Student')
+
+
+==================== TABLE: Tree ====================
+COLUMNS: ['treeID', 'ownerUsername', 'health', 'growthStage', 'lastUpdated']
+-----------------------------------------------------------------------------
+   ('8fb8f984-d5ea-443e-b988-d932fe4a65f2', 'dhaivatpachchigar@gmail.com', 'Healthy', 0, '2026-02-25T18:47:28.570525')
+
+
+==================== TABLE: TreeResources ====================
+COLUMNS: ['treeID', 'water', 'earth', 'sun']
+---------------------------------------------
+   ('8fb8f984-d5ea-443e-b988-d932fe4a65f2', 60, 100, 56)
+
+
+==================== TABLE: TreeDecoration ====================
+COLUMNS: ['decorationID', 'treeID', 'appearanceID']
+----------------------------------------------------
+   [EMPTY TABLE] - No data rows found.
+
+
+==================== TABLE: Event ====================
+COLUMNS: ['eventID', 'eventType', 'resourceAffected', 'description', 'percentChange', 'conditions']
+----------------------------------------------------------------------------------------------------
+   [EMPTY TABLE] - No data rows found.
+
+
+==================== TABLE: Class ====================
+COLUMNS: ['classID', 'className', 'classLevel', 'teacherUsername', 'active', 'levelPolicy']
+--------------------------------------------------------------------------------------------
+   [EMPTY TABLE] - No data rows found.
+
+
+==================== TABLE: Enrollment ====================
+COLUMNS: ['username', 'classID']
+---------------------------------
+   [EMPTY TABLE] - No data rows found.
+
+
+==================== TABLE: Question ====================
+COLUMNS: ['questionID', 'text', 'type', 'difficulty', 'resourceType']
+----------------------------------------------------------------------
+   ('b3781978-3852-465c-9316-19013a812f40', 'What is the powerhouse of the cell?', 'MCQ', 1, 'Sun')
+   ('6fdeafe3-21e4-4564-8f03-a5b916180d73', 'Which process do plants use to make food?', 'MCQ', 1, 'Sun')
+   ('16634ef8-812c-43d8-8c64-eef9545b0fd2', 'What is H2O?', 'MCQ', 1, 'Water')
+   ('7fc85c5c-0276-4656-ac7e-3c7ba9bcd3e0', 'Which of these are renewable energy sources?', 'MultiSelect', 1, 'Sun')
+   ('6dc9fa48-326d-4037-879c-ba1c11b94ae1', 'Which of the following elements appears in water?', 'MultiSelect', 1, 'Water')
+   ('7e67c419-1138-4b41-8647-f6941afebba5', 'Water/H2O', 'MultiSelect', 1, 'Earth')
+   ('5af1aa1a-884a-43e4-9127-afd2c531fa1d', 'Carbon Dioxide/CO2', 'MultiSelect', 1, 'Earth')
+   ('cfc8b962-a232-4ed9-a5c2-0717e4e710a3', 'Ammonia/NH3', 'MultiSelect', 1, 'Earth')
+   ('d4a821e8-e044-4f63-b54b-169580401e97', 'Methane/CH4', 'MultiSelect', 1, 'Earth')
+   ('38f4704e-e6be-416d-b5a7-4c9f81784849', 'Sodium Chloride/NaCl', 'MultiSelect', 1, 'Earth')
+   ('dd2a0cf9-5885-4761-8abb-2737e618b88f', 'Glucose/C6H12O6', 'MultiSelect', 1, 'Earth')
+   ('8fd15bf7-c6cb-4247-a2f3-7e3d5d630061', 'What are the main components of soil?', 'MultiSelect', 1, 'Earth')
+   ('447467ef-1c59-41b1-92dc-8a71e8fd0500', 'What is the chemical formula for water?', 'MCQ', 1, 'Water')
+   ('456dd9bc-4da7-4021-ba96-ed4653089c2e', 'What percentage of the earth is covered by water?', 'MCQ', 1, 'Water')
+   ('630055a2-2d66-4200-b2fd-f50a664dfcb3', 'Which one of these is NOT a state of water?', 'MCQ', 1, 'Water')
+
+
+==================== TABLE: QuestionChoice ====================
+COLUMNS: ['choiceID', 'questionID', 'text', 'isCorrect']
+---------------------------------------------------------
+   ('b8663e00-78ac-4e7b-8ad0-64411890027f', 'b3781978-3852-465c-9316-19013a812f40', 'The mitochondria', 1)
+   ('aeed9273-65b8-4fa1-8232-2ec5e0f0c80a', 'b3781978-3852-465c-9316-19013a812f40', 'The nucleus', 0)
+   ('c2dd9db8-577e-4dc4-8435-2f970f7c4d39', 'b3781978-3852-465c-9316-19013a812f40', 'The ribosome', 0)
+   ('d1664b84-861d-47ef-beef-aae918a18cfd', 'b3781978-3852-465c-9316-19013a812f40', 'The endoplasmic reticulum', 0)
+   ('e3b2acc7-bb84-4114-9fee-7f57f2fdca09', '6fdeafe3-21e4-4564-8f03-a5b916180d73', 'Respiration', 0)
+   ('cfe9b36e-1f30-4254-b2b5-fd2638af7297', '6fdeafe3-21e4-4564-8f03-a5b916180d73', 'Photosynthesis', 1)
+   ('f4ca7e43-95c5-48c2-a3b3-7b18c1d841d4', '6fdeafe3-21e4-4564-8f03-a5b916180d73', 'Digestion', 0)
+   ('c86def18-fd87-4791-9e9f-e33794da97c1', '6fdeafe3-21e4-4564-8f03-a5b916180d73', 'Fermentation', 0)
+   ('2829ef39-d87f-44ee-810b-c599212ec5c3', '16634ef8-812c-43d8-8c64-eef9545b0fd2', 'Hydrogen Peroxide', 0)
+   ('4e2f15c0-6147-43e8-ba4e-c65cb66fdfac', '16634ef8-812c-43d8-8c64-eef9545b0fd2', 'Water', 1)
+   ('a6735c7f-4597-40f9-bac2-7b39abcf4314', '16634ef8-812c-43d8-8c64-eef9545b0fd2', 'Hydrochloric Acid', 0)
+   ('30a9da76-676a-444a-b222-aa48c1f12fe5', '16634ef8-812c-43d8-8c64-eef9545b0fd2', 'Heavy Water', 0)
+   ('0c83829b-f576-447e-8d7b-a3ef4b90c85a', '7fc85c5c-0276-4656-ac7e-3c7ba9bcd3e0', 'Solar', 1)
+   ('6ebd5e34-d34f-4c8e-8fb7-87f64ccc7a7d', '7fc85c5c-0276-4656-ac7e-3c7ba9bcd3e0', 'Coal', 0)
+   ('8b981c2b-3e03-480c-a4c2-c6348fe950f6', '7fc85c5c-0276-4656-ac7e-3c7ba9bcd3e0', 'Wind', 1)
+   ('08091d22-aeb4-4511-9485-d6ed1e52dca4', '7fc85c5c-0276-4656-ac7e-3c7ba9bcd3e0', 'Natural Gas', 0)
+   ('12fe24ca-43fc-4507-9c6b-dea1779a85f6', '6dc9fa48-326d-4037-879c-ba1c11b94ae1', 'Hydrogen', 1)
+   ('ba8748a4-5eb0-4f12-b42a-ff0c66dd4d04', '6dc9fa48-326d-4037-879c-ba1c11b94ae1', 'Oxygen', 1)
+   ('fe2bfaac-6823-4762-99a7-4f5ac1c79d60', '6dc9fa48-326d-4037-879c-ba1c11b94ae1', 'Carbon', 0)
+   ('4fc033e6-6a6c-4e6b-b5af-7ab29420a487', '6dc9fa48-326d-4037-879c-ba1c11b94ae1', 'Nitrogen', 0)
+   ('413ca74b-d70f-4184-b307-04e023177e87', '7e67c419-1138-4b41-8647-f6941afebba5', '2H', 1)
+   ('73c2f880-b664-44c3-9572-4c5e1b0e7d5f', '7e67c419-1138-4b41-8647-f6941afebba5', 'O', 1)
+   ('ac9cc7f8-da49-4c4d-825a-ea1baf1bc0eb', '7e67c419-1138-4b41-8647-f6941afebba5', '2Fe', 0)
+   ('904b19ee-843a-4a09-9952-62265c473c52', '5af1aa1a-884a-43e4-9127-afd2c531fa1d', 'C', 1)
+   ('6b70f0f4-9c5c-4da8-93cc-421de068f4b4', '5af1aa1a-884a-43e4-9127-afd2c531fa1d', '2O', 1)
+   ('173ea18c-84fa-417b-b0a0-9f8d340f5732', '5af1aa1a-884a-43e4-9127-afd2c531fa1d', 'H', 0)
+   ('27695c45-daf6-4d29-92ff-279133aece80', 'cfc8b962-a232-4ed9-a5c2-0717e4e710a3', 'N', 1)
+   ('793f24fc-5544-4f1b-bab8-93ffb0f18c23', 'cfc8b962-a232-4ed9-a5c2-0717e4e710a3', '3H', 1)
+   ('591b3c2f-0c9e-4cdc-bb03-cd6245a657a8', 'cfc8b962-a232-4ed9-a5c2-0717e4e710a3', 'O', 0)
+   ('f16f3bab-fcfa-4da8-a14d-98c96cbd1229', 'd4a821e8-e044-4f63-b54b-169580401e97', 'C', 1)
+   ('ddb1d14a-7332-41f3-9755-c8dd476d6111', 'd4a821e8-e044-4f63-b54b-169580401e97', '4H', 1)
+   ('43471ede-fa7d-4ea0-ba5f-76d1c759ee92', 'd4a821e8-e044-4f63-b54b-169580401e97', 'O', 0)
+   ('12be9b09-4366-4cfb-8fbb-b8a0b48a34cd', '38f4704e-e6be-416d-b5a7-4c9f81784849', 'Na', 1)
+   ('098737cd-77f1-4850-9864-f0533ef7286e', '38f4704e-e6be-416d-b5a7-4c9f81784849', 'Cl', 1)
+   ('8aaf6f77-38ec-4043-a3e8-1105e862cdf3', '38f4704e-e6be-416d-b5a7-4c9f81784849', '2O', 0)
+   ('1ca26740-8dd4-4045-a679-b8599e751a69', 'dd2a0cf9-5885-4761-8abb-2737e618b88f', '6C', 1)
+   ('444e266f-3484-43a6-bba9-8015fea35394', 'dd2a0cf9-5885-4761-8abb-2737e618b88f', '12H', 1)
+   ('16a19216-5cad-4bc2-a713-10cc47691b3f', 'dd2a0cf9-5885-4761-8abb-2737e618b88f', '6O', 1)
+   ('a02ea1ce-bdd2-46d1-a682-a3e14a4408ec', 'dd2a0cf9-5885-4761-8abb-2737e618b88f', '2N', 0)
+   ('767c06a7-a0a4-4562-847f-fa2ae64b702e', '8fd15bf7-c6cb-4247-a2f3-7e3d5d630061', 'Minerals', 1)
+   ('856fa324-f0b1-4bd8-bc63-69c743df79ec', '8fd15bf7-c6cb-4247-a2f3-7e3d5d630061', 'Organic matter', 1)
+   ('ea7f0a74-983b-4af6-91ed-3b0c24bfecc2', '8fd15bf7-c6cb-4247-a2f3-7e3d5d630061', 'Water', 1)
+   ('e06745b3-1408-4c1b-a7ed-22eca6a2b966', '8fd15bf7-c6cb-4247-a2f3-7e3d5d630061', 'Air', 1)
+   ('ed0bcbac-a50f-4362-ba44-61254c27e166', '447467ef-1c59-41b1-92dc-8a71e8fd0500', 'CO2', 0)
+   ('23ea7699-3112-4029-826b-7b14da71afc0', '447467ef-1c59-41b1-92dc-8a71e8fd0500', 'H2O', 1)
+   ('38c7ed4f-1858-4302-909b-5410318d2231', '447467ef-1c59-41b1-92dc-8a71e8fd0500', 'NaCl', 0)
+   ('0b814cd8-7c38-464d-893a-b5402c5b4a16', '447467ef-1c59-41b1-92dc-8a71e8fd0500', 'HO', 0)
+   ('c3cbfb81-2bcd-4ec2-9c94-a337b81e1514', '456dd9bc-4da7-4021-ba96-ed4653089c2e', '30', 0)
+   ('71deaf1d-ee1b-49e4-ad85-9b7075e8e3e6', '456dd9bc-4da7-4021-ba96-ed4653089c2e', '50', 0)
+   ('b8df0cd3-7493-4e2d-8b74-3e3361b13b0f', '456dd9bc-4da7-4021-ba96-ed4653089c2e', '70', 1)
+   ('a1f155b0-6967-4354-987e-632028d64349', '456dd9bc-4da7-4021-ba96-ed4653089c2e', '100', 0)
+   ('b2a99ac1-2789-447e-9534-b899319c4d30', '630055a2-2d66-4200-b2fd-f50a664dfcb3', 'Ice', 0)
+   ('44788be6-716e-4725-9864-adfdd5f701dd', '630055a2-2d66-4200-b2fd-f50a664dfcb3', 'Liquid', 0)
+   ('ba5ee9ef-f48e-47b1-99da-7499c4eeb2cb', '630055a2-2d66-4200-b2fd-f50a664dfcb3', 'Gas', 0)
+   ('d24afd93-3c33-4b31-b940-06a28ee7addf', '630055a2-2d66-4200-b2fd-f50a664dfcb3', 'Rock', 1)
+
+
+==================== TABLE: QuestionClass ====================
+COLUMNS: ['questionID', 'classID']
+-----------------------------------
+   [EMPTY TABLE] - No data rows found.
+
+
+==================== TABLE: QuestionAttempt ====================
+COLUMNS: ['attemptID', 'username', 'questionID', 'isCorrect', 'resourceAwarded', 'timestamp']
+----------------------------------------------------------------------------------------------
+   [EMPTY TABLE] - No data rows found.
+
+
+==================== TABLE: StudentDetails ====================
+COLUMNS: ['studentUsername', 'studentLevel', 'studentStats', 'parentEmail']
+----------------------------------------------------------------------------
+   [EMPTY TABLE] - No data rows found.
+
+
+End of Database Dump.
+
+
+=================== End of Database Contents ====================
+
+
+
+=================== User Overview ===================
+
+User: Dhaivat Pachchigar (dhaivatpachchigar@gmail.com) [ID: dhaivatp]
+  Email: dhaivatpachchigar@gmail.com
+  Roles: Student
+  Status: Last login: 2026-02-25T18:57:18.514427
+  Tree 8fb8f984 | Health: Healthy | Growth: 0 | Updated: 2026-02-25T18:47:28.570525
+    Resources -> Water: 60, Earth: 100, Sun: 56
+
+
+
+
+=================== Questions Overview ===================
+Total Questions: 15
+
+======================================================================
+Question ID: cfc8b962-a232-4ed9-a5c2-0717e4e710a3
+Type: MultiSelect | Resource: Earth | Difficulty: 1
+======================================================================
+Q: Ammonia/NH3
+
+Choices:
+  [✓] 1. N
+  [ ] 2. O
+  [✓] 3. 3H
+
+======================================================================
+Question ID: 5af1aa1a-884a-43e4-9127-afd2c531fa1d
+Type: MultiSelect | Resource: Earth | Difficulty: 1
+======================================================================
+Q: Carbon Dioxide/CO2
+
+Choices:
+  [ ] 1. H
+  [✓] 2. 2O
+  [✓] 3. C
+
+======================================================================
+Question ID: dd2a0cf9-5885-4761-8abb-2737e618b88f
+Type: MultiSelect | Resource: Earth | Difficulty: 1
+======================================================================
+Q: Glucose/C6H12O6
+
+Choices:
+  [✓] 1. 6O
+  [✓] 2. 6C
+  [✓] 3. 12H
+  [ ] 4. 2N
+
+======================================================================
+Question ID: d4a821e8-e044-4f63-b54b-169580401e97
+Type: MultiSelect | Resource: Earth | Difficulty: 1
+======================================================================
+Q: Methane/CH4
+
+Choices:
+  [ ] 1. O
+  [✓] 2. 4H
+  [✓] 3. C
+
+======================================================================
+Question ID: 38f4704e-e6be-416d-b5a7-4c9f81784849
+Type: MultiSelect | Resource: Earth | Difficulty: 1
+======================================================================
+Q: Sodium Chloride/NaCl
+
+Choices:
+  [✓] 1. Cl
+  [✓] 2. Na
+  [ ] 3. 2O
+
+======================================================================
+Question ID: 7e67c419-1138-4b41-8647-f6941afebba5
+Type: MultiSelect | Resource: Earth | Difficulty: 1
+======================================================================
+Q: Water/H2O
+
+Choices:
+  [✓] 1. 2H
+  [✓] 2. O
+  [ ] 3. 2Fe
+
+======================================================================
+Question ID: 8fd15bf7-c6cb-4247-a2f3-7e3d5d630061
+Type: MultiSelect | Resource: Earth | Difficulty: 1
+======================================================================
+Q: What are the main components of soil?
+
+Choices:
+  [✓] 1. Minerals
+  [✓] 2. Organic matter
+  [✓] 3. Air
+  [✓] 4. Water
+
+======================================================================
+Question ID: b3781978-3852-465c-9316-19013a812f40
+Type: MCQ | Resource: Sun | Difficulty: 1
+======================================================================
+Q: What is the powerhouse of the cell?
+
+Choices:
+  [ ] 1. The nucleus
+  [✓] 2. The mitochondria
+  [ ] 3. The ribosome
+  [ ] 4. The endoplasmic reticulum
+
+======================================================================
+Question ID: 6fdeafe3-21e4-4564-8f03-a5b916180d73
+Type: MCQ | Resource: Sun | Difficulty: 1
+======================================================================
+Q: Which process do plants use to make food?
+
+Choices:
+  [ ] 1. Fermentation
+  [✓] 2. Photosynthesis
+  [ ] 3. Respiration
+  [ ] 4. Digestion
+
+======================================================================
+Question ID: 7fc85c5c-0276-4656-ac7e-3c7ba9bcd3e0
+Type: MultiSelect | Resource: Sun | Difficulty: 1
+======================================================================
+Q: Which of these are renewable energy sources?
+
+Choices:
+  [ ] 1. Natural Gas
+  [✓] 2. Solar
+  [ ] 3. Coal
+  [✓] 4. Wind
+
+======================================================================
+Question ID: 16634ef8-812c-43d8-8c64-eef9545b0fd2
+Type: MCQ | Resource: Water | Difficulty: 1
+======================================================================
+Q: What is H2O?
+
+Choices:
+  [ ] 1. Hydrogen Peroxide
+  [ ] 2. Heavy Water
+  [✓] 3. Water
+  [ ] 4. Hydrochloric Acid
+
+======================================================================
+Question ID: 447467ef-1c59-41b1-92dc-8a71e8fd0500
+Type: MCQ | Resource: Water | Difficulty: 1
+======================================================================
+Q: What is the chemical formula for water?
+
+Choices:
+  [ ] 1. HO
+  [✓] 2. H2O
+  [ ] 3. NaCl
+  [ ] 4. CO2
+
+======================================================================
+Question ID: 456dd9bc-4da7-4021-ba96-ed4653089c2e
+Type: MCQ | Resource: Water | Difficulty: 1
+======================================================================
+Q: What percentage of the earth is covered by water?
+
+Choices:
+  [ ] 1. 50
+  [ ] 2. 100
+  [✓] 3. 70
+  [ ] 4. 30
+
+======================================================================
+Question ID: 630055a2-2d66-4200-b2fd-f50a664dfcb3
+Type: MCQ | Resource: Water | Difficulty: 1
+======================================================================
+Q: Which one of these is NOT a state of water?
+
+Choices:
+  [ ] 1. Liquid
+  [ ] 2. Ice
+  [ ] 3. Gas
+  [✓] 4. Rock
+
+======================================================================
+Question ID: 6dc9fa48-326d-4037-879c-ba1c11b94ae1
+Type: MultiSelect | Resource: Water | Difficulty: 1
+======================================================================
+Q: Which of the following elements appears in water?
+
+Choices:
+  [✓] 1. Hydrogen
+  [ ] 2. Nitrogen
+  [✓] 3. Oxygen
+  [ ] 4. Carbon
+

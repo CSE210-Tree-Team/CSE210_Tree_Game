@@ -73,6 +73,7 @@ function createInitialState(): GameState {
     inventory: {},
     terminalLog: [],
     questsCompleted: 0,
+    showCompletionPopup: false,
   };
 }
 
@@ -129,6 +130,7 @@ export function useSoilGame() {
       inventory: createEmptyInventory(Array.from(uniqueElements)),
       terminalLog: initialLog,
       questsCompleted: 0,
+      showCompletionPopup: false,
     }));
   }, []);
 
@@ -303,6 +305,7 @@ export function useSoilGame() {
       setGameState(prev => ({
         ...prev,
         phase: 'complete',
+        showCompletionPopup: true,
         terminalLog: [...prev.terminalLog, '', 'Database updated successfully!']
       }));
     }
