@@ -61,6 +61,12 @@ const MAP_SIZE = 5;
 
 const isValidQuest = (quest: Quest | null): quest is Quest => quest != null;
 
+export const PROGRESS_PER_QUEST = 25;
+
+export function calculateProgress(questsCompleted: number): number {
+  return questsCompleted * PROGRESS_PER_QUEST;
+}
+
 // ========================
 // Initial State
 // ========================
@@ -296,7 +302,8 @@ export function useSoilGame() {
 
 
   const completeGame = useCallback(async () => {
-    const totalProgress = state.questsCompleted * 25;
+    // const totalProgress = state.questsCompleted * 25;
+    const totalProgress = calculateProgress(state.questsCompleted);
     const success = await pushGameResults(totalProgress, 'earth');
 
     if (success) {
@@ -355,13 +362,23 @@ export function useSoilGame() {
     };
   }, []);
 
+  // Use for testing completion
+  const setQuestsCompleted = (value: number) => {
+    setGameState(prev => ({
+      ...prev,
+      questsCompleted: value
+    }));
+  };
+
 
   return {
     state,
     setPhase,
     startGame,
     handleCommand,
-    collectResources
+    collectResources,
+    completeGame,
+    setQuestsCompleted,
   };
 }
 
