@@ -55,9 +55,17 @@ import {
 } from '../SoilGameQuestionManager';
 import { toSoilQuest } from '../utils/QuestionAdapter'
 
+import { audioSystem } from '../AudioSystem';
+
 const MAP_SIZE = 5;
 
 const isValidQuest = (quest: Quest | null): quest is Quest => quest != null;
+
+export const PROGRESS_PER_QUEST = 25;
+
+export function calculateProgress(questsCompleted: number): number {
+  return questsCompleted * PROGRESS_PER_QUEST;
+}
 
 // ========================
 // Initial State
@@ -233,7 +241,6 @@ export function useSoilGame() {
     });
   }, []);
 
-  // ---- The follow commands are notes for later, do not use them ----
   const handleCommand = useCallback((rawInput: string) => {
     const logUserCommand = `> ${rawInput}`;
     // 1. Validate using the helper
@@ -297,7 +304,8 @@ export function useSoilGame() {
 
 
   const completeGame = useCallback(async () => {
-    const totalProgress = state.questsCompleted * 25;
+    // const totalProgress = state.questsCompleted * 25;
+    const totalProgress = calculateProgress(state.questsCompleted);
     const success = await pushGameResults(totalProgress, 'earth');
 
     if (success) {
@@ -339,11 +347,45 @@ export function useSoilGame() {
     }
   }, [state.map, state.playerPosition]);
 
+  useEffect(() => {
+    if (state.phase === "playing") {
+      console.log("Playing game music")
+      audioSystem.playAmbient();
+    }
+
+    if (state.phase === "complete") {
+      console.log("Fade game music")
+      audioSystem.fadeOut(3000);
+    }
+  }, [state.phase]);
+
+  useEffect(() => {
+    return () => {
+      audioSystem.stopAmbient();
+    };
+  }, []);
+
+  // Use for testing completion
+  const setQuestsCompleted = (value: number) => {
+    setGameState(prev => ({
+      ...prev,
+      questsCompleted: value
+    }));
+  };
+
+
   return {
     state,
     setPhase,
     startGame,
     handleCommand,
-    collectResources
+    collectResources,
+    completeGame,
+    setQuestsCompleted,
   };
 }
+
+// When questions are fetched show the questions on screen
+// Test command event handlers
+// Upon completion send questions back to database
+// Unit vs end to end tests.
