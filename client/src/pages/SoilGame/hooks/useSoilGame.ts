@@ -55,7 +55,7 @@ import {
 } from '../SoilGameQuestionManager';
 import { toSoilQuest } from '../utils/QuestionAdapter'
 
-import { audioSystem } from '../AudioSystem';
+// import { audioSystem } from '../AudioSystem';
 
 const MAP_SIZE = 5;
 
@@ -346,24 +346,6 @@ export function useSoilGame() {
       console.table(debugGrid);
     }
   }, [state.map, state.playerPosition]);
-
-  useEffect(() => {
-    if (state.phase === "playing") {
-      console.log("Playing game music")
-      audioSystem.playAmbient();
-    }
-
-    if (state.phase === "complete") {
-      console.log("Fade game music")
-      audioSystem.fadeOut(3000);
-    }
-  }, [state.phase]);
-
-  useEffect(() => {
-    return () => {
-      audioSystem.stopAmbient();
-    };
-  }, []);
 
   // Use for testing completion
   const setQuestsCompleted = (value: number) => {
