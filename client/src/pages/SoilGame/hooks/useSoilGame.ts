@@ -55,6 +55,8 @@ import {
 } from '../SoilGameQuestionManager';
 import { toSoilQuest } from '../utils/QuestionAdapter'
 
+import { audioSystem } from '../AudioSystem';
+
 const MAP_SIZE = 5;
 
 const isValidQuest = (quest: Quest | null): quest is Quest => quest != null;
@@ -336,6 +338,25 @@ export function useSoilGame() {
     }
   }, [state.map, state.playerPosition]);
 
+  useEffect(() => {
+    if (state.phase === "playing") {
+      console.log("Playing game music")
+      audioSystem.playAmbient();
+    }
+
+    if (state.phase === "complete") {
+      console.log("Fade game music")
+      audioSystem.fadeOut(3000);
+    }
+  }, [state.phase]);
+
+  useEffect(() => {
+    return () => {
+      audioSystem.stopAmbient();
+    };
+  }, []);
+
+
   return {
     state,
     setPhase,
@@ -344,3 +365,8 @@ export function useSoilGame() {
     collectResources
   };
 }
+
+// When questions are fetched show the questions on screen
+// Test command event handlers
+// Upon completion send questions back to database
+// Unit vs end to end tests.
