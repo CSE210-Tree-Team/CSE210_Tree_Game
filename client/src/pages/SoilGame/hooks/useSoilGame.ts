@@ -100,6 +100,7 @@ export function useSoilGame() {
     const parsedQuests = fetchedQuestions.map((question) => toSoilQuest(question));
     const fetchedQuests: Quest[] = parsedQuests.filter(isValidQuest);
     if (fetchedQuests.length !== SOIL_QUESTION_COUNT) {
+      console.log(fetchedQuests)
       throw new Error("Some questions failed to parse into quests");
     }
 
