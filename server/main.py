@@ -9,7 +9,7 @@ from dotenv import load_dotenv
 from Database.getItemsFromDatabase import get_person, get_tree, get_question, get_questions, get_all_trees
 from Database.addItemsToDatabase import add_account, generate_tree, add_question, update_last_login, apply_passive_decay, update_stat
 from constants import ROLE_STUDENT, PASSIVE_DECAY_RATE
-from dataRecords import Tree, Event
+from dataRecords import Tree, Event, DUMMY_EVENT
 from email.message import EmailMessage
 import smtplib
 
@@ -62,15 +62,8 @@ async def startup_event():
     """Start the passive decay background task when the app starts."""
     global decay_task
     decay_task = asyncio.create_task(run_passive_decay_loop())
-
-    DUMMY_EVENT = {
-        "eventType": "Decay",
-        "resourceAffected": "Water",
-        "description": "Your tree lost some water due to evaporation.",
-        "percentChange": -5,
-        "conditions": "Passive decay applied every hour."
-    }
-    send_email("adrian.s.rosing@gmail.com", DUMMY_EVENT)
+    
+    # send_email("adrian.s.rosing@gmail.com", DUMMY_EVENT)  # Test email sending on startup
     
     print("Passive decay background task started")
 
@@ -143,8 +136,9 @@ def create_account(username: str, user_data: dict):
         print(f"Error creating account: {e}")
         raise HTTPException(status_code=500, detail="Failed to create account")
 
-def send_email(target_user, event):
-    event_str = f"Event Type: {event['eventType']}, Resource Affected: {event['resourceAffected']}, Description: {event['description']}, Stat Changes: {event['percentChange']}%, Conditions Met: {event['conditions']}"
+def send_email(target_user : str, event : dict | Event):
+    event_data = event.__dict__ if isinstance(event, Event) else event
+    event_str = f"Event Type: {event_data['eventType']}, Resource Affected: {event_data['resourceAffected']}, Description: {event_data['description']}, Stat Changes: {event_data['percentChange']}%, Conditions Met: {event_data['conditions']}"
     print(f"Preparing to send email to {target_user} with message: {event_str}")
     try:
         # TODO: Implement Events more in-depth if we have time.
@@ -155,7 +149,7 @@ def send_email(target_user, event):
         # TODO: Update email once we have a domain.
         # Email server configuration
         sender_email = "potplugtesting@gmail.com"  # Normal Email - pass is Testing123~
-        password = "pwrplsmoecjduvnr"  # App Password
+        password = str(os.getenv("EMAIL_PASSWORD"))
     except:
         print("Failed to find user.")
         return {"User Not Found."}
