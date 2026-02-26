@@ -10,7 +10,7 @@
  *   "text": "Water/H2O",
  *   "type": "MultiSelect",
  *   "difficulty": 1,
- *   "resourceType": "earth",
+ *   "resourceType": "Earth",
  *   "choices": [
  *     { "text": "2H", "isCorrect": true },
  *     { "text": "1O", "isCorrect": true },

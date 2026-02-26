@@ -90,7 +90,7 @@ const run = async (): Promise<void> => {
 
   const call = fetchCalls[0];
   assert(call.url === "/api/get-questions", "Manager should call the get-questions endpoint.");
-  assert(call.body.resourceType === "earth", "Manager should request earth questions.");
+  assert(call.body.resourceType === "Earth", "Manager should request earth questions.");
   assert(call.body.questionType === SOIL_QUESTION_TYPE, "Manager should request MultiSelect questions.");
   assert(
     call.body.numQuestions === SOIL_QUESTION_COUNT,
