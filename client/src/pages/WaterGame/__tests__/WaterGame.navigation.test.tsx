@@ -13,10 +13,10 @@ import { MemoryRouter } from "react-router-dom";
 import { vi, beforeEach, afterEach } from "vitest";
 
 import { WaterGame } from "../WaterGame";
-import type { WaterQuestion } from "../../ServerCalls/ServerCalls";
+import type { Question } from "../../ServerCalls/ServerCalls";
 import * as ServerCalls from "../../ServerCalls/ServerCalls";
 
-const mockWaterQuestions = [
+const mockQuestions = [
   {
     questionID: "1",
     difficulty: 1,
@@ -33,7 +33,7 @@ const mockWaterQuestions = [
 
 beforeEach(() => {
   vi.spyOn(ServerCalls, "fetchQuestions").mockResolvedValue(
-    mockWaterQuestions as WaterQuestion[],
+    mockQuestions as Question[],
   );
 });
 

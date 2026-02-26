@@ -3,9 +3,11 @@ Game Screen Integration Tests for the WaterGame Component
 
 This module contains integration tests for the game screen of the WaterGame
 component. These tests verify that the game screen components (question
-container, bucket, raindrops) render correctly, that the bucket moves
-correctly in response to arrow key presses, and that the end screen displays
-the correct results after the player catches a correct or incorrect raindrop.
+container, bucket, raindrops, point counter) render correctly, that the bucket 
+moves correctly in response to arrow key presses, the correct point indicator
+appears based on the raindrop caught, the point counter updates as questions 
+are answered, and that the end screen displays the correct results after the 
+player catches a correct or incorrect raindrop.
 */
 
 import { render, screen, waitFor } from "@testing-library/react";
@@ -16,12 +18,12 @@ import { vi, beforeEach, afterEach } from "vitest";
 import { WaterGame } from "../WaterGame";
 import styles from "../WaterGame.module.css";
 import type { RaindropAnswer } from "../types";
-import type { WaterQuestion } from "../../ServerCalls/ServerCalls";
+import type { Question } from "../../ServerCalls/ServerCalls";
 import * as ServerCalls from "../../ServerCalls/ServerCalls";
 import * as utils from "../utils";
 import { INCORRECT, NUM_POINTS } from "../constants";
 
-const mockWaterQuestions = [
+const mockQuestions = [
   {
     questionID: "1",
     difficulty: 1,
@@ -38,7 +40,7 @@ const mockWaterQuestions = [
 
 beforeEach(() => {
   vi.spyOn(ServerCalls, "fetchQuestions").mockResolvedValue(
-    mockWaterQuestions as WaterQuestion[],
+    mockQuestions as Question[],
   );
 });
 
@@ -295,7 +297,7 @@ test("displays correct point indicator when bucket catches correct raindrop", as
         { text: "50", isCorrect: false },
       ],
     },
-  ] as WaterQuestion[]);
+  ] as Question[]);
 
   vi.spyOn(utils, "shuffleArray").mockImplementation((array) => {
     const incorrect = (array as RaindropAnswer[]).filter((a) => !a.isCorrect);
@@ -357,7 +359,7 @@ test("displays incorrect point indicator when bucket catches incorrect raindrop"
         { text: "50", isCorrect: false },
       ],
     },
-  ] as WaterQuestion[]);
+  ] as Question[]);
 
   vi.spyOn(utils, "shuffleArray").mockImplementation((array) => {
     const incorrect = (array as RaindropAnswer[]).filter((a) => !a.isCorrect);
@@ -419,7 +421,7 @@ test("point indicator disappears after duration", async () => {
         { text: "50", isCorrect: false },
       ],
     },
-  ] as WaterQuestion[]);
+  ] as Question[]);
   vi.spyOn(utils, "shuffleArray").mockImplementation((array) => {
     const incorrect = (array as RaindropAnswer[]).filter((a) => !a.isCorrect);
     const correct = (array as RaindropAnswer[]).filter((a) => a.isCorrect);
@@ -484,7 +486,7 @@ test("displays correct point count when bucket catches correct raindrop", async 
         { text: "50", isCorrect: false },
       ],
     },
-  ] as WaterQuestion[]);
+  ] as Question[]);
 
   vi.spyOn(utils, "shuffleArray").mockImplementation((array) => {
     const incorrect = (array as RaindropAnswer[]).filter((a) => !a.isCorrect);
@@ -546,7 +548,7 @@ test("displays correct point counter display when bucket catches incorrect raind
         { text: "50", isCorrect: false },
       ],
     },
-  ] as WaterQuestion[]);
+  ] as Question[]);
 
   vi.spyOn(utils, "shuffleArray").mockImplementation((array) => {
     const incorrect = (array as RaindropAnswer[]).filter((a) => !a.isCorrect);
