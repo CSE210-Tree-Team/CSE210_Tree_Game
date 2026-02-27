@@ -1,5 +1,5 @@
 import { useAuth0 } from '@auth0/auth0-react';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Tree } from "../../components/Tree";
 import { Earth } from "../../components/Earth";
@@ -9,25 +9,9 @@ import styles from "../../components/homepage.module.css"
 import fontStyles from "../../components/Popup.module.css"
 import buttonStyles from "../../components/Button.module.css"
 import Tutorial from "./Tutorial"
-interface UserInfo {
-    success: boolean;
-    user: {
-        username: string;
-        displayName: string;
-        email: string;
-        roles: string[];
-    };
-    tree: {
-        treeID: string;
-        health: string;
-        growthStage: number;
-        resourceLevels: {
-            water: number;
-            earth: number;
-            sun: number;
-        };
-    };
-}
+import { type UserInfo } from "./hooks/ServerCalls"
+import { useFetchUserInfo } from "./hooks/ServerCalls"
+
 
 const userInfoMock: UserInfo = {
     success: true,
@@ -50,49 +34,15 @@ const userInfoMock: UserInfo = {
 
 }
 
-
-
 export const Homepage = () => {
-    const { user, logout, getAccessTokenSilently } = useAuth0();
-    const [userInfo, setUserInfo] = useState<UserInfo | null>(null);
+    const { logout } = useAuth0();
     const navigate = useNavigate();
     const [showTutorial, setShowTutorial] = useState<boolean>(() => {
         const hasSeenTutorial = sessionStorage.getItem('hasSeenTutorial');
         return !hasSeenTutorial; // Show tutorial if user hasn't seen it before
     });
 
-
-    useEffect(() => {
-        // Replace with actual user info fetch
-        //setUserInfo(userInfoMock);
-        // Establish backend session after Auth0 login
-        const establishSession = async () => {
-            try {
-                const token = await getAccessTokenSilently();
-                await fetch('/api/auth/verify', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${token}`
-                    },
-                    body: JSON.stringify({ user })
-                });
-
-                // Fetch user info including resource levels
-                const response = await fetch('/api/get-user-info');
-                if (response.ok) {
-                    const data = await response.json();
-                    setUserInfo(data);
-                }
-            } catch (error) {
-                console.error('Failed to establish backend session:', error);
-            }
-        };
-
-        if (user) {
-            establishSession();
-        }
-    }, [user, getAccessTokenSilently]);
+    const { userInfo } = useFetchUserInfo();
 
     const handleLogout = () => {
         sessionStorage.removeItem('hasSeenTutorial');
