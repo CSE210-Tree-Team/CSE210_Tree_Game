@@ -125,7 +125,7 @@ export function formatLocationInfo(pos: Position, map: Node[][]): string[] {
 /** Check if a string is a valid player command */
 export function isValidCommand(input: string): boolean {
 	const normalized = input.toLowerCase().trim();
-	return ['w', 'a', 's', 'd', 'c', 'collect', '1', '2', '3', '4'].includes(normalized);
+	return ['w', 'a', 's', 'd', 'c', 'collect', '1', '2', '3', '4', 'i'].includes(normalized);
 }
 
 /** 

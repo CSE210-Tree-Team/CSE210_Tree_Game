@@ -7,6 +7,7 @@ const COMMANDS = [
     { key: 'D', label: 'go right' },
     { key: 'C', label: 'collect/put in inventory' },
     { key: '1 / 2 / 3', label: 'submit the quest you are working on' },
+    { key: 'I', label: 'print map and get current location' },
 ];
 
 export function CommandsSection() {

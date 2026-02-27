@@ -262,6 +262,32 @@ export function useSoilGame() {
       movePlayer(cmd as Direction);
     } else if (cmd === 'c') {
       collectResources();
+    } else if (cmd === 'i') {
+      setGameState(prev => {
+        if (prev.phase !== 'playing') return prev;
+
+        const mapLines: string[] = [];
+        for (let y = 0; y < prev.mapSize; y++) {
+          let rowStr = '';
+          for (let x = 0; x < prev.mapSize; x++) {
+            if (x === prev.playerPosition.x && y === prev.playerPosition.y) {
+              rowStr += '[ * ]   ';
+            } else {
+              rowStr += '[   ]   ';
+            }
+          }
+          mapLines.push(rowStr.trimEnd());
+        }
+
+        return {
+          ...prev,
+          terminalLog: [
+            ...prev.terminalLog,
+            '',
+            ...mapLines
+          ]
+        };
+      });
     } else if (['1', '2', '3'].includes(cmd)) {
       const questIndex = parseInt(cmd) - 1;
       setGameState((prev) => {
