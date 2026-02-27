@@ -9,10 +9,6 @@ export function QuestSection({ quests }: { quests: Quest[] }) {
                 QUESTS
             </h1>
             {quests.map((q) => {
-                const progress = Object.entries(q.required)
-                    .map(([symbol, req]) => `${q.submitted[symbol] ?? 0} / ${req} ${symbol}`)
-                    .join('  •  ');
-
                 return (
                     <div key={q.moleculeFormula} className={styles.questItem}>
                         <div className={styles.text}>
@@ -21,9 +17,8 @@ export function QuestSection({ quests }: { quests: Quest[] }) {
                                 alt={q.completed ? 'completed' : 'incomplete'}
                                 style={{ marginRight: '8px' }}
                             />
-                            {q.moleculeName} [{q.moleculeFormula}]
+                            {q.moleculeName}
                         </div>
-                        {!q.completed && <span className={styles.questProgress}>{progress}</span>}
                     </div>
                 );
             })}
