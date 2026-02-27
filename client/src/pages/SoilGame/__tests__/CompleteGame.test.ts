@@ -1,6 +1,7 @@
 import { describe, it, expect, vi } from 'vitest';
 import { renderHook, act } from '@testing-library/react';
-import { useSoilGame, calculateProgress } from '../hooks/useSoilGame';
+import { useSoilGame } from '../hooks/useSoilGame';
+import { ScoreManager } from '../managers/ScoreManager';
 
 const pushGameResultsMock = vi.fn().mockResolvedValue(true);
 
@@ -17,9 +18,15 @@ vi.mock('../../ServerCalls/ServerCalls', () => ({
 // }));
 
 describe('completeGame', () => {
+  beforeEach(() => {
+    pushGameResultsMock.mockClear();
+  });
 
   it('calculates progress correctly', () => {
-    expect(calculateProgress(2)).toBe(50);
+    const manager = new ScoreManager();
+    manager.completeQuest();
+    manager.completeQuest();
+    expect(manager.calculateScore()).toBe(50);
   });
 
   it('calls pushGameResults with correct progress', async () => {
@@ -30,15 +37,15 @@ describe('completeGame', () => {
       result.current.setPhase('playing');
     });
 
+    // Set quests completed to 2 (now properly syncs with scoreManager)
     act(() => {
-        result.current.setQuestsCompleted(2);
+      result.current.setQuestsCompleted(2);
     });
 
     await act(async () => {
       await result.current.completeGame();
     });
 
-    expect(pushGameResultsMock).toHaveBeenCalledWith(50, 'earth');
+    expect(pushGameResultsMock).toHaveBeenCalledWith(50, 'Earth');
   });
-
 });

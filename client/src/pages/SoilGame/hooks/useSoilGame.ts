@@ -18,10 +18,6 @@ import {
 } from '../types/Abstract.types';
 
 import {
-  SOIL_QUESTION_COUNT
-} from '../SoilGameQuestionManager';
-
-import {
   getNodeAt,
   hasUncollectedResource,
   generateMap
@@ -42,7 +38,7 @@ import {
   parseCommand
 } from '../utils/QuestListHelper';
 
-import { pushGameResults } from '../../ServerCalls/ServerCalls';
+
 
 import {
   isValidPosition,
@@ -52,20 +48,19 @@ import {
 
 import {
   fetchSoilQuestions,
-} from '../SoilGameQuestionManager';
+  SOIL_QUESTION_COUNT,
+} from '../managers/SoilGameQuestionManager';
 import { toSoilQuest } from '../utils/QuestionAdapter'
+
+import {
+  ScoreManager,
+} from '../managers/ScoreManager';
 
 // import { audioSystem } from '../AudioSystem';
 
 const MAP_SIZE = 5;
 
 const isValidQuest = (quest: Quest | null): quest is Quest => quest != null;
-
-export const PROGRESS_PER_QUEST = 25;
-
-export function calculateProgress(questsCompleted: number): number {
-  return questsCompleted * PROGRESS_PER_QUEST;
-}
 
 // ========================
 // Initial State
@@ -82,6 +77,7 @@ function createInitialState(): GameState {
     inventoryCapacity: 0,
     terminalLog: [],
     questsCompleted: 0,
+    score: 0,
     showCompletionPopup: false,
   };
 }
@@ -92,6 +88,7 @@ function createInitialState(): GameState {
 
 export function useSoilGame() {
   const [state, setGameState] = useState<GameState>(createInitialState);
+  const [scoreManager] = useState(() => new ScoreManager());
 
   /**
    * Change the game phase (title → tutorial)
@@ -100,9 +97,11 @@ export function useSoilGame() {
     setGameState((prev) => ({ ...prev, phase }));
   }, []);
 
-  //
   const startGame = useCallback(async () => {
     // TODO: (Not Sure If We Still Need This) Replace with actual API call to GET /api/soil-game/start
+
+    // Reset progress tracking for new game
+    scoreManager.reset();
 
     // Fetch questions from server
     const fetchedQuestions = await fetchSoilQuestions();
@@ -144,9 +143,18 @@ export function useSoilGame() {
       inventoryCapacity: calculatedCap,
       terminalLog: initialLog,
       questsCompleted: 0,
+      score: 0,
       showCompletionPopup: false,
     }));
-  }, []);
+  }, [scoreManager]);
+
+  /**
+   * Get current score state from ScoreManager
+   * Used to sync GameState with the manager's single source of truth
+   */
+  const getScoreState = useCallback(() => {
+    return scoreManager.getScoreState();
+  }, [scoreManager]);
 
   const movePlayer = useCallback((direction: Direction) => {
     setGameState((prev) => {
@@ -376,7 +384,11 @@ export function useSoilGame() {
         if (result) {
           const newQuests = [...prev.quests];
           newQuests[questIndex] = result.updatedQuest;
-          const newQuestsCompleted = prev.questsCompleted + 1;
+
+          // Sync score manager from authoritative quest completion state
+          const completedQuestCount = newQuests.filter((q) => q.completed).length;
+          scoreManager.setQuestsCompleted(completedQuestCount);
+          const scoreState = scoreManager.getScoreState();
 
           let nextLog = [...prev.terminalLog, '', 'GOOD job you completed a quest!'];
 
@@ -384,7 +396,8 @@ export function useSoilGame() {
             ...prev,
             inventory: result.updatedInventory,
             quests: newQuests,
-            questsCompleted: newQuestsCompleted,
+            questsCompleted: scoreState.questsCompleted,
+            score: scoreState.score,
             terminalLog: nextLog
           };
         } else {
@@ -394,17 +407,21 @@ export function useSoilGame() {
           };
         }
       });
+    } else if (baseCmd === 'exit') {
+      setGameState(prev => ({
+        ...prev,
+        terminalLog: [...prev.terminalLog, '', 'Exiting game. Calculating final score...']
+      }));
+      completeGame();
     }
 
-  }, [movePlayer, collectResources, dropResources]);
+  }, [movePlayer, collectResources, dropResources, scoreManager]);
 
 
   const completeGame = useCallback(async () => {
-    // const totalProgress = state.questsCompleted * 25;
-    const totalProgress = calculateProgress(state.questsCompleted);
-    const success = await pushGameResults(totalProgress, 'earth');
+    const result = await scoreManager.submitScore();
 
-    if (success) {
+    if (result.success) {
       console.log('Database updated successfully!');
       setGameState(prev => ({
         ...prev,
@@ -412,21 +429,27 @@ export function useSoilGame() {
         showCompletionPopup: true,
         terminalLog: [...prev.terminalLog, '', 'Database updated successfully!']
       }));
+    } else {
+      console.error('Failed to submit progress:', result.error);
+      setGameState(prev => ({
+        ...prev,
+        terminalLog: [...prev.terminalLog, '', `Error saving progress: ${result.error}`]
+      }));
     }
 
     return {
-      success,
-      progress_added: totalProgress,
-      new_soil_level: totalProgress, // This would normally come from the response if it returned it
+      success: result.success,
+      progress_added: result.scoreAdded,
+      new_soil_level: result.scoreAdded,
     };
-  }, [state.questsCompleted]);
+  }, [scoreManager]);
 
   // Check for game completion
   useEffect(() => {
-    if (state.phase === 'playing' && state.questsCompleted === SOIL_QUESTION_COUNT) {
+    if (state.phase === 'playing' && scoreManager.getQuestsCompleted() === SOIL_QUESTION_COUNT) {
       completeGame();
     }
-  }, [state.questsCompleted, state.phase, completeGame]);
+  }, [scoreManager, state.phase, completeGame]);
 
   useEffect(() => {
     if (state.map.length > 0) {
@@ -443,11 +466,16 @@ export function useSoilGame() {
     }
   }, [state.map, state.playerPosition]);
 
-  // Use for testing completion
+  // Use for testing completion - updates both state and scoreManager
   const setQuestsCompleted = (value: number) => {
+    // Sync scoreManager to desired count
+    scoreManager.setQuestsCompleted(value);
+
+    const scoreState = scoreManager.getScoreState();
     setGameState(prev => ({
       ...prev,
-      questsCompleted: value
+      questsCompleted: scoreState.questsCompleted,
+      score: scoreState.score
     }));
   };
 
@@ -461,5 +489,6 @@ export function useSoilGame() {
     dropResources,
     completeGame,
     setQuestsCompleted,
+    getScoreState,
   };
 }
