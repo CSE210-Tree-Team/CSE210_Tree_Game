@@ -12,22 +12,14 @@ import { useNavigate } from 'react-router-dom';
 import { Button } from '../../components/Button';
 import styles from '../../components/account-settings.module.css';
 import {
+    type AccountProfile,
     establishAuthSession,
     fetchAccountProfile,
     updateAccountProfile,
 } from '../ServerCalls/ServerCalls';
 
-type Profile = {
-    name: string;
-    email: string;
-    parentEmail: string;
-    educationLevel: string;
-};
-
-type AccountProfileResponse = {
-    success: boolean;
-    profile?: Partial<Profile>;
-};
+const EDUCATION_LEVELS = ['3-6', '6-8', '9-12'] as const;
+const DEFAULT_EDUCATION_LEVEL = EDUCATION_LEVELS[0];
 
 const isValidOptionalEmail = (value: string) => {
     const trimmed = value.trim();
@@ -44,21 +36,17 @@ const isValidRequiredEmail = (value: string) => {
 const useProfileDefaults = (user: ReturnType<typeof useAuth0>['user']) => {
     const defaultName = user?.name || user?.nickname || user?.email || 'Player';
 
-    const appEducationLevel = user?.app_metadata?.educationLevel;
-    const userEducationLevel = user?.user_metadata?.educationLevel;
-    const defaultEducationLevel = appEducationLevel || userEducationLevel || '3-6';
-
     const defaultEmail = user?.email || 'Email not provided';
 
-    return { defaultName, defaultEducationLevel, defaultEmail };
+    return { defaultName, defaultEmail };
 };
 
 export const AccountSettings = () => {
     const { user, logout, getAccessTokenSilently } = useAuth0();
     const navigate = useNavigate();
-    const [profile, setProfile] = useState<Partial<Profile>>({});
+    const [profile, setProfile] = useState<Partial<AccountProfile>>({});
 
-    const { defaultName, defaultEducationLevel, defaultEmail } = useProfileDefaults(user);
+    const { defaultName, defaultEmail } = useProfileDefaults(user);
 
     useEffect(() => {
         const load = async () => {
@@ -72,10 +60,10 @@ export const AccountSettings = () => {
             }
 
             try {
-                const data = (await fetchAccountProfile()) as AccountProfileResponse;
+                const data = await fetchAccountProfile();
                 if (data?.profile) setProfile(data.profile);
             } catch {
-                // Ignore profile load errors and fall back to Auth0-derived defaults.
+                // Ignore profile load errors and fall back to defaults.
             }
         };
 
@@ -84,7 +72,7 @@ export const AccountSettings = () => {
 
     const displayName = profile.name || defaultName;
     const parentEmail = profile.parentEmail || '';
-    const educationLevel = profile.educationLevel || defaultEducationLevel;
+    const educationLevel = profile.educationLevel || DEFAULT_EDUCATION_LEVEL;
     const email = profile.email || defaultEmail;
 
     return (
@@ -137,18 +125,18 @@ export const AccountSettings = () => {
 export const AccountSettingsEdit = () => {
     const { user, getAccessTokenSilently } = useAuth0();
     const navigate = useNavigate();
-    const { defaultName, defaultEducationLevel, defaultEmail } = useProfileDefaults(user);
+    const { defaultName, defaultEmail } = useProfileDefaults(user);
     const isDirtyRef = useRef(false);
     const [isSaving, setIsSaving] = useState(false);
     const [saveError, setSaveError] = useState<string | null>(null);
     const [isParentEmailTouched, setIsParentEmailTouched] = useState(false);
     const [isEmailTouched, setIsEmailTouched] = useState(false);
 
-    const [formData, setFormData] = useState<Profile>({
+    const [formData, setFormData] = useState<AccountProfile>({
         name: defaultName,
         email: defaultEmail,
         parentEmail: '',
-        educationLevel: defaultEducationLevel,
+        educationLevel: DEFAULT_EDUCATION_LEVEL,
     });
 
     useEffect(() => {
@@ -163,7 +151,7 @@ export const AccountSettingsEdit = () => {
             }
 
             try {
-                const data = (await fetchAccountProfile()) as AccountProfileResponse;
+                const data = await fetchAccountProfile();
                 if (!data?.profile) return;
                 if (isDirtyRef.current) return;
                 setFormData((prev) => ({
@@ -317,9 +305,11 @@ export const AccountSettingsEdit = () => {
                                     setFormData({ ...formData, educationLevel: event.target.value });
                                 }}
                             >
-                                <option>3-6</option>
-                                <option>6-8</option>
-                                <option>9-12</option>
+                                {EDUCATION_LEVELS.map((level) => (
+                                    <option key={level} value={level}>
+                                        {level}
+                                    </option>
+                                ))}
                             </select>
                             <span className={styles.arrow}>▼</span>
                         </div>
