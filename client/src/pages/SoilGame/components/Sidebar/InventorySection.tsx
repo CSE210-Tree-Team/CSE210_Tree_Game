@@ -1,14 +1,15 @@
 import styles from './Sidebar.module.css';
 import type { Inventory } from '../../types/Abstract.types';
 
-export function InventorySection({ inventory }: { inventory: Inventory }) {
+export function InventorySection({ inventory, inventoryCapacity }: { inventory: Inventory; inventoryCapacity: number }) {
     const sortedElements = Object.keys(inventory).sort();
+    const currentInventoryCount = Object.values(inventory).reduce((sum, count) => sum + count, 0);
 
     return (
         <div className={styles.section}>
             <h2 className={styles.heading}>
                 <img src="/assets/inventory.svg" alt="" className={styles.headingIcon} />
-                INVENTORY
+                INVENTORY ({currentInventoryCount}/{inventoryCapacity})
             </h2>
             <div className={styles.scrollableList}>
                 {sortedElements.map((element) => (

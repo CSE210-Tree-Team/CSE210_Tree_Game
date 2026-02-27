@@ -61,6 +61,7 @@ export interface GameState {
   quests: Quest[];
   playerPosition: Position;
   inventory: Inventory;
+  inventoryCapacity: number;
   terminalLog: string[];
   questsCompleted: number;
   showCompletionPopup: boolean;
