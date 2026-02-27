@@ -15,13 +15,13 @@ import {
 // ========================
 
 /** Check if a quest is fully completed (all required elements submitted) */
-export function isQuestComplete(quest: Quest): boolean {
-	for (const [element, required] of Object.entries(quest.required)) {
-		const submitted = quest.submitted[element] || 0;
-		if (submitted < required) return false;
-	}
-	return true;
-}
+// export function isQuestComplete(quest: Quest): boolean {
+// 	for (const [element, required] of Object.entries(quest.required)) {
+// 		const submitted = quest.submitted[element] || 0;
+// 		if (submitted < required) return false;
+// 	}
+// 	return true;
+// }
 
 /** Get the next needed element for a quest, returns null if quest is complete */
 export function getNextNeededElement(quest: Quest): { element: ElementType; remaining: number } | null {

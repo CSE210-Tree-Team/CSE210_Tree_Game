@@ -366,8 +366,3 @@ export function useSoilGame() {
     setQuestsCompleted,
   };
 }
-
-// When questions are fetched show the questions on screen
-// Test command event handlers
-// Upon completion send questions back to database
-// Unit vs end to end tests.

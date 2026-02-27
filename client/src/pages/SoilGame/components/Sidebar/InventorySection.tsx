@@ -2,8 +2,12 @@ import styles from './Sidebar.module.css';
 import type { Inventory } from '../../types/Abstract.types';
 
 export function InventorySection({ inventory }: { inventory: Inventory }) {
-    const sortedElements = Object.keys(inventory).sort();
+    // const sortedElements = Object.keys(inventory).sort();
 
+    const sortedElements = Object.keys(inventory)
+        .filter((element) => inventory[element] > 0)
+        .sort();
+        
     return (
         <div className={styles.section}>
             <h2 className={styles.heading}>
