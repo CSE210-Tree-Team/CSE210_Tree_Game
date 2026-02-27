@@ -303,16 +303,17 @@ export function useSoilGame() {
     }
     // 2. Parse and Route
     const cmd = parseCommand(rawInput);
+    const parts = cmd.split(/\s+/);
+    const baseCmd = parts[0];
 
     setGameState(prev => ({
       ...prev,
       terminalLog: [...prev.terminalLog, '', logUserCommand]
     }));
-    if (['w', 'a', 's', 'd'].includes(cmd)) {
-      movePlayer(cmd as Direction);
-    } else if (cmd === 'c') {
-      collectResources();
-    } else if (cmd === 'i') {
+
+    if (['w', 'a', 's', 'd'].includes(baseCmd)) {
+      movePlayer(baseCmd as Direction);
+    } else if (baseCmd === 'i') {
       setGameState(prev => {
         if (prev.phase !== 'playing') return prev;
 
@@ -338,15 +339,6 @@ export function useSoilGame() {
           ]
         };
       });
-    } else if (['1', '2', '3'].includes(cmd)) {
-      const questIndex = parseInt(cmd) - 1;
-
-    // Command parts logic
-    const parts = cmd.split(/\s+/);
-    const baseCmd = parts[0];
-
-    if (['w', 'a', 's', 'd'].includes(baseCmd)) {
-      movePlayer(baseCmd as Direction);
     } else if (baseCmd === 'collect' && parts.length === 3) {
       collectResources(parts[1], parseInt(parts[2], 10));
     } else if (baseCmd === 'drop' && parts.length === 3) {
@@ -388,6 +380,7 @@ export function useSoilGame() {
         }
       });
     }
+
   }, [movePlayer, collectResources, dropResources]);
 
 

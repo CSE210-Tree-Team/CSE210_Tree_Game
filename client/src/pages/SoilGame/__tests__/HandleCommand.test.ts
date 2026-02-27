@@ -139,6 +139,8 @@ describe('handleCommand - movement & collection', () => {
       '[   ]   [   ]   [   ]   [   ]   [   ]',
       '[   ]   [   ]   [   ]   [   ]   [   ]',
     ]);
+  });
+
   it('prevents collection if it exceeds inventory capacity', () => {
     // Map has Nitrogen: 2 at (0,0), so this exceeds a capacity of 1
     const result = setupPlayingState(1);
