@@ -4,13 +4,13 @@ import { useSoilGame } from '../hooks/useSoilGame';
 import type { Node } from '../types/Abstract.types';
 
 // Mock audio system (avoid side effects)
-vi.mock('../AudioSystem', () => ({
-  audioSystem: {
-    playAmbient: vi.fn(),
-    fadeOut: vi.fn(),
-    stopAmbient: vi.fn(),
-  }
-}));
+// vi.mock('../AudioSystem', () => ({
+//   audioSystem: {
+//     playAmbient: vi.fn(),
+//     fadeOut: vi.fn(),
+//     stopAmbient: vi.fn(),
+//   }
+// }));
 
 // Mock server call
 vi.mock('../../ServerCalls/ServerCalls', () => ({

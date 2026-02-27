@@ -18,12 +18,13 @@ const emptyInventory: Inventory = {
 };
 
 
-test("renders all 4 elements", () => {
-  render(<InventorySection inventory={emptyInventory} inventoryCapacity={10} />);
-  expect(screen.getByText("Nitrogen")).toBeInTheDocument();
-  expect(screen.getByText("Hydrogen")).toBeInTheDocument();
-  expect(screen.getByText("Carbon")).toBeInTheDocument();
-  expect(screen.getByText("Oxygen")).toBeInTheDocument();
+test("does not render elements with value 0", () => {
+  render(<InventorySection inventory={emptyInventory} />);
+
+  expect(screen.queryByText("Nitrogen")).not.toBeInTheDocument();
+  expect(screen.queryByText("Hydrogen")).not.toBeInTheDocument();
+  expect(screen.queryByText("Carbon")).not.toBeInTheDocument();
+  expect(screen.queryByText("Oxygen")).not.toBeInTheDocument();
 });
 
 test("displays correct count for each element", () => {
@@ -38,12 +39,4 @@ test("element with count > 0 renders with success color and bold weight", () => 
   render(<InventorySection inventory={inventory} inventoryCapacity={10} />);
   const countSpan = screen.getByText("2");
   expect(countSpan).toHaveStyle({ color: "var(--color-success)", fontWeight: "bold" });
-});
-
-test("element with count 0 renders with grey color and normal weight", () => {
-  render(<InventorySection inventory={emptyInventory} inventoryCapacity={10} />);
-  const zeroSpans = screen.getAllByText("0");
-  zeroSpans.forEach((span) => {
-    expect(span).toHaveStyle({ color: "var(--color-grey1)", fontWeight: "normal" });
-  });
 });

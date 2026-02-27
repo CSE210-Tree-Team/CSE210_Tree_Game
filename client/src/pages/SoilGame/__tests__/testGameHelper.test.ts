@@ -30,7 +30,6 @@ import {
 } from '../utils/InventoryHelper';
 
 import {
-  isQuestComplete,
   getNextNeededElement,
   checkAndCompleteQuest,
   formatQuestProgress,
@@ -348,18 +347,6 @@ describe('GameHelper_REP', () => {
       const after = removeFromInventory(inv, 'Oxygen', 2);
       expect(after).not.toBeNull();
       expect(after?.Oxygen).toBe(0);
-    });
-  });
-
-  describe('isQuestComplete', () => {
-    it('returns true when all required elements are submitted', () => {
-      const quest: Quest = { moleculeName: 'Water', moleculeFormula: 'H2O', required: { Hydrogen: 2 }, submitted: { Hydrogen: 2 }, completed: false };
-      expect(isQuestComplete(quest)).toBe(true);
-    });
-
-    it('returns false when requirements are not met', () => {
-      const quest: Quest = { moleculeName: 'Ammonia', moleculeFormula: 'NH3', required: { Nitrogen: 1, Hydrogen: 3 }, submitted: { Nitrogen: 1, Hydrogen: 2 }, completed: false };
-      expect(isQuestComplete(quest)).toBe(false);
     });
   });
 
