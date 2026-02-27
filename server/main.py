@@ -26,7 +26,13 @@ from Database.addItemsToDatabase import (
     add_student_details,
     upsert_student_details,
 )
-from constants import ROLE_STUDENT, PASSIVE_DECAY_RATE
+from constants import (
+    ROLE_STUDENT,
+    PASSIVE_DECAY_RATE,
+    DEFAULT_EDUCATION_LEVEL_CODE,
+    EDUCATION_LEVEL_CODE_TO_LABEL,
+    EDUCATION_LEVEL_LABEL_TO_CODE,
+)
 from dataRecords import Tree, Event
 
 
@@ -220,7 +226,29 @@ class AccountProfilePayload(BaseModel):
     name: str | None = None
     email: str | None = None
     parentEmail: str | None = None
-    educationLevel: str | None = None
+    educationLevel: int | str | None = None
+
+
+def _education_level_label(value) -> str:
+    """
+    Normalize DB-stored education level (int code) into the UI/API label (e.g. "3-6").
+    Falls back to the default label when missing or unrecognized.
+    """
+    if value is None:
+        return EDUCATION_LEVEL_CODE_TO_LABEL[DEFAULT_EDUCATION_LEVEL_CODE]
+    if isinstance(value, int):
+        return EDUCATION_LEVEL_CODE_TO_LABEL.get(
+            value, EDUCATION_LEVEL_CODE_TO_LABEL[DEFAULT_EDUCATION_LEVEL_CODE]
+        )
+    try:
+        trimmed = str(value).strip()
+        if trimmed.isdigit():
+            return _education_level_label(int(trimmed))
+        if trimmed in EDUCATION_LEVEL_LABEL_TO_CODE:
+            return trimmed
+    except Exception:
+        pass
+    return EDUCATION_LEVEL_CODE_TO_LABEL[DEFAULT_EDUCATION_LEVEL_CODE]
 
 @app.post("/api/auth/verify")
 async def verify_auth(request: Request):
@@ -316,7 +344,7 @@ def api_get_account_profile(student=Depends(student_required)):
         raise HTTPException(status_code=400, detail="Missing username")
 
     student_details = get_student_details(username) or {}
-    education_level = student_details.get("studentLevel") or "3-6"
+    education_level = _education_level_label(student_details.get("studentLevel"))
     parent_email = student_details.get("parentEmail") or ""
 
     return {

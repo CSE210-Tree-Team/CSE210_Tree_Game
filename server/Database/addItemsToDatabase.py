@@ -35,7 +35,8 @@ from constants import (
     RESOURCE_WATER, RESOURCE_EARTH, RESOURCE_SUN, RESOURCE_ALL, RESOURCE_NONE,
     VALID_QUESTION_TYPES, VALID_QUESTION_RESOURCE_TYPES,
     ATTEMPT_RESOURCE_NONE, EVENT_LEVEL, EVENT_BONUS, EVENT_PENALTY, EVENT_NEUTRAL,
-    RESOURCE_MAX_LEVEL, RESOURCE_MIN_LEVEL, PASSIVE_DECAY_RATE
+    RESOURCE_MAX_LEVEL, RESOURCE_MIN_LEVEL, PASSIVE_DECAY_RATE,
+    DEFAULT_EDUCATION_LEVEL_CODE, EDUCATION_LEVEL_LABEL_TO_CODE
 )
 import dataRecords as dataclasses
 import uuid
@@ -533,10 +534,26 @@ def add_student_details(student_username: str, student_level: str = "3-6", stude
         INSERT INTO StudentDetails (studentUsername, studentLevel, studentStats, parentEmail)
         VALUES (?, ?, ?, ?)
     '''
-    
-    _execute(sql, (student_username, student_level, student_stats, parent_email))
 
-def upsert_student_details(student_username: str, parent_email: str | None = None, education_level: str | None = None):
+    level_code = _normalize_education_level_code(student_level)
+    _execute(sql, (student_username, level_code, student_stats, parent_email))
+
+def _normalize_education_level_code(value: int | str | None) -> int:
+    if value is None:
+        return DEFAULT_EDUCATION_LEVEL_CODE
+    if isinstance(value, int):
+        if value in EDUCATION_LEVEL_LABEL_TO_CODE.values():
+            return value
+        raise ValueError(f"Invalid education level code: {value}")
+    trimmed = value.strip()
+    if trimmed.isdigit():
+        return _normalize_education_level_code(int(trimmed))
+    if trimmed in EDUCATION_LEVEL_LABEL_TO_CODE:
+        return EDUCATION_LEVEL_LABEL_TO_CODE[trimmed]
+    raise ValueError(f"Invalid education level label: {value}")
+
+
+def upsert_student_details(student_username: str, parent_email: str | None = None, education_level: int | str | None = None):
     """
     Create StudentDetails row if missing and update parentEmail and/or studentLevel (education level).
     """
@@ -545,6 +562,12 @@ def upsert_student_details(student_username: str, parent_email: str | None = Non
 
     if parent_email is None and education_level is None:
         return
+
+    education_level_code = (
+        _normalize_education_level_code(education_level)
+        if education_level is not None
+        else None
+    )
 
     with sqlite3.connect(DB_PATH) as conn:
         cursor = conn.cursor()
@@ -557,14 +580,21 @@ def upsert_student_details(student_username: str, parent_email: str | None = Non
         if not exists:
             cursor.execute(
                 "INSERT INTO StudentDetails (studentUsername, studentLevel, studentStats, parentEmail) VALUES (?, ?, ?, ?)",
-                (student_username, education_level or "3-6", '{"xp": 0}', parent_email),
+                (
+                    student_username,
+                    education_level_code
+                    if education_level_code is not None
+                    else DEFAULT_EDUCATION_LEVEL_CODE,
+                    '{"xp": 0}',
+                    parent_email,
+                ),
             )
             conn.commit()
             return
 
         cursor.execute(
             "UPDATE StudentDetails SET parentEmail = COALESCE(?, parentEmail), studentLevel = COALESCE(?, studentLevel) WHERE studentUsername = ?",
-            (parent_email, education_level, student_username),
+            (parent_email, education_level_code, student_username),
         )
         conn.commit()
 

@@ -603,7 +603,7 @@ class TestStudentDetails(DatabaseInteractTestCase):
             )
             result = dict(cursor.fetchone())
             
-            self.assertEqual(result['studentLevel'], "3-6")
+            self.assertEqual(result['studentLevel'], 1)
             self.assertEqual(result['studentStats'], student_stats)
             self.assertEqual(result['parentEmail'], "parent@example.com")
 

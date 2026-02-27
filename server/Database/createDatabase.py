@@ -202,7 +202,7 @@ def create_schema(db_path=DB_PATH):
     cursor.execute('''
     CREATE TABLE IF NOT EXISTS StudentDetails (
         studentUsername TEXT PRIMARY KEY,
-        studentLevel TEXT,
+        studentLevel INTEGER,
         studentStats TEXT, -- JSON
         parentEmail TEXT,
         FOREIGN KEY (studentUsername) REFERENCES Account(username) ON DELETE CASCADE

@@ -57,3 +57,15 @@ VALID_ATTEMPT_RESOURCES = [ATTEMPT_RESOURCE_WATER, ATTEMPT_RESOURCE_EARTH, ATTEM
 
 # Passive decay rates for resources -- how many minutes to decay 1 level of the resource
 PASSIVE_DECAY_RATE = 30 # 30 minutes to decay 1 level - 50 hours for tree to die from full.
+
+# Education level codes (stored in DB as integers)
+# Keep API/UI labels stable and map at the database boundary.
+EDUCATION_LEVEL_CODE_TO_LABEL: dict[int, str] = {
+    1: "3-6",
+    2: "6-8",
+    3: "9-12",
+}
+EDUCATION_LEVEL_LABEL_TO_CODE: dict[str, int] = {
+    label: code for code, label in EDUCATION_LEVEL_CODE_TO_LABEL.items()
+}
+DEFAULT_EDUCATION_LEVEL_CODE = 1
