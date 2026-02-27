@@ -6,7 +6,8 @@ Account Settings pages
 */
 
 import { useAuth0 } from '@auth0/auth0-react';
-import { FormEvent, useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
+import type { FormEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '../../components/Button';
 import styles from '../../components/account-settings.module.css';
@@ -41,16 +42,11 @@ const isValidRequiredEmail = (value: string) => {
 };
 
 const useProfileDefaults = (user: ReturnType<typeof useAuth0>['user']) => {
-    const defaultName = useMemo(() => {
-        if (!user) return 'Player';
-        return user.name || user.nickname || user.email || 'Player';
-    }, [user]);
+    const defaultName = user?.name || user?.nickname || user?.email || 'Player';
 
-    const defaultEducationLevel = useMemo(() => {
-        const appEducationLevel = user?.app_metadata?.educationLevel;
-        const userEducationLevel = user?.user_metadata?.educationLevel;
-        return appEducationLevel || userEducationLevel || '3-6';
-    }, [user]);
+    const appEducationLevel = user?.app_metadata?.educationLevel;
+    const userEducationLevel = user?.user_metadata?.educationLevel;
+    const defaultEducationLevel = appEducationLevel || userEducationLevel || '3-6';
 
     const defaultEmail = user?.email || 'Email not provided';
 
@@ -76,7 +72,7 @@ export const AccountSettings = () => {
             }
 
             try {
-                const data = (await fetchAccountProfile()) as unknown as AccountProfileResponse;
+                const data = (await fetchAccountProfile()) as AccountProfileResponse;
                 if (data?.profile) setProfile(data.profile);
             } catch {
                 // Ignore profile load errors and fall back to Auth0-derived defaults.
@@ -167,7 +163,7 @@ export const AccountSettingsEdit = () => {
             }
 
             try {
-                const data = (await fetchAccountProfile()) as unknown as AccountProfileResponse;
+                const data = (await fetchAccountProfile()) as AccountProfileResponse;
                 if (!data?.profile) return;
                 if (isDirtyRef.current) return;
                 setFormData((prev) => ({
