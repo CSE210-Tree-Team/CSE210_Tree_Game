@@ -112,6 +112,9 @@ export const Homepage = () => {
         sessionStorage.setItem('hasSeenTutorial', 'true');
     }
 
+    const handleSettings = () => {
+        navigate('/account');
+    };
 
     return (
         <div className={styles.homepageWrapper}>
@@ -133,7 +136,10 @@ export const Homepage = () => {
                     Logout
                     </button>
 
-                    <button className={`${buttonStyles.button} ${buttonStyles.grass} ${styles.buttonSingle} ${styles.buttonSetting}`} onClick={() => navigate("/")}>
+                    <button
+                        className={`${buttonStyles.button} ${buttonStyles.grass} ${styles.buttonSingle} ${styles.buttonSetting}`}
+                        onClick={handleSettings}
+                    >
                     Settings
                     </button>
                 </div>

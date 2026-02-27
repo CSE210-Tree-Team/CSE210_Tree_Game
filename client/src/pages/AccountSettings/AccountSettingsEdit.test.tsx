@@ -85,6 +85,26 @@ describe('AccountSettingsEdit', () => {
         expect(navigateMock).toHaveBeenCalledWith('/account');
     });
 
+    it('blocks save when parent email is invalid', async () => {
+        const user = userEvent.setup();
+        renderPage();
+
+        await user.type(screen.getByLabelText('Parent Email:'), 'jewhfihei');
+        await user.click(screen.getByRole('button', { name: 'SAVE' }));
+
+        const putCall = fetchMock.mock.calls.find(
+            (call) => String(call[0]) === '/api/account/profile' && call[1]?.method === 'PUT'
+        );
+        expect(putCall).toBeUndefined();
+
+        const alertText = screen
+            .getAllByRole('alert')
+            .map((node) => node.textContent ?? '')
+            .join(' ');
+        expect(alertText).toMatch(/valid parent email/i);
+        expect(navigateMock).not.toHaveBeenCalledWith('/account');
+    });
+
     it('cancels and returns to account page', async () => {
         renderPage();
         await userEvent.click(screen.getByRole('button', { name: 'CANCEL' }));

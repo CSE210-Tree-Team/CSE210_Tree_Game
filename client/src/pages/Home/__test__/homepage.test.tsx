@@ -112,6 +112,16 @@ describe('Homepage', () => {
     expect(screen.getByRole('button', { name: /settings/i })).toBeInTheDocument()
   })
 
+  it('navigates to account settings when Settings is clicked', async () => {
+    const user = userEvent.setup()
+    render(<Homepage />)
+
+    const settingsButton = screen.getByRole('button', { name: /settings/i })
+    await user.click(settingsButton)
+
+    expect(mockNavigate).toHaveBeenCalledWith('/account')
+  })
+
     it('navigates to soil game when Earth is clicked', async () => {
         const user = userEvent.setup()
         render(<Homepage />)

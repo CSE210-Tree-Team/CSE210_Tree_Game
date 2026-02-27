@@ -1,6 +1,7 @@
 import { useAuth0 } from '@auth0/auth0-react';
 import { FormEvent, useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import buttonStyles from '../../components/Button.module.css';
 import styles from '../../components/account-settings.module.css';
 
 type Profile = {
@@ -13,6 +14,12 @@ type Profile = {
 type AccountProfileResponse = {
     success: boolean;
     profile?: Partial<Profile>;
+};
+
+const isValidOptionalEmail = (value: string) => {
+    const trimmed = value.trim();
+    if (!trimmed) return true;
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmed);
 };
 
 const useProfileDefaults = (user: ReturnType<typeof useAuth0>['user']) => {
@@ -105,9 +112,14 @@ export const AccountSettings = () => {
                 </div>
 
                 <div className={styles.actions}>
-                    <button className={styles.actionButton} onClick={() => navigate('/account/edit')}>EDIT</button>
                     <button
-                        className={styles.actionButton}
+                        className={`${buttonStyles.button} ${buttonStyles.grass} ${styles.actionButton}`}
+                        onClick={() => navigate('/account/edit')}
+                    >
+                        EDIT
+                    </button>
+                    <button
+                        className={`${buttonStyles.button} ${buttonStyles.grass} ${styles.actionButton}`}
                         onClick={() => logout({ logoutParams: { returnTo: window.location.origin } })}
                     >
                         LOG OUT
@@ -125,6 +137,7 @@ export const AccountSettingsEdit = () => {
     const isDirtyRef = useRef(false);
     const [isSaving, setIsSaving] = useState(false);
     const [saveError, setSaveError] = useState<string | null>(null);
+    const [isParentEmailTouched, setIsParentEmailTouched] = useState(false);
 
     const [formData, setFormData] = useState<Profile>({
         name: defaultName,
@@ -170,10 +183,23 @@ export const AccountSettingsEdit = () => {
         load();
     }, [user]);
 
+    const parentEmailIsValid = isValidOptionalEmail(formData.parentEmail);
+    const parentEmailError =
+        isParentEmailTouched && !parentEmailIsValid
+            ? 'Please enter a valid parent email address (example: name@example.com).'
+            : null;
+
     const handleSave = async (event: FormEvent<HTMLFormElement>) => {
         event.preventDefault();
-        setIsSaving(true);
         setSaveError(null);
+
+        if (!parentEmailIsValid) {
+            setIsParentEmailTouched(true);
+            setSaveError('Please enter a valid parent email address.');
+            return;
+        }
+
+        setIsSaving(true);
         try {
             const response = await fetch('/api/account/profile', {
                 method: 'PUT',
@@ -231,13 +257,29 @@ export const AccountSettingsEdit = () => {
                         <input
                             id="parentEmail"
                             className={styles.input}
+                            type="email"
+                            inputMode="email"
+                            autoComplete="email"
                             value={formData.parentEmail}
+                            aria-invalid={Boolean(formData.parentEmail.trim()) && !parentEmailIsValid}
+                            aria-describedby={parentEmailError ? 'parentEmailError' : undefined}
                             onChange={(event) => {
                                 isDirtyRef.current = true;
+                                if (!isParentEmailTouched) setIsParentEmailTouched(true);
                                 setFormData({ ...formData, parentEmail: event.target.value });
                             }}
+                            onBlur={() => setIsParentEmailTouched(true)}
                         />
                     </div>
+                    {parentEmailError ? (
+                        <p
+                            id="parentEmailError"
+                            role="alert"
+                            style={{ color: 'darkred', margin: '-10px 0 0', textAlign: 'center' }}
+                        >
+                            {parentEmailError}
+                        </p>
+                    ) : null}
 
                     <div className={styles.row}>
                         <label htmlFor="email" className={styles.label}>Email:</label>
@@ -273,10 +315,20 @@ export const AccountSettingsEdit = () => {
                     </div>
 
                     <div className={styles.actions}>
-                        <button className={styles.actionButton} type="submit" disabled={isSaving}>
+                        <button
+                            className={`${buttonStyles.button} ${buttonStyles.grass} ${styles.actionButton}`}
+                            type="submit"
+                            disabled={isSaving || !parentEmailIsValid}
+                        >
                             SAVE
                         </button>
-                        <button className={styles.actionButton} type="button" onClick={() => navigate('/account')}>CANCEL</button>
+                        <button
+                            className={`${buttonStyles.button} ${buttonStyles.grass} ${styles.actionButton}`}
+                            type="button"
+                            onClick={() => navigate('/account')}
+                        >
+                            CANCEL
+                        </button>
                     </div>
                 </form>
             </div>
