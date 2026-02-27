@@ -7,11 +7,11 @@ progress string display, and multiple quests.
 
 import { render, screen } from "@testing-library/react";
 import { QuestSection } from "../components/Sidebar/QuestSection";
-import type { Quest } from "../types/SoilGame_REP.type";
+import type { Quest } from "../types/Abstract.types";
 
 
 const mockQuest: Quest = {
-  id: 1,
+
   moleculeName: "Water",
   moleculeFormula: "H2O",
   required: { H: 2, O: 1 },
@@ -57,7 +57,6 @@ test("hides progress string for a completed quest", () => {
 
 test("renders multiple quests", () => {
   const quest2: Quest = {
-    id: 2,
     moleculeName: "Ammonia",
     moleculeFormula: "NH3",
     required: { N: 1, H: 3 },

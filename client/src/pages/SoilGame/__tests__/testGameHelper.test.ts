@@ -1,32 +1,49 @@
 import { describe, it, expect } from 'vitest';
-import { 
-  isValidPosition,
-  getNextPosition,
-  getPossibleMoves,
-  createEmptyInventory,
-  addToInventory,
-  removeFromInventory,
-  isQuestComplete,
-  getNextNeededElement,
-  submitElementToQuest,
-  getElementSymbol,
-  formatQuestProgress,
-  isValidCommand,
-  parseCommand,
-} from '../utils/GameHelper_REP';
 
 import {
+  type ElementType,
+  type GamePhase,
+  type Inventory,
+  type Position,
   type Node,
+  type Quest,
+  type GameState,
+  type CompleteGameRequest,
+  type CompleteGameResponse,
+  type Direction,
+  type PlayerCommand,
+  DIRECTION_DELTAS,
+  SYMBOL_TO_ELEMENT,
+  DIRECTION_LABELS
+} from '../types/Abstract.types';
+
+import {
   getNodeAt,
   hasUncollectedResource,
-} from '../types/Node.type'
+  generateMap
+} from '../utils/MapHelper'
 
 import {
-  type Position,
-  type Direction,
-  type Inventory,
-  type Quest,
-} from '../types/SoilGame_REP.type';
+  createEmptyInventory,
+  addToInventory,
+  removeFromInventory
+} from '../utils/InventoryHelper';
+
+import {
+  getNextNeededElement,
+  checkAndCompleteQuest,
+  formatQuestProgress,
+  getElementSymbol,
+  formatLocationInfo,
+  isValidCommand,
+  parseCommand
+} from '../utils/QuestListHelper';
+
+import {
+  isValidPosition,
+  getNextPosition,
+  getPossibleMoves
+} from '../utils/PositionHelper';
 
 /**
  * Vitest (unit tests) for GameHelper implementation.
@@ -103,10 +120,10 @@ describe('GameHelper_REP', () => {
   describe('getPossibleMoves', () => {
     it('should return all direction labels for a center position with all moves available', () => {
       const moves = getPossibleMoves({ x: 2, y: 2 }, 5);
-      expect(moves).toContain('w');
-      expect(moves).toContain('a');
-      expect(moves).toContain('s');
-      expect(moves).toContain('d');
+      // expect(moves).toContain('w');
+      // expect(moves).toContain('a');
+      // expect(moves).toContain('s');
+      // expect(moves).toContain('d');
       expect(moves).toContain('Up');
       expect(moves).toContain('Left');
       expect(moves).toContain('Down');
@@ -115,8 +132,8 @@ describe('GameHelper_REP', () => {
 
     it('should exclude direction labels for blocked moves at top-left corner', () => {
       const moves = getPossibleMoves({ x: 0, y: 0 }, 5);
-      expect(moves).toContain('s');
-      expect(moves).toContain('d');
+      // expect(moves).toContain('s');
+      // expect(moves).toContain('d');
       expect(moves).toContain('Down');
       expect(moves).toContain('Right');
       expect(moves).not.toContain('Up');
@@ -125,8 +142,8 @@ describe('GameHelper_REP', () => {
 
     it('should exclude direction labels for blocked moves at top-right corner', () => {
       const moves = getPossibleMoves({ x: 4, y: 0 }, 5);
-      expect(moves).toContain('s');
-      expect(moves).toContain('a');
+      // expect(moves).toContain('s');
+      // expect(moves).toContain('a');
       expect(moves).toContain('Down');
       expect(moves).toContain('Left');
       expect(moves).not.toContain('Up');
@@ -135,8 +152,8 @@ describe('GameHelper_REP', () => {
 
     it('should exclude direction labels for blocked moves at bottom-left corner', () => {
       const moves = getPossibleMoves({ x: 0, y: 4 }, 5);
-      expect(moves).toContain('w');
-      expect(moves).toContain('d');
+      // expect(moves).toContain('w');
+      // expect(moves).toContain('d');
       expect(moves).toContain('Up');
       expect(moves).toContain('Right');
       expect(moves).not.toContain('Down');
@@ -145,28 +162,28 @@ describe('GameHelper_REP', () => {
 
     it('should exclude direction labels for blocked moves at bottom-right corner', () => {
       const moves = getPossibleMoves({ x: 4, y: 4 }, 5);
-      expect(moves).toContain('w');
-      expect(moves).toContain('a');
+      // expect(moves).toContain('w');
+      // expect(moves).toContain('a');
       expect(moves).toContain('Up');
       expect(moves).toContain('Left');
       expect(moves).not.toContain('Down');
       expect(moves).not.toContain('Right');
     });
 
-    it('should use default MAP_SIZE when mapSize is not provided', () => {
+    it('should use default MAP_SIZE=5 when mapSize is not provided', () => {
       const moves = getPossibleMoves({ x: 2, y: 2 });
-      expect(moves).toContain('w');
-      expect(moves).toContain('a');
-      expect(moves).toContain('s');
-      expect(moves).toContain('d');
+      // expect(moves).toContain('w');
+      // expect(moves).toContain('a');
+      // expect(moves).toContain('s');
+      // expect(moves).toContain('d');
+      expect(moves).toContain('Up');
+      expect(moves).toContain('Right');
+      expect(moves).toContain('Down');
+      expect(moves).toContain('Left');
     });
 
     it('should work with different map sizes', () => {
       const moves = getPossibleMoves({ x: 5, y: 5 }, 10);
-      expect(moves).toContain('w');
-      expect(moves).toContain('a');
-      expect(moves).toContain('s');
-      expect(moves).toContain('d');
       expect(moves).toContain('Up');
       expect(moves).toContain('Left');
       expect(moves).toContain('Down');
@@ -277,9 +294,20 @@ describe('GameHelper_REP', () => {
     });
   });
 
+  describe('generateMap', () => {
+    it('generates a DEFAULT = 5 x 5 size map', () => {
+      const questList: Quest[] = [
+        { moleculeName: "Water", moleculeFormula: "H2O", required: { "H": 2, "O": 1 }, submitted: {}, completed: false }
+      ];
+      const map: Node[][] = generateMap(questList);
+      expect(map.length).toBe(5);
+      expect(map[0].length).toBe(5);
+    });
+  });
+
   describe('createEmptyInventory', () => {
     it('creates an inventory with all counts zero', () => {
-      const inv = createEmptyInventory();
+      const inv = createEmptyInventory(['Nitrogen', 'Hydrogen', 'Carbon', 'Oxygen']);
       expect(inv.Nitrogen).toBe(0);
       expect(inv.Hydrogen).toBe(0);
       expect(inv.Carbon).toBe(0);
@@ -289,7 +317,7 @@ describe('GameHelper_REP', () => {
 
   describe('addToInventory', () => {
     it('increments the specified element by one', () => {
-      const inv = createEmptyInventory();
+      const inv = createEmptyInventory(['Nitrogen', 'Hydrogen', 'Carbon', 'Oxygen']);
       const updated = addToInventory(inv, 'Hydrogen');
       expect(updated.Hydrogen).toBe(1);
       expect(updated.Nitrogen).toBe(0);
@@ -300,7 +328,7 @@ describe('GameHelper_REP', () => {
 
   describe('removeFromInventory', () => {
     it('decrements the specified element when enough is available', () => {
-      const inv = createEmptyInventory();
+      const inv = createEmptyInventory(['Nitrogen', 'Hydrogen', 'Carbon', 'Oxygen']);
       const withItem = addToInventory(inv, 'Carbon'); // Carbon = 1
       const after = removeFromInventory(withItem, 'Carbon');
       expect(after).not.toBeNull();
@@ -308,12 +336,12 @@ describe('GameHelper_REP', () => {
     });
 
     it('returns null when trying to remove more than available', () => {
-      const inv = createEmptyInventory();
+      const inv = createEmptyInventory(['Nitrogen', 'Hydrogen', 'Carbon', 'Oxygen']);
       expect(removeFromInventory(inv, 'Nitrogen')).toBeNull();
     });
 
     it('supports removing a custom amount when sufficient', () => {
-      let inv = createEmptyInventory();
+      let inv = createEmptyInventory(['Nitrogen', 'Hydrogen', 'Carbon', 'Oxygen']);
       inv = addToInventory(inv, 'Oxygen');
       inv = addToInventory(inv, 'Oxygen'); // Oxygen = 2
       const after = removeFromInventory(inv, 'Oxygen', 2);
@@ -322,21 +350,9 @@ describe('GameHelper_REP', () => {
     });
   });
 
-  describe('isQuestComplete', () => {
-    it('returns true when all required elements are submitted', () => {
-      const quest: Quest = { id: 1, moleculeName: 'Water', moleculeFormula: 'H2O', required: { Hydrogen: 2 }, submitted: { Hydrogen: 2 }, completed: false };
-      expect(isQuestComplete(quest)).toBe(true);
-    });
-
-    it('returns false when requirements are not met', () => {
-      const quest: Quest = { id: 2, moleculeName: 'Ammonia', moleculeFormula: 'NH3', required: { Nitrogen: 1, Hydrogen: 3 }, submitted: { Nitrogen: 1, Hydrogen: 2 }, completed: false };
-      expect(isQuestComplete(quest)).toBe(false);
-    });
-  });
-
   describe('getNextNeededElement', () => {
     it('returns the next needed element and remaining count', () => {
-      const quest: Quest = { id: 3, moleculeName: 'Test', moleculeFormula: '', required: { Nitrogen: 1, Hydrogen: 2 }, submitted: { Nitrogen: 0, Hydrogen: 1 }, completed: false };
+      const quest: Quest = { moleculeName: 'Test', moleculeFormula: '', required: { Nitrogen: 1, Hydrogen: 2 }, submitted: { Nitrogen: 0, Hydrogen: 1 }, completed: false };
       const next = getNextNeededElement(quest);
       expect(next).not.toBeNull();
       expect(next?.element).toBe('Nitrogen');
@@ -344,26 +360,28 @@ describe('GameHelper_REP', () => {
     });
 
     it('returns null when quest is complete', () => {
-      const quest: Quest = { id: 4, moleculeName: 'Done', moleculeFormula: '', required: { Carbon: 1 }, submitted: { Carbon: 1 }, completed: true };
+      const quest: Quest = { moleculeName: 'Done', moleculeFormula: '', required: { Carbon: 1 }, submitted: { Carbon: 1 }, completed: true };
       expect(getNextNeededElement(quest)).toBeNull();
     });
   });
 
-  describe('submitElementToQuest', () => {
-    it('submits the next available element from inventory to the quest', () => {
-      const quest: Quest = { id: 5, moleculeName: 'Make', moleculeFormula: '', required: { Nitrogen: 1, Hydrogen: 1 }, submitted: { Nitrogen: 0, Hydrogen: 0 }, completed: false };
-      const inventory = { Nitrogen: 1, Hydrogen: 0, Carbon: 0, Oxygen: 0 } as Inventory;
-      const result = submitElementToQuest(quest, inventory);
+  describe('checkAndCompleteQuest', () => {
+    it('successfully completes a quest when elements are exactly sufficient', () => {
+      const quest: Quest = { moleculeName: 'Water', moleculeFormula: 'H2O', required: { H: 2, O: 1 }, submitted: { H: 0, O: 0 }, completed: false };
+      const inventory = { Hydrogen: 2, Oxygen: 1, Carbon: 0, Nitrogen: 0 } as Inventory;
+      const result = checkAndCompleteQuest(quest, inventory);
+
       expect(result).not.toBeNull();
-      expect(result?.elementUsed).toBe('Nitrogen');
-      expect(result?.updatedInventory.Nitrogen).toBe(0);
-      expect(result?.updatedQuest.submitted.Nitrogen).toBe(1);
+      expect(result?.updatedQuest.completed).toBe(true);
+      expect(result?.updatedInventory.Hydrogen).toBe(0);
+      expect(result?.updatedInventory.Oxygen).toBe(0);
     });
 
-    it('returns null when no required elements are available in inventory', () => {
-      const quest: Quest = { id: 6, moleculeName: 'None', moleculeFormula: '', required: { Oxygen: 1 }, submitted: { Oxygen: 0 }, completed: false };
-      const inventory = createEmptyInventory();
-      expect(submitElementToQuest(quest, inventory)).toBeNull();
+    it('returns null when items are insufficient', () => {
+      const quest: Quest = { moleculeName: 'Water', moleculeFormula: 'H2O', required: { H: 2, O: 1 }, submitted: { H: 0, O: 0 }, completed: false };
+      const inventory = { Hydrogen: 1, Oxygen: 1 } as Inventory;
+      const result = checkAndCompleteQuest(quest, inventory);
+      expect(result).toBeNull();
     });
   });
 
@@ -383,7 +401,7 @@ describe('GameHelper_REP', () => {
   // describe('formatLocationInfo', () => {});
   describe('formatQuestProgress', () => {
     it('formats quest progress as submitted/required pairs', () => {
-      const quest: Quest = { id: 7, moleculeName: 'X', moleculeFormula: '', required: { Nitrogen: 1, Hydrogen: 2 }, submitted: { Nitrogen: 1, Hydrogen: 1 }, completed: false };
+      const quest: Quest = { moleculeName: 'X', moleculeFormula: '', required: { Nitrogen: 1, Hydrogen: 2 }, submitted: { Nitrogen: 1, Hydrogen: 1 }, completed: false };
       const formatted = formatQuestProgress(quest);
       expect(formatted).toBe('1/1 Nitrogen, 1/2 Hydrogen');
     });

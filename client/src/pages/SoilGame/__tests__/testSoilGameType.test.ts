@@ -1,27 +1,51 @@
 import { describe, it, expect } from 'vitest';
 
 import {
-  type Position,
-  type Direction,
-  type Inventory,
-  type Quest,
   type ElementType,
   type GamePhase,
+  type Inventory,
+  type Position,
+  type Node,
+  type Quest,
   type GameState,
   type CompleteGameRequest,
   type CompleteGameResponse,
+  type Direction,
   type PlayerCommand,
   DIRECTION_DELTAS,
-} from '../types/SoilGame_REP.type';
-
-import {
   SYMBOL_TO_ELEMENT,
-  DIRECTION_LABELS,
-} from '../types/stringMappings'
+  DIRECTION_LABELS
+} from '../types/Abstract.types';
 
 import {
-  type Node,
-} from '../types/Node.type'
+  getNodeAt,
+  hasUncollectedResource,
+  generateMap
+} from '../utils/MapHelper'
+
+import {
+  createEmptyInventory,
+  addToInventory,
+  removeFromInventory
+} from '../utils/InventoryHelper';
+
+import {
+  isQuestComplete,
+  getNextNeededElement,
+  submitElementToQuest,
+  formatQuestProgress,
+  getElementSymbol,
+  formatLocationInfo,
+  isValidCommand,
+  parseCommand
+} from '../utils/QuestListHelper';
+
+import {
+  isValidPosition,
+  getNextPosition,
+  getPossibleMoves
+} from '../utils/PositionHelper';
+
 
 describe('SoilGame_REP.type exports', () => {
   it('SYMBOL_TO_ELEMENT maps symbols to ElementType', () => {
@@ -56,7 +80,7 @@ describe('SoilGame_REP.type exports', () => {
   });
 
   it('can create Quest, Inventory and GameState shapes', () => {
-    const quest: Quest = { id: 1, moleculeName: 'Test', moleculeFormula: 'T', required: { Nitrogen: 1 }, submitted: { Nitrogen: 0 }, completed: false };
+    const quest: Quest = { moleculeName: 'Test', moleculeFormula: 'T', required: { Nitrogen: 1 }, submitted: { Nitrogen: 0 }, completed: false };
     const inv: Inventory = { Nitrogen: 0, Hydrogen: 0, Carbon: 0, Oxygen: 0 };
     const state: GameState = {
       phase: 'playing',
@@ -70,7 +94,7 @@ describe('SoilGame_REP.type exports', () => {
     };
     expect(state.phase).toBe('playing');
     expect(state.mapSize).toBe(1);
-    expect(state.quests[0].id).toBe(1);
+    expect(state.quests[0].moleculeName).toBe('Test');
   });
 
   it('CompleteGameRequest/Response shapes are usable', () => {
