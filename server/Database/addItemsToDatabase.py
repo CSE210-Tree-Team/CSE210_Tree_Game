@@ -369,8 +369,6 @@ def update_stat(tree_ID: str, stat_name: str, value: int):
     """
     from Database.getItemsFromDatabase import _query
 
-    print("Testing")
-
     stat_name_lower = stat_name.lower()
     valid_stats = ['water', 'earth', 'sun']  # TODO: Consider converting this to be: VALID_RESOURCES
     

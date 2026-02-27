@@ -56,6 +56,24 @@
   margin: 0;
 }
 
+.pointCount {
+  display: flex;
+  padding: 20px;
+  align-items: center;
+  position: absolute;
+  right: 4rem;
+  top: 4rem;
+  border-radius: 30px;
+  background-color: color-mix(in srgb, var(--color-blue2) 80%, transparent);
+}
+
+.pointCountText {
+  color: #fff;
+  text-align: center;
+  font-size: 2rem;
+  margin: 0;
+}
+
 .bucketContainer {
   position: relative;
   width: 100%;

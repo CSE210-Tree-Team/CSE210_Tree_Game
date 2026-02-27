@@ -13,10 +13,10 @@ import userEvent from "@testing-library/user-event";
 import { MemoryRouter } from "react-router-dom";
 import { vi, beforeEach, afterEach } from "vitest";
 import { WaterGame } from "../WaterGame";
-import type { WaterQuestion } from "../../ServerCalls/ServerCalls";
+import type { Question } from "../../ServerCalls/ServerCalls";
 import * as ServerCalls from "../../ServerCalls/ServerCalls";
 
-const mockWaterQuestions = [
+const mockQuestions = [
   {
     questionID: "1",
     difficulty: 1,
@@ -46,7 +46,7 @@ const mockWaterQuestions = [
 
 beforeEach(() => {
   vi.spyOn(ServerCalls, "fetchQuestions").mockResolvedValue(
-    mockWaterQuestions as WaterQuestion[],
+    mockQuestions as Question[],
   );
 });
 
@@ -67,12 +67,12 @@ test("renders fetched question text on game screen", async () => {
   await user.click(screen.getByRole("button", { name: /i'm ready/i }));
 
   expect(screen.getByTestId("water-game")).toBeInTheDocument();
-  expect(screen.getByText(mockWaterQuestions[0].text)).toBeInTheDocument();
+  expect(screen.getByText(mockQuestions[0].text)).toBeInTheDocument();
 });
 
 test("shows loading indicator while questions are being fetched", async () => {
-  let resolveQuestions!: (value: WaterQuestion[]) => void;
-  const questionsPromise = new Promise<WaterQuestion[]>((resolve) => {
+  let resolveQuestions!: (value: Question[]) => void;
+  const questionsPromise = new Promise<Question[]>((resolve) => {
     resolveQuestions = resolve;
   });
 
@@ -86,7 +86,7 @@ test("shows loading indicator while questions are being fetched", async () => {
 
   expect(screen.getByText(/loading/i)).toBeInTheDocument();
 
-  resolveQuestions(mockWaterQuestions as WaterQuestion[]);
+  resolveQuestions(mockQuestions as Question[]);
   await waitFor(() => {
     expect(screen.queryByText(/loading/i)).not.toBeInTheDocument();
   });
@@ -116,11 +116,11 @@ test("question text updates after bucket catching raindrop", async () => {
   await user.click(screen.getByRole("button", { name: /play/i }));
   await user.click(screen.getByRole("button", { name: /i'm ready/i }));
 
-  expect(screen.getByText(mockWaterQuestions[0].text)).toBeInTheDocument();
+  expect(screen.getByText(mockQuestions[0].text)).toBeInTheDocument();
 
   await waitFor(
     () => {
-      expect(screen.getByText(mockWaterQuestions[1].text)).toBeInTheDocument();
+      expect(screen.getByText(mockQuestions[1].text)).toBeInTheDocument();
     },
     { timeout: 5000 },
   );
