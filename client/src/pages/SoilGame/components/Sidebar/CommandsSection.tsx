@@ -8,6 +8,7 @@ const COMMANDS = [
     { key: 'collect [element] [amount]', label: 'collect specific resource' },
     { key: 'drop [element] [amount]', label: 'drop specific resource' },
     { key: '1 / 2 / 3', label: 'submit the quest you are working on' },
+    { key: 'I', label: 'print map and get current location' },
 ];
 
 export function CommandsSection() {

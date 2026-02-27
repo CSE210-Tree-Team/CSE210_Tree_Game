@@ -123,6 +123,22 @@ describe('handleCommand - movement & collection', () => {
     ).toContain('There are no resources');
   });
 
+  it('prints map with "i"', () => {
+    const result = setupPlayingState();
+
+    act(() => {
+      result.current.handleCommand('i');
+    });
+
+    const terminalLog = result.current.state.terminalLog;
+    // Map is 5x5, so the last 5 logs should be the map rows
+    expect(terminalLog.slice(-5)).toEqual([
+      '[ * ]   [   ]   [   ]   [   ]   [   ]',
+      '[   ]   [   ]   [   ]   [   ]   [   ]',
+      '[   ]   [   ]   [   ]   [   ]   [   ]',
+      '[   ]   [   ]   [   ]   [   ]   [   ]',
+      '[   ]   [   ]   [   ]   [   ]   [   ]',
+    ]);
   it('prevents collection if it exceeds inventory capacity', () => {
     // Map has Nitrogen: 2 at (0,0), so this exceeds a capacity of 1
     const result = setupPlayingState(1);
