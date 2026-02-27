@@ -5,7 +5,8 @@ const COMMANDS = [
     { key: 'A', label: 'go left' },
     { key: 'S', label: 'go down' },
     { key: 'D', label: 'go right' },
-    { key: 'C', label: 'collect/put in inventory' },
+    { key: 'collect [element] [amount]', label: 'collect specific resource' },
+    { key: 'drop [element] [amount]', label: 'drop specific resource' },
     { key: '1 / 2 / 3', label: 'submit the quest you are working on' },
 ];
 

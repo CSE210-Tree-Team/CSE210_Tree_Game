@@ -79,6 +79,7 @@ function createInitialState(): GameState {
     quests: [],
     playerPosition: { x: 0, y: 0 },
     inventory: {},
+    inventoryCapacity: 0,
     terminalLog: [],
     questsCompleted: 0,
     showCompletionPopup: false,
@@ -115,11 +116,15 @@ export function useSoilGame() {
 
     // Extract all unique elements needed for quests
     const uniqueElements = new Set<string>();
+    let calculatedCap = 0;
     fetchedQuests.forEach(quest => {
+      let questRequiredTotal = 0;
       Object.keys(quest.required).forEach(symbol => {
         const elementName = SYMBOL_TO_ELEMENT[symbol] || symbol;
         uniqueElements.add(elementName);
+        questRequiredTotal += quest.required[symbol];
       });
+      calculatedCap = Math.max(calculatedCap, questRequiredTotal);
     });
 
     const map = generateMap(fetchedQuests);
@@ -136,6 +141,7 @@ export function useSoilGame() {
       quests: fetchedQuests,
       playerPosition: startPos,
       inventory: createEmptyInventory(Array.from(uniqueElements)),
+      inventoryCapacity: calculatedCap,
       terminalLog: initialLog,
       questsCompleted: 0,
       showCompletionPopup: false,
@@ -177,9 +183,9 @@ export function useSoilGame() {
   }, []);
 
   /**
-   * Collect all resources at the current player position
+   * Collect specific resource at the current player position
    */
-  const collectResources = useCallback(() => {
+  const collectResources = useCallback((elementName: string, amountToCollect: number) => {
     setGameState((prev) => {
       if (prev.phase !== 'playing') return prev;
 
@@ -195,37 +201,50 @@ export function useSoilGame() {
         };
       }
 
-      // Add ALL resources from the node to the inventory
-      let newInventory = { ...prev.inventory };
-      const collectedItems: string[] = [];
+      const properElement = Object.values(SYMBOL_TO_ELEMENT).find(e => e.toLowerCase() === elementName.toLowerCase()) || elementName;
 
-      Object.entries(node.resources).forEach(([element, amount]) => {
-        if (amount > 0) {
-          newInventory = addToInventory(newInventory, element, amount);
-          collectedItems.push(`${amount} ${element}`);
-        }
-      });
-
-      // If for some reason there were 0 entries but resources existed
-      if (collectedItems.length === 0) {
+      if (!node.resources[properElement] || node.resources[properElement] < amountToCollect) {
         return {
           ...prev,
           terminalLog: [
             ...prev.terminalLog,
             '',
-            'Area is empty.',
+            `> Not enough ${properElement} here to collect that amount.`,
           ],
         };
       }
 
-      // Mark the node as collected across the entire map
+      // Check inventory capacity
+      const currentInventoryCount = Object.values(prev.inventory).reduce((sum, count) => sum + count, 0);
+
+      if (currentInventoryCount + amountToCollect > prev.inventoryCapacity) {
+        return {
+          ...prev,
+          terminalLog: [
+            ...prev.terminalLog,
+            '',
+            '> Inventory full! You cannot carry more elements.',
+          ],
+        };
+      }
+
+      // Add resource to inventory
+      let newInventory = addToInventory(prev.inventory, properElement, amountToCollect);
+
+      // Update node
       const newMap = prev.map.map((row) =>
-        row.map((n) =>
-          n.x === node.x && n.y === node.y ? { ...n, collected: true } : n
-        )
+        row.map((n) => {
+          if (n.x === node.x && n.y === node.y) {
+            const updatedResources = { ...n.resources };
+            updatedResources[properElement] -= amountToCollect;
+            const collectedAll = Object.values(updatedResources).every(v => v === 0);
+            return { ...n, resources: updatedResources, collected: collectedAll };
+          }
+          return n;
+        })
       );
 
-      const collectionMessage = `Gathered: ${collectedItems.join(', ')}.`;
+      const collectionMessage = `Gathered: ${amountToCollect} ${properElement}.`;
 
       return {
         ...prev,
@@ -234,9 +253,40 @@ export function useSoilGame() {
         terminalLog: [
           ...prev.terminalLog,
           '',
-          collectionMessage,
-          'Area cleared.',
+          collectionMessage
         ],
+      };
+    });
+  }, []);
+
+  const dropResources = useCallback((elementName: string, amountToDrop: number) => {
+    setGameState((prev) => {
+      if (prev.phase !== 'playing') return prev;
+
+      const properElement = Object.values(SYMBOL_TO_ELEMENT).find(e => e.toLowerCase() === elementName.toLowerCase()) || elementName;
+      const currentAmount = prev.inventory[properElement] || 0;
+
+      if (currentAmount < amountToDrop) {
+        return {
+          ...prev,
+          terminalLog: [
+            ...prev.terminalLog,
+            '',
+            `> You do not have ${amountToDrop} ${properElement} to drop.`
+          ]
+        };
+      }
+
+      let newInventory = removeFromInventory(prev.inventory, properElement, amountToDrop) as Inventory;
+
+      return {
+        ...prev,
+        inventory: newInventory,
+        terminalLog: [
+          ...prev.terminalLog,
+          '',
+          `Dropped ${amountToDrop} ${properElement}. Space freed.`
+        ]
       };
     });
   }, []);
@@ -258,12 +308,19 @@ export function useSoilGame() {
       ...prev,
       terminalLog: [...prev.terminalLog, '', logUserCommand]
     }));
-    if (['w', 'a', 's', 'd'].includes(cmd)) {
-      movePlayer(cmd as Direction);
-    } else if (cmd === 'c') {
-      collectResources();
-    } else if (['1', '2', '3'].includes(cmd)) {
-      const questIndex = parseInt(cmd) - 1;
+
+    // Command parts logic
+    const parts = cmd.split(/\s+/);
+    const baseCmd = parts[0];
+
+    if (['w', 'a', 's', 'd'].includes(baseCmd)) {
+      movePlayer(baseCmd as Direction);
+    } else if (baseCmd === 'collect' && parts.length === 3) {
+      collectResources(parts[1], parseInt(parts[2], 10));
+    } else if (baseCmd === 'drop' && parts.length === 3) {
+      dropResources(parts[1], parseInt(parts[2], 10));
+    } else if (['1', '2', '3'].includes(baseCmd)) {
+      const questIndex = parseInt(baseCmd) - 1;
       setGameState((prev) => {
         if (prev.phase !== 'playing') return prev;
         const quest = prev.quests[questIndex];
@@ -299,7 +356,7 @@ export function useSoilGame() {
         }
       });
     }
-  }, [movePlayer, collectResources]);
+  }, [movePlayer, collectResources, dropResources]);
 
 
 
@@ -362,6 +419,7 @@ export function useSoilGame() {
     startGame,
     handleCommand,
     collectResources,
+    dropResources,
     completeGame,
     setQuestsCompleted,
   };
