@@ -33,19 +33,6 @@ describe("fetchQuestions", () => {
         { text: "Heavy Water", isCorrect: false },
       ],
     },
-    {
-      questionID: "q3",
-      difficulty: 1,
-      resourceType: "Earth",
-      text: "What are the main components of soil?",
-      type: "MultiSelect",
-      choices: [
-        { text: "Minerals", isCorrect: true },
-        { text: "Organic matter", isCorrect: true },
-        { text: "Water", isCorrect: true },
-        { text: "Air", isCorrect: true },
-      ],
-    },
   ];
 
   it("fetches questions successfully", async () => {

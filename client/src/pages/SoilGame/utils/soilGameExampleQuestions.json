@@ -1,7 +1,7 @@
 [
     {
         "id": "12345",
-        "resource_type": "Soil",
+        "resource_type": "Earth",
         "molecule_name": "Water",
         "molecule_formula": "H2O",
         "required": {
@@ -11,7 +11,7 @@
     },
     {
         "id": "67890",
-        "resource_type": "Soil",
+        "resource_type": "Earth",
         "molecule_name": "Ammonia",
         "molecule_formula": "NH3",
         "required": {
@@ -21,7 +21,7 @@
     },
     {
         "id": "54321",
-        "resource_type": "Soil",
+        "resource_type": "Earth",
         "molecule_name": "Carbon Dioxide",
         "molecule_formula": "CO2",
         "required": {
@@ -31,7 +31,7 @@
     },
     {
         "id": "14534",
-        "resource_type": "Soil",
+        "resource_type": "Earth",
         "molecule_name": "Methane",
         "molecule_formula": "CH4",
         "required": {
@@ -41,7 +41,7 @@
     },
     {
         "id": "98765",
-        "resource_type": "Soil",
+        "resource_type": "Earth",
         "molecule_name": "Glucose",
         "molecule_formula": "C6H12O6",
         "required": {
