@@ -5,10 +5,8 @@ export function InventorySection({ inventory, inventoryCapacity }: { inventory: 
     const sortedElements = Object.keys(inventory).sort();
     const currentInventoryCount = Object.values(inventory).reduce((sum, count) => sum + count, 0);
 
-    const sortedElements = Object.keys(inventory)
-        .filter((element) => inventory[element] > 0)
-        .sort();
-        
+
+
     return (
         <div className={styles.section}>
             <h2 className={styles.heading}>
@@ -16,12 +14,12 @@ export function InventorySection({ inventory, inventoryCapacity }: { inventory: 
                 INVENTORY ({currentInventoryCount}/{inventoryCapacity})
             </h2>
             <div className={styles.scrollableList}>
-                {sortedElements.map((element) => (
+                {sortedElements.filter(element => inventory[element] > 0).map((element) => (
                     <div key={element} className={`${styles.text} ${styles.inventoryRow}`}>
                         <span>{element}</span>
                         <span style={{
-                            color: inventory[element] > 0 ? 'var(--color-success)' : 'var(--color-grey1)',
-                            fontWeight: inventory[element] > 0 ? 'bold' : 'normal',
+                            color: 'var(--color-success)',
+                            fontWeight: 'bold',
                         }}>
                             {inventory[element]}
                         </span>
