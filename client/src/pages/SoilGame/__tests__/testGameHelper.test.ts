@@ -424,17 +424,17 @@ describe('GameHelper_REP', () => {
     it('validates allowed commands and rejects others', () => {
       expect(isValidCommand('w')).toBe(true);
       expect(isValidCommand('W')).toBe(true);
-      expect(isValidCommand('collect')).toBe(true);
+      expect(isValidCommand('collect Nitrogen 1')).toBe(true);
+      expect(isValidCommand('drop Nitrogen 1')).toBe(true);
       expect(isValidCommand('foo')).toBe(false);
+      expect(isValidCommand('collect')).toBe(false);
     });
   });
 
   describe('parseCommand', () => {
-    it('normalizes collect to c and trims input', () => {
-      expect(parseCommand('Collect')).toBe('c');
+    it('normalizes and trims input', () => {
+      expect(parseCommand('Collect Nitrogen 1')).toBe('collect nitrogen 1');
       expect(parseCommand(' w ')).toBe('w');
     });
   });
-
-  // describe('', () => {});
 });

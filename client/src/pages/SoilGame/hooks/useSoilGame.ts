@@ -359,7 +359,6 @@ export function useSoilGame() {
   }, [movePlayer, collectResources, dropResources]);
 
 
-
   const completeGame = useCallback(async () => {
     // const totalProgress = state.questsCompleted * 25;
     const totalProgress = calculateProgress(state.questsCompleted);
