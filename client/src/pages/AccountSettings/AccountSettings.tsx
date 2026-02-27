@@ -1,8 +1,20 @@
+/*
+Account Settings pages
+- AccountSettings: read-only profile display and navigation.
+- AccountSettingsEdit: editable profile form with client-side email validation.
+- API calls are routed through `ServerCalls.ts` to keep fetch logic centralized.
+*/
+
 import { useAuth0 } from '@auth0/auth0-react';
 import { FormEvent, useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import buttonStyles from '../../components/Button.module.css';
+import { Button } from '../../components/Button';
 import styles from '../../components/account-settings.module.css';
+import {
+    establishAuthSession,
+    fetchAccountProfile,
+    updateAccountProfile,
+} from '../ServerCalls/ServerCalls';
 
 type Profile = {
     name: string;
@@ -19,6 +31,12 @@ type AccountProfileResponse = {
 const isValidOptionalEmail = (value: string) => {
     const trimmed = value.trim();
     if (!trimmed) return true;
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmed);
+};
+
+const isValidRequiredEmail = (value: string) => {
+    const trimmed = value.trim();
+    if (!trimmed) return false;
     return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmed);
 };
 
@@ -52,23 +70,13 @@ export const AccountSettings = () => {
 
             try {
                 const token = await getAccessTokenSilently();
-                await fetch('/api/auth/verify', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        Authorization: `Bearer ${token}`,
-                    },
-                    credentials: 'include',
-                    body: JSON.stringify({ user }),
-                });
+                await establishAuthSession(token, user);
             } catch {
                 // If session establishment fails, the profile request may still succeed (e.g., existing session).
             }
 
             try {
-                const response = await fetch('/api/account/profile', { credentials: 'include' });
-                if (!response.ok) return;
-                const data = (await response.json()) as AccountProfileResponse;
+                const data = (await fetchAccountProfile()) as unknown as AccountProfileResponse;
                 if (data?.profile) setProfile(data.profile);
             } catch {
                 // Ignore profile load errors and fall back to Auth0-derived defaults.
@@ -112,18 +120,18 @@ export const AccountSettings = () => {
                 </div>
 
                 <div className={styles.actions}>
-                    <button
-                        className={`${buttonStyles.button} ${buttonStyles.grass} ${styles.actionButton}`}
+                    <Button
+                        variant="grass"
+                        label="EDIT"
+                        className={styles.actionButton}
                         onClick={() => navigate('/account/edit')}
-                    >
-                        EDIT
-                    </button>
-                    <button
-                        className={`${buttonStyles.button} ${buttonStyles.grass} ${styles.actionButton}`}
+                    />
+                    <Button
+                        variant="grass"
+                        label="LOG OUT"
+                        className={styles.actionButton}
                         onClick={() => logout({ logoutParams: { returnTo: window.location.origin } })}
-                    >
-                        LOG OUT
-                    </button>
+                    />
                 </div>
             </div>
         </div>
@@ -138,6 +146,7 @@ export const AccountSettingsEdit = () => {
     const [isSaving, setIsSaving] = useState(false);
     const [saveError, setSaveError] = useState<string | null>(null);
     const [isParentEmailTouched, setIsParentEmailTouched] = useState(false);
+    const [isEmailTouched, setIsEmailTouched] = useState(false);
 
     const [formData, setFormData] = useState<Profile>({
         name: defaultName,
@@ -152,23 +161,13 @@ export const AccountSettingsEdit = () => {
 
             try {
                 const token = await getAccessTokenSilently();
-                await fetch('/api/auth/verify', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        Authorization: `Bearer ${token}`,
-                    },
-                    credentials: 'include',
-                    body: JSON.stringify({ user }),
-                });
+                await establishAuthSession(token, user);
             } catch {
                 // Ignore session establishment failures.
             }
 
             try {
-                const response = await fetch('/api/account/profile', { credentials: 'include' });
-                if (!response.ok) return;
-                const data = (await response.json()) as AccountProfileResponse;
+                const data = (await fetchAccountProfile()) as unknown as AccountProfileResponse;
                 if (!data?.profile) return;
                 if (isDirtyRef.current) return;
                 setFormData((prev) => ({
@@ -189,9 +188,21 @@ export const AccountSettingsEdit = () => {
             ? 'Please enter a valid parent email address (example: name@example.com).'
             : null;
 
+    const emailIsValid = isValidRequiredEmail(formData.email);
+    const emailError =
+        isEmailTouched && !emailIsValid
+            ? 'Please enter a valid email address (example: name@example.com).'
+            : null;
+
     const handleSave = async (event: FormEvent<HTMLFormElement>) => {
         event.preventDefault();
         setSaveError(null);
+
+        if (!emailIsValid) {
+            setIsEmailTouched(true);
+            setSaveError('Please enter a valid email address.');
+            return;
+        }
 
         if (!parentEmailIsValid) {
             setIsParentEmailTouched(true);
@@ -201,16 +212,8 @@ export const AccountSettingsEdit = () => {
 
         setIsSaving(true);
         try {
-            const response = await fetch('/api/account/profile', {
-                method: 'PUT',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                credentials: 'include',
-                body: JSON.stringify(formData),
-            });
-
-            if (!response.ok) {
+            const ok = await updateAccountProfile(formData);
+            if (!ok) {
                 setSaveError('Save failed. Please log in again and try again.');
                 return;
             }
@@ -235,7 +238,7 @@ export const AccountSettingsEdit = () => {
 
                 <form className={styles.formArea} onSubmit={handleSave}>
                     {saveError ? (
-                        <p role="alert" style={{ color: 'darkred', marginTop: 0 }}>
+                        <p role="alert" className={styles.errorMessage}>
                             {saveError}
                         </p>
                     ) : null}
@@ -275,7 +278,7 @@ export const AccountSettingsEdit = () => {
                         <p
                             id="parentEmailError"
                             role="alert"
-                            style={{ color: 'darkred', margin: '-10px 0 0', textAlign: 'center' }}
+                            className={styles.fieldError}
                         >
                             {parentEmailError}
                         </p>
@@ -286,13 +289,25 @@ export const AccountSettingsEdit = () => {
                         <input
                             id="email"
                             className={styles.input}
+                            type="email"
+                            inputMode="email"
+                            autoComplete="email"
                             value={formData.email}
+                            aria-invalid={!emailIsValid}
+                            aria-describedby={emailError ? 'emailError' : undefined}
                             onChange={(event) => {
                                 isDirtyRef.current = true;
+                                if (!isEmailTouched) setIsEmailTouched(true);
                                 setFormData({ ...formData, email: event.target.value });
                             }}
+                            onBlur={() => setIsEmailTouched(true)}
                         />
                     </div>
+                    {emailError ? (
+                        <p id="emailError" role="alert" className={styles.fieldError}>
+                            {emailError}
+                        </p>
+                    ) : null}
 
                     <div className={styles.row}>
                         <label htmlFor="educationLevel" className={styles.label}>Education Level:</label>
@@ -315,20 +330,20 @@ export const AccountSettingsEdit = () => {
                     </div>
 
                     <div className={styles.actions}>
-                        <button
-                            className={`${buttonStyles.button} ${buttonStyles.grass} ${styles.actionButton}`}
+                        <Button
+                            variant="grass"
+                            label="SAVE"
+                            className={styles.actionButton}
                             type="submit"
-                            disabled={isSaving || !parentEmailIsValid}
-                        >
-                            SAVE
-                        </button>
-                        <button
-                            className={`${buttonStyles.button} ${buttonStyles.grass} ${styles.actionButton}`}
+                            disabled={isSaving || !parentEmailIsValid || !emailIsValid}
+                        />
+                        <Button
+                            variant="grass"
+                            label="CANCEL"
+                            className={styles.actionButton}
                             type="button"
                             onClick={() => navigate('/account')}
-                        >
-                            CANCEL
-                        </button>
+                        />
                     </div>
                 </form>
             </div>

@@ -9,6 +9,7 @@ import styles from "../../components/homepage.module.css"
 import fontStyles from "../../components/Popup.module.css"
 import buttonStyles from "../../components/Button.module.css"
 import Tutorial from "./Tutorial"
+import { establishAuthSession, fetchUserInfo } from "../ServerCalls/ServerCalls";
 interface UserInfo {
     success: boolean;
     user: {
@@ -69,21 +70,11 @@ export const Homepage = () => {
         const establishSession = async () => {
             try {
                 const token = await getAccessTokenSilently();
-                await fetch('/api/auth/verify', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${token}`
-                    },
-                    body: JSON.stringify({ user })
-                });
+                await establishAuthSession(token, user);
 
                 // Fetch user info including resource levels
-                const response = await fetch('/api/get-user-info');
-                if (response.ok) {
-                    const data = await response.json();
-                    setUserInfo(data);
-                }
+                const data = await fetchUserInfo();
+                setUserInfo(data);
             } catch (error) {
                 console.error('Failed to establish backend session:', error);
             }

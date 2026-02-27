@@ -146,7 +146,7 @@ describe('Homepage', () => {
     render(<Homepage />)
     
     await waitFor(() => {
-      expect(global.fetch).toHaveBeenCalledWith('/api/get-user-info')
+      expect(global.fetch).toHaveBeenCalledWith('/api/get-user-info', expect.anything())
     })
   })
 
