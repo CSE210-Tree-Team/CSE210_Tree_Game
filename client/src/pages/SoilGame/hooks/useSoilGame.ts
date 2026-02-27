@@ -279,9 +279,23 @@ export function useSoilGame() {
 
       let newInventory = removeFromInventory(prev.inventory, properElement, amountToDrop) as Inventory;
 
+      // Update map: add dropped resources back to the current node
+      const newMap = prev.map.map((row) =>
+        row.map((n) => {
+          if (n.x === prev.playerPosition.x && n.y === prev.playerPosition.y) {
+            const updatedResources = n.resources ? { ...n.resources } : {} as Record<string, number>;
+            updatedResources[properElement] = (updatedResources[properElement] || 0) + amountToDrop;
+            // Mark as not collected so it shows up in map info again
+            return { ...n, resources: updatedResources, collected: false };
+          }
+          return n;
+        })
+      );
+
       return {
         ...prev,
         inventory: newInventory,
+        map: newMap,
         terminalLog: [
           ...prev.terminalLog,
           '',
@@ -290,6 +304,7 @@ export function useSoilGame() {
       };
     });
   }, []);
+
 
   const handleCommand = useCallback((rawInput: string) => {
     const logUserCommand = `> ${rawInput}`;
