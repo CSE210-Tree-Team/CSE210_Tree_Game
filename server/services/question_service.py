@@ -6,21 +6,7 @@ from database.addItemsToDatabase import add_question
 
 class QuestionService:
     """
-    Handles question-related business logic.
-    
-    This service manages all operations related to educational questions,
-    including creating, retrieving, and filtering questions from the database.
-    
-    Example usage:
-    ```python
-    # Add a new question
-    question_id = QuestionService.add_new_question(
-        text='What is photosynthesis?',
-        question_type='MCQ',
-        resource_type='Sun',
-        choices=['Making food', 'Breathing', 'Growing'],
-        correct_choices=[0]
-    )
+    Handles all question-related logic including creation, retrieval, and filtering of questions.
     """
     
     @staticmethod
