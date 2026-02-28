@@ -24,19 +24,19 @@ import uuid
 import random
 import datetime
 import os
-from Database import createDatabase
-from constants import DB_NAME
+from database import createDatabase
+from config.settings import settings
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-DB_PATH = os.path.join(BASE_DIR, DB_NAME)
+DB_PATH = os.path.join(BASE_DIR, settings.DB_NAME)
 
 ### SAMPLE INPUT TEST DATA FOR GENERATION ###
 STUDENT_NAMES = ["Adrian", "Dhaivat", "Cash", "Kathy", "Alex", "Stanley"]
 QUESTIONS = [
-    ("What color is the sun?", "MCQ", "Sun", ["Yellow", "Green", "Blue"], 0),
-    ("2 + 2 = ?", "MCQ", "General", ["3", "4", "5"], 1),
-    ("How do trees drink?", "FreeResponse", "Water", [], None),
-    ("Select all primary colors.", "MultiSelect", "General", ["Red", "Green", "Blue", "Yellow"], [0, 2]),
+    ("What color is the sun?", "MCQ", "sun", ["Yellow", "Green", "Blue"], 0),
+    ("2 + 2 = ?", "MCQ", "general", ["3", "4", "5"], 1),
+    ("How do trees drink?", "FreeResponse", "water", [], None),
+    ("Select all primary colors.", "MultiSelect", "general", ["Red", "Green", "Blue", "Yellow"], [0, 2]),
 ]
 DEFAULT_HEALTH_STATUS = "Healthy"
 DEFAULT_RESOURCE_LEVEL = 100

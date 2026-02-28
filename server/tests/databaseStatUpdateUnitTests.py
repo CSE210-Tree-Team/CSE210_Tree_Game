@@ -19,15 +19,13 @@ from datetime import datetime, timedelta
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 # Import the modules to test
-from Database.createDatabase import create_schema
-from Database.addItemsToDatabase import (
+from database.createDatabase import create_schema
+from database.addItemsToDatabase import (
     add_account, generate_tree, update_stat, apply_passive_decay
 )
-from Database.getItemsFromDatabase import get_tree
+from database.getItemsFromDatabase import get_tree
 
-from constants import (
-    DB_NAME, ROLE_STUDENT, RESOURCE_MAX_LEVEL, RESOURCE_MIN_LEVEL, PASSIVE_DECAY_RATE
-)
+from config.settings import settings
 
 
 class UpdateStatsTestCase(unittest.TestCase):
@@ -36,12 +34,12 @@ class UpdateStatsTestCase(unittest.TestCase):
     def setUp(self):
         """Set up a fresh database before each test."""
         self.test_dir = tempfile.mkdtemp()
-        self.db_path = os.path.join(self.test_dir, DB_NAME)
+        self.db_path = os.path.join(self.test_dir, settings.DB_NAME)
         
         # Patch the database path in all imported modules
-        import Database.addItemsToDatabase as addItemsToDatabase
-        import Database.getItemsFromDatabase as getItemsFromDatabase
-        import Database.createDatabase as createDatabase
+        import database.addItemsToDatabase as addItemsToDatabase
+        import database.getItemsFromDatabase as getItemsFromDatabase
+        import database.createDatabase as createDatabase
         
         addItemsToDatabase.DB_PATH = self.db_path
         getItemsFromDatabase.DB_PATH = self.db_path
@@ -63,7 +61,7 @@ class UpdateStatsTestCase(unittest.TestCase):
             displayName="Test User",
             accountReference="test_ref",
             dateOfBirth="2000-01-01",
-            role=ROLE_STUDENT
+            role=settings.ROLE_STUDENT
         )
         tree_id = generate_tree(username)
         return tree_id, username
@@ -142,7 +140,7 @@ class DatabaseStatUpdateTests(UpdateStatsTestCase):
         self.assertEqual(tree['resourceLevels']['sun'], initial_sun + 25)
     
     def test_update_clamped_at_max(self):
-        """Test that resources are clamped at RESOURCE_MAX_LEVEL."""
+        """Test that resources are clamped at settings.RESOURCE_MAX_LEVEL."""
         tree_id, username = self.create_test_tree()
         
         # Try to increase water beyond max
@@ -150,10 +148,10 @@ class DatabaseStatUpdateTests(UpdateStatsTestCase):
         
         # Verify it's clamped at max
         tree = get_tree(username)
-        self.assertEqual(tree['resourceLevels']['water'], RESOURCE_MAX_LEVEL)
+        self.assertEqual(tree['resourceLevels']['water'], settings.RESOURCE_MAX_LEVEL)
     
     def test_update_clamped_at_min(self):
-        """Test that resources are clamped at RESOURCE_MIN_LEVEL."""
+        """Test that resources are clamped at settings.RESOURCE_MIN_LEVEL."""
         tree_id, username = self.create_test_tree()
         
         # Try to decrease water below min
@@ -161,7 +159,7 @@ class DatabaseStatUpdateTests(UpdateStatsTestCase):
         
         # Verify it's clamped at min
         tree = get_tree(username)
-        self.assertEqual(tree['resourceLevels']['water'], RESOURCE_MIN_LEVEL)
+        self.assertEqual(tree['resourceLevels']['water'], settings.RESOURCE_MIN_LEVEL)
     
     def test_update_multiple_resources(self):
         """Test updating multiple resources sequentially."""
@@ -227,6 +225,37 @@ class DatabaseStatUpdateTests(UpdateStatsTestCase):
         # Verify no change
         tree = get_tree(username)
         self.assertEqual(tree['resourceLevels']['water'], initial_water)
+    
+    def test_update_stat_case_insensitivity(self):
+        """Test that update_stat accepts different cases for stat names."""
+        tree_id, username = self.create_test_tree()
+        
+        # First reduce all resources to make room for testing
+        update_stat(tree_id, 'water', -40)
+        update_stat(tree_id, 'earth', -40)
+        update_stat(tree_id, 'sun', -40)
+        
+        # Get initial state
+        tree = get_tree(username)
+        initial_water = tree['resourceLevels']['water']
+        initial_earth = tree['resourceLevels']['earth']
+        initial_sun = tree['resourceLevels']['sun']
+        
+        # Test uppercase stat names
+        update_stat(tree_id, 'WATER', 5)
+        update_stat(tree_id, 'EARTH', 5)
+        update_stat(tree_id, 'SUN', 5)
+        
+        # Test mixed case stat names
+        update_stat(tree_id, 'Water', 5)
+        update_stat(tree_id, 'Earth', 5)
+        update_stat(tree_id, 'Sun', 5)
+        
+        # Verify all updates worked (should be +10 total for each)
+        tree = get_tree(username)
+        self.assertEqual(tree['resourceLevels']['water'], initial_water + 10)
+        self.assertEqual(tree['resourceLevels']['earth'], initial_earth + 10)
+        self.assertEqual(tree['resourceLevels']['sun'], initial_sun + 10)
 
 
 class TestPassiveDecay(UpdateStatsTestCase):
@@ -273,15 +302,15 @@ class TestPassiveDecay(UpdateStatsTestCase):
         # Apply decay
         result = apply_passive_decay(tree_id)
         
-        # Calculate expected decay: 120 minutes / PASSIVE_DECAY_RATE
-        expected_decay = int(120 // PASSIVE_DECAY_RATE)
+        # Calculate expected decay: 120 minutes / settings.PASSIVE_DECAY_RATE
+        expected_decay = int(120 // settings.PASSIVE_DECAY_RATE)
         
         # Verify decay occurred
         self.assertTrue(result)
         tree = get_tree(username)
-        self.assertEqual(tree['resourceLevels']['water'], max(initial_water - expected_decay, RESOURCE_MIN_LEVEL))
-        self.assertEqual(tree['resourceLevels']['earth'], max(initial_earth - expected_decay, RESOURCE_MIN_LEVEL))
-        self.assertEqual(tree['resourceLevels']['sun'], max(initial_sun - expected_decay, RESOURCE_MIN_LEVEL))
+        self.assertEqual(tree['resourceLevels']['water'], max(initial_water - expected_decay, settings.RESOURCE_MIN_LEVEL))
+        self.assertEqual(tree['resourceLevels']['earth'], max(initial_earth - expected_decay, settings.RESOURCE_MIN_LEVEL))
+        self.assertEqual(tree['resourceLevels']['sun'], max(initial_sun - expected_decay, settings.RESOURCE_MIN_LEVEL))
     
     def test_decay_updates_lastUpdated(self):
         """Test that successful decay updates the lastUpdated timestamp."""
@@ -304,15 +333,15 @@ class TestPassiveDecay(UpdateStatsTestCase):
             self.assertGreater(tree['lastUpdated'], one_hour_ago)
     
     def test_decay_exact_rate(self):
-        """Test decay with exactly PASSIVE_DECAY_RATE minutes elapsed."""
+        """Test decay with exactly settings.PASSIVE_DECAY_RATE minutes elapsed."""
         tree_id, username = self.create_test_tree()
         
         # Get initial resources
         tree = get_tree(username)
         initial_water = tree['resourceLevels']['water']
         
-        # Set lastUpdated to exactly PASSIVE_DECAY_RATE minutes ago
-        past_time = (datetime.now() - timedelta(minutes=PASSIVE_DECAY_RATE)).isoformat()
+        # Set lastUpdated to exactly settings.PASSIVE_DECAY_RATE minutes ago
+        past_time = (datetime.now() - timedelta(minutes=settings.PASSIVE_DECAY_RATE)).isoformat()
         with sqlite3.connect(self.db_path) as conn:
             cursor = conn.cursor()
             cursor.execute("UPDATE Tree SET lastUpdated = ? WHERE treeID = ?", 
@@ -328,15 +357,15 @@ class TestPassiveDecay(UpdateStatsTestCase):
         self.assertEqual(tree['resourceLevels']['water'], initial_water - 1)
     
     def test_decay_less_than_rate(self):
-        """Test that no decay occurs when elapsed time is less than PASSIVE_DECAY_RATE."""
+        """Test that no decay occurs when elapsed time is less than settings.PASSIVE_DECAY_RATE."""
         tree_id, username = self.create_test_tree()
         
         # Get initial resources
         tree = get_tree(username)
         initial_water = tree['resourceLevels']['water']
         
-        # Set lastUpdated to less than PASSIVE_DECAY_RATE minutes ago
-        past_time = (datetime.now() - timedelta(minutes=PASSIVE_DECAY_RATE - 5)).isoformat()
+        # Set lastUpdated to less than settings.PASSIVE_DECAY_RATE minutes ago
+        past_time = (datetime.now() - timedelta(minutes=settings.PASSIVE_DECAY_RATE - 5)).isoformat()
         with sqlite3.connect(self.db_path) as conn:
             cursor = conn.cursor()
             cursor.execute("UPDATE Tree SET lastUpdated = ? WHERE treeID = ?", 
@@ -352,7 +381,7 @@ class TestPassiveDecay(UpdateStatsTestCase):
         self.assertEqual(tree['resourceLevels']['water'], initial_water)
     
     def test_decay_clamped_at_zero(self):
-        """Test that decay doesn't take resources below RESOURCE_MIN_LEVEL."""
+        """Test that decay doesn't take resources below settings.RESOURCE_MIN_LEVEL."""
         tree_id, username = self.create_test_tree()
         
         # Set resources to low values
@@ -374,9 +403,9 @@ class TestPassiveDecay(UpdateStatsTestCase):
         # Verify resources are clamped at minimum
         self.assertTrue(result)
         tree = get_tree(username)
-        self.assertEqual(tree['resourceLevels']['water'], RESOURCE_MIN_LEVEL)
-        self.assertEqual(tree['resourceLevels']['earth'], RESOURCE_MIN_LEVEL)
-        self.assertEqual(tree['resourceLevels']['sun'], RESOURCE_MIN_LEVEL)
+        self.assertEqual(tree['resourceLevels']['water'], settings.RESOURCE_MIN_LEVEL)
+        self.assertEqual(tree['resourceLevels']['earth'], settings.RESOURCE_MIN_LEVEL)
+        self.assertEqual(tree['resourceLevels']['sun'], settings.RESOURCE_MIN_LEVEL)
     
     def test_decay_all_resources_at_zero(self):
         """Test decay behavior when all resources are already at zero."""
@@ -407,20 +436,20 @@ class TestPassiveDecay(UpdateStatsTestCase):
         # So result should be False since resources didn't actually change
         self.assertFalse(result)
         tree = get_tree(username)
-        self.assertEqual(tree['resourceLevels']['water'], RESOURCE_MIN_LEVEL)
-        self.assertEqual(tree['resourceLevels']['earth'], RESOURCE_MIN_LEVEL)
-        self.assertEqual(tree['resourceLevels']['sun'], RESOURCE_MIN_LEVEL)
+        self.assertEqual(tree['resourceLevels']['water'], settings.RESOURCE_MIN_LEVEL)
+        self.assertEqual(tree['resourceLevels']['earth'], settings.RESOURCE_MIN_LEVEL)
+        self.assertEqual(tree['resourceLevels']['sun'], settings.RESOURCE_MIN_LEVEL)
     
     def test_decay_multiple_periods(self):
-        """Test decay over multiple PASSIVE_DECAY_RATE periods."""
+        """Test decay over multiple settings.PASSIVE_DECAY_RATE periods."""
         tree_id, username = self.create_test_tree()
         
         # Get initial resources
         tree = get_tree(username)
         initial_water = tree['resourceLevels']['water']
         
-        # Set lastUpdated to 3 * PASSIVE_DECAY_RATE minutes ago
-        past_time = (datetime.now() - timedelta(minutes=3 * PASSIVE_DECAY_RATE)).isoformat()
+        # Set lastUpdated to 3 * settings.PASSIVE_DECAY_RATE minutes ago
+        past_time = (datetime.now() - timedelta(minutes=3 * settings.PASSIVE_DECAY_RATE)).isoformat()
         with sqlite3.connect(self.db_path) as conn:
             cursor = conn.cursor()
             cursor.execute("UPDATE Tree SET lastUpdated = ? WHERE treeID = ?", 
@@ -451,8 +480,8 @@ class TestPassiveDecay(UpdateStatsTestCase):
         tree = get_tree(username)
         initial_water = tree['resourceLevels']['water']
         
-        # Set lastUpdated to 1.5 * PASSIVE_DECAY_RATE minutes ago
-        past_time = (datetime.now() - timedelta(minutes=1.5 * PASSIVE_DECAY_RATE)).isoformat()
+        # Set lastUpdated to 1.5 * settings.PASSIVE_DECAY_RATE minutes ago
+        past_time = (datetime.now() - timedelta(minutes=1.5 * settings.PASSIVE_DECAY_RATE)).isoformat()
         with sqlite3.connect(self.db_path) as conn:
             cursor = conn.cursor()
             cursor.execute("UPDATE Tree SET lastUpdated = ? WHERE treeID = ?", 

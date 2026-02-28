@@ -14,11 +14,11 @@ Returns:
 
 import sqlite3
 import os
-from constants import DB_NAME
+from config.settings import settings
 
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-DB_PATH = os.path.join(BASE_DIR, DB_NAME)
+DB_PATH = os.path.join(BASE_DIR, settings.DB_NAME)
 
 def _query(sql, params=(), fetchone=False):
     """Internal helper to handle database connections and clean up. 
@@ -190,7 +190,7 @@ def get_questions(num_questions=None, resource_type=None, question_type=None, di
 
     Args:
         num_questions (int, optional): Maximum number of questions to return. If None, returns all matching questions.
-        resource_type (str, optional): Filter by resource type ('Water', 'Earth', 'Sun', 'General')
+        resource_type (str, optional): Filter by resource type ('water', 'earth', 'sun', 'general', etc.)
         question_type (str, optional): Filter by question type ('MCQ', 'FreeResponse', 'MultiSelect')
         difficulty (int, optional): Filter by difficulty level
 
@@ -201,7 +201,7 @@ def get_questions(num_questions=None, resource_type=None, question_type=None, di
                 'text': '...',
                 'type': 'MCQ',
                 'difficulty': 1,
-                'resourceType': 'Water',
+                'resourceType': 'water',
                 'choices': [{'text': '...', 'isCorrect': True/False}, ...]
             }
     """
@@ -210,8 +210,9 @@ def get_questions(num_questions=None, resource_type=None, question_type=None, di
     params = []
     
     if resource_type:
+        # Normalize resource_type to lowercase for case-insensitive comparison
         where_clauses.append("resourceType = ?")
-        params.append(resource_type)
+        params.append(resource_type.lower())
     
     if question_type:
         where_clauses.append("type = ?")

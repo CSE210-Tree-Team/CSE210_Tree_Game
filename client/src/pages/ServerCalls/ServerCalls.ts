@@ -7,7 +7,7 @@
  * 
  * The question and response formats are defined as TypeScript interfaces.
  * 
- * Reference constants.py for valid resource types and question types.
+ * Reference settings.py for valid resource types and question types.
  * Reference main.py for API endpoint implementations and expected request/response handling.
  * 
  * Example usage:
@@ -41,6 +41,25 @@ interface UpdateStatResponse {
 }
 
 /**
+ * Custom error class for authentication failures
+ */
+export class AuthenticationError extends Error {
+    constructor(message: string = 'Authentication required. Please log in again.') {
+        super(message);
+        this.name = 'AuthenticationError';
+    }
+}
+
+/**
+ * Handles 401 authentication errors by showing alert and redirecting to login
+ */
+export function handle401Error(): void {
+    alert('Your session has expired. Please log in again.');
+    // Redirect to root which will trigger Auth0 login
+    window.location.href = '/';
+}
+
+/**
  * Fetches questions list from Server. Refer to main.py for more.
  * @param numQuestions - Max number of questions to return
  * @param resourceType - Filter by resource (Defines the minigame the pulled questions pertained to)
@@ -68,6 +87,9 @@ export async function fetchQuestions(
     });
 
     if (!response.ok) {
+        if (response.status === 401) {
+            throw new AuthenticationError();
+        }
         throw new Error('Failed to fetch questions');
     }
 
@@ -96,7 +118,7 @@ export async function pushGameResults(progress: number, gameType: string): Promi
     const statName = gameType.toLowerCase();
 
     const response = await fetch('/api/update-stat', {
-        method: 'POST',
+        method: 'PUT',
         headers: {
             'Content-Type': 'application/json',
         },
@@ -107,6 +129,9 @@ export async function pushGameResults(progress: number, gameType: string): Promi
     });
 
     if (!response.ok) {
+        if (response.status === 401) {
+            throw new AuthenticationError();
+        }
         throw new Error(`Failed to update stat: ${response.statusText}`);
     }
 

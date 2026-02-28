@@ -24,17 +24,11 @@ Tables Created:
 
 import sqlite3
 import os
-from constants import (
-    DB_NAME, ROLE_STUDENT, ROLE_TEACHER, HEALTH_DEAD, HEALTH_WITHERED,
-    HEALTH_UNHEALTHY, HEALTH_HEALTHY, EVENT_LEVEL, EVENT_BONUS, EVENT_PENALTY, EVENT_NEUTRAL,
-    RESOURCE_WATER, RESOURCE_EARTH, RESOURCE_SUN, RESOURCE_NONE, RESOURCE_ALL,
-    QUESTION_MCQ, QUESTION_FREE_RESPONSE, QUESTION_MULTI_SELECT,
-    QUESTION_RESOURCE_WATER, QUESTION_RESOURCE_EARTH, QUESTION_RESOURCE_SUN, QUESTION_RESOURCE_GENERAL, QUESTION_RESOURCE_NONE
-)
+from config.settings import settings
 
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-DB_PATH = os.path.join(BASE_DIR, DB_NAME)
+DB_PATH = os.path.join(BASE_DIR, settings.DB_NAME)
 
 def create_schema(db_path=DB_PATH):
 
@@ -65,20 +59,20 @@ def create_schema(db_path=DB_PATH):
     cursor.execute(f'''
     CREATE TABLE IF NOT EXISTS AccountRole (
         username TEXT NOT NULL,
-        role TEXT NOT NULL CHECK(role IN ('{ROLE_STUDENT}', '{ROLE_TEACHER}')),
+        role TEXT NOT NULL CHECK(role IN ('{settings.ROLE_STUDENT}', '{settings.ROLE_TEACHER}')),
         PRIMARY KEY (username, role),
         FOREIGN KEY (username) REFERENCES Account(username) ON DELETE CASCADE
     )
     ''')
 
     # Tree Table
-    # health can only be 'Dead', 'Withered', 'Unhealthy', 'Healthy'
+    # health can be 'Healthy', 'Unhealthy', or 'Withered' based on resource levels
     # growthStage is an INTEGER representing stages of growth --> currently undefined specification
     cursor.execute(f'''
     CREATE TABLE IF NOT EXISTS Tree (
         treeID TEXT PRIMARY KEY,
         ownerUsername TEXT NOT NULL,
-        health TEXT NOT NULL CHECK(health IN ('{HEALTH_DEAD}', '{HEALTH_WITHERED}', '{HEALTH_UNHEALTHY}', '{HEALTH_HEALTHY}')),
+        health TEXT NOT NULL CHECK(health IN ('{settings.HEALTH_HEALTHY}', '{settings.HEALTH_UNHEALTHY}', '{settings.HEALTH_WITHERED}')),
         growthStage INTEGER DEFAULT 0,
         lastUpdated TEXT,
         FOREIGN KEY (ownerUsername) REFERENCES Account(username) ON DELETE CASCADE
@@ -109,12 +103,12 @@ def create_schema(db_path=DB_PATH):
 
     # Event Table
     # eventType can only be 'Level', 'Bonus', 'Penalty', 'Neutral'
-    # resourceAffected can be 'Water', 'Earth', 'Sun', 'None', 'All'
+    # resourceAffected can be 'water', 'earth', 'sun', 'none', 'all' (lowercase)
     cursor.execute(f'''
     CREATE TABLE IF NOT EXISTS Event (
         eventID TEXT PRIMARY KEY,
-        eventType TEXT NOT NULL CHECK(eventType IN ('{EVENT_LEVEL}', '{EVENT_BONUS}', '{EVENT_PENALTY}', '{EVENT_NEUTRAL}')),
-        resourceAffected TEXT CHECK(resourceAffected IN ('{RESOURCE_WATER}', '{RESOURCE_EARTH}', '{RESOURCE_SUN}', '{RESOURCE_NONE}', '{RESOURCE_ALL}')),
+        eventType TEXT NOT NULL CHECK(eventType IN ('{settings.EVENT_LEVEL}', '{settings.EVENT_BONUS}', '{settings.EVENT_PENALTY}', '{settings.EVENT_NEUTRAL}')),
+        resourceAffected TEXT CHECK(resourceAffected IN ('{settings.RESOURCE_WATER}', '{settings.RESOURCE_EARTH}', '{settings.RESOURCE_SUN}', '{settings.RESOURCE_NONE}', '{settings.RESOURCE_ALL}')),
         description TEXT,
         percentChange INTEGER,
         conditions TEXT
@@ -149,14 +143,14 @@ def create_schema(db_path=DB_PATH):
 
     # Question Table
     # type can be 'MCQ', 'FreeResponse', 'MultiSelect'
-    # resourceType can be 'Water', 'Earth', 'Sun', 'General'  --> General means all resources
+    # resourceType can be 'water', 'earth', 'sun', 'general' (lowercase)  --> General means all resources
     cursor.execute(f'''
     CREATE TABLE IF NOT EXISTS Question (
         questionID TEXT PRIMARY KEY,
         text TEXT NOT NULL,
-        type TEXT NOT NULL CHECK(type IN ('{QUESTION_MCQ}', '{QUESTION_FREE_RESPONSE}', '{QUESTION_MULTI_SELECT}')),
+        type TEXT NOT NULL CHECK(type IN ('{settings.QUESTION_MCQ}', '{settings.QUESTION_FREE_RESPONSE}', '{settings.QUESTION_MULTI_SELECT}')),
         difficulty INTEGER,
-        resourceType TEXT CHECK(resourceType IN ('{QUESTION_RESOURCE_WATER}', '{QUESTION_RESOURCE_EARTH}', '{QUESTION_RESOURCE_SUN}', '{QUESTION_RESOURCE_GENERAL}'))
+        resourceType TEXT CHECK(resourceType IN ('{settings.QUESTION_RESOURCE_WATER}', '{settings.QUESTION_RESOURCE_EARTH}', '{settings.QUESTION_RESOURCE_SUN}', '{settings.QUESTION_RESOURCE_GENERAL}'))
     )
     ''')
 

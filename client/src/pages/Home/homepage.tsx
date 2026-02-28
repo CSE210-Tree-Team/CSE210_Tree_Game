@@ -1,5 +1,6 @@
 import { useAuth0 } from '@auth0/auth0-react';
 import { useEffect, useState } from 'react';
+import { handle401Error } from '../ServerCalls/ServerCalls';
 import { useNavigate } from 'react-router-dom';
 import { Tree } from "../../components/Tree";
 import { Earth } from "../../components/Earth";
@@ -83,6 +84,9 @@ export const Homepage = () => {
                 if (response.ok) {
                     const data = await response.json();
                     setUserInfo(data);
+                } else if (response.status === 401) {
+                    handle401Error();
+                    return;
                 }
             } catch (error) {
                 console.error('Failed to establish backend session:', error);

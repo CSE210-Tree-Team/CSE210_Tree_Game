@@ -19,9 +19,9 @@ Test Coverage:
 import unittest
 import sqlite3
 import os
-from Database import createDatabase
-from Database import generateTestData
-from constants import DB_NAME
+from database import createDatabase
+from database import generateTestData
+from config.settings import settings
 
 class TestGameDatabaseSystem(unittest.TestCase):
     TEST_DB = "test_game_database.db"

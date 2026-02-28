@@ -10,10 +10,11 @@ import json
 import os
 import sys
 
-SERVER_DIR = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'server')
+# Add parent directory to path for imports
+SERVER_DIR = os.path.dirname(os.path.dirname(__file__))
 sys.path.insert(0, SERVER_DIR)
 
-from Database.addItemsToDatabase import add_question
+from database.addItemsToDatabase import add_question
 
 QUESTIONS_FILE = os.path.join(os.path.dirname(__file__), "questions.json")
 

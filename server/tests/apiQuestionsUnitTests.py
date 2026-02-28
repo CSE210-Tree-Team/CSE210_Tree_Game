@@ -23,15 +23,11 @@ from fastapi.testclient import TestClient
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 # Import the modules to test
-from Database.createDatabase import create_schema
-from Database.addItemsToDatabase import add_account, generate_tree, add_question
-from Database.getItemsFromDatabase import get_person
+from database.createDatabase import create_schema
+from database.addItemsToDatabase import add_account, generate_tree, add_question
+from database.getItemsFromDatabase import get_person
 
-from constants import (
-    DB_NAME, ROLE_STUDENT, QUESTION_MCQ, QUESTION_FREE_RESPONSE, QUESTION_MULTI_SELECT,
-    QUESTION_RESOURCE_WATER, QUESTION_RESOURCE_EARTH, QUESTION_RESOURCE_SUN,
-    QUESTION_RESOURCE_GENERAL
-)
+from config.settings import settings
 
 
 class APIQuestionsTestCase(unittest.TestCase):
@@ -40,12 +36,12 @@ class APIQuestionsTestCase(unittest.TestCase):
     def setUp(self):
         """Set up a fresh database and test client before each test."""
         self.test_dir = tempfile.mkdtemp()
-        self.db_path = os.path.join(self.test_dir, DB_NAME)
+        self.db_path = os.path.join(self.test_dir, settings.DB_NAME)
         
         # Patch the database path in all imported modules
-        import Database.addItemsToDatabase as addItemsToDatabase
-        import Database.getItemsFromDatabase as getItemsFromDatabase
-        import Database.createDatabase as createDatabase
+        import database.addItemsToDatabase as addItemsToDatabase
+        import database.getItemsFromDatabase as getItemsFromDatabase
+        import database.createDatabase as createDatabase
         
         addItemsToDatabase.DB_PATH = self.db_path
         getItemsFromDatabase.DB_PATH = self.db_path
@@ -68,7 +64,7 @@ class APIQuestionsTestCase(unittest.TestCase):
             displayName="Test Student",
             accountReference="test_ref",
             dateOfBirth="2000-01-01",
-            role=ROLE_STUDENT
+            role=settings.ROLE_STUDENT
         )
         generate_tree(username)
         return username
@@ -95,8 +91,8 @@ class TestAddQuestionFunction(APIQuestionsTestCase):
         """Test adding a multiple choice question."""
         question_id = add_question(
             text="What is 2+2?",
-            question_type=QUESTION_MCQ,
-            resource_type=QUESTION_RESOURCE_GENERAL,
+            question_type=settings.QUESTION_MCQ,
+            resource_type=settings.QUESTION_RESOURCE_GENERAL,
             choices=["3", "4", "5"],
             correct_choices=[1]
         )
@@ -110,8 +106,8 @@ class TestAddQuestionFunction(APIQuestionsTestCase):
             result = cursor.fetchone()
             self.assertIsNotNone(result)
             self.assertEqual(result[0], "What is 2+2?")
-            self.assertEqual(result[1], QUESTION_MCQ)
-            self.assertEqual(result[2], QUESTION_RESOURCE_GENERAL)
+            self.assertEqual(result[1], settings.QUESTION_MCQ)
+            self.assertEqual(result[2], settings.QUESTION_RESOURCE_GENERAL)
             
             # Check choices
             cursor.execute("SELECT text, isCorrect FROM QuestionChoice WHERE questionID = ? ORDER BY text", (question_id,))
@@ -125,8 +121,8 @@ class TestAddQuestionFunction(APIQuestionsTestCase):
         """Test adding a multi-select question with multiple correct answers."""
         question_id = add_question(
             text="Which are primary colors?",
-            question_type=QUESTION_MULTI_SELECT,
-            resource_type=QUESTION_RESOURCE_SUN,
+            question_type=settings.QUESTION_MULTI_SELECT,
+            resource_type=settings.QUESTION_RESOURCE_SUN,
             choices=["Red", "Green", "Blue", "Yellow"],
             correct_choices=[0, 2]  # Red and Blue
         )
@@ -146,8 +142,8 @@ class TestAddQuestionFunction(APIQuestionsTestCase):
         """Test adding a free response question without choices."""
         question_id = add_question(
             text="Explain photosynthesis.",
-            question_type=QUESTION_FREE_RESPONSE,
-            resource_type=QUESTION_RESOURCE_GENERAL,
+            question_type=settings.QUESTION_FREE_RESPONSE,
+            resource_type=settings.QUESTION_RESOURCE_GENERAL,
             choices=[],
             correct_choices=[]
         )
@@ -166,8 +162,8 @@ class TestAddQuestionFunction(APIQuestionsTestCase):
         # Add first question
         add_question(
             text="What is the capital of France?",
-            question_type=QUESTION_MCQ,
-            resource_type=QUESTION_RESOURCE_GENERAL,
+            question_type=settings.QUESTION_MCQ,
+            resource_type=settings.QUESTION_RESOURCE_GENERAL,
             choices=["London", "Paris", "Berlin"],
             correct_choices=[1]
         )
@@ -176,8 +172,8 @@ class TestAddQuestionFunction(APIQuestionsTestCase):
         with self.assertRaises(ValueError) as context:
             add_question(
                 text="What is the capital of France?",
-                question_type=QUESTION_MCQ,
-                resource_type=QUESTION_RESOURCE_GENERAL,
+                question_type=settings.QUESTION_MCQ,
+                resource_type=settings.QUESTION_RESOURCE_GENERAL,
                 choices=["London", "Paris", "Berlin"],
                 correct_choices=[1]
             )
@@ -189,8 +185,8 @@ class TestAddQuestionFunction(APIQuestionsTestCase):
         # Add first question
         q1_id = add_question(
             text="What is 1+1?",
-            question_type=QUESTION_MCQ,
-            resource_type=QUESTION_RESOURCE_GENERAL,
+            question_type=settings.QUESTION_MCQ,
+            resource_type=settings.QUESTION_RESOURCE_GENERAL,
             choices=["1", "2", "3"],
             correct_choices=[1]
         )
@@ -198,8 +194,8 @@ class TestAddQuestionFunction(APIQuestionsTestCase):
         # Add same text but different choices - should succeed
         q2_id = add_question(
             text="What is 1+1?",
-            question_type=QUESTION_MCQ,
-            resource_type=QUESTION_RESOURCE_GENERAL,
+            question_type=settings.QUESTION_MCQ,
+            resource_type=settings.QUESTION_RESOURCE_GENERAL,
             choices=["0", "2", "4"],
             correct_choices=[1]
         )
@@ -211,8 +207,8 @@ class TestAddQuestionFunction(APIQuestionsTestCase):
         # Add first question
         add_question(
             text="Test question",
-            question_type=QUESTION_MCQ,
-            resource_type=QUESTION_RESOURCE_GENERAL,
+            question_type=settings.QUESTION_MCQ,
+            resource_type=settings.QUESTION_RESOURCE_GENERAL,
             choices=["A", "B"],
             correct_choices=[0],
             check_duplicates=True
@@ -221,8 +217,8 @@ class TestAddQuestionFunction(APIQuestionsTestCase):
         # Add duplicate with check_duplicates=False - should succeed
         q2_id = add_question(
             text="Test question",
-            question_type=QUESTION_MCQ,
-            resource_type=QUESTION_RESOURCE_GENERAL,
+            question_type=settings.QUESTION_MCQ,
+            resource_type=settings.QUESTION_RESOURCE_GENERAL,
             choices=["A", "B"],
             correct_choices=[0],
             check_duplicates=False
@@ -236,7 +232,7 @@ class TestAddQuestionFunction(APIQuestionsTestCase):
             add_question(
                 text="Test",
                 question_type="InvalidType",
-                resource_type=QUESTION_RESOURCE_GENERAL,
+                resource_type=settings.QUESTION_RESOURCE_GENERAL,
                 choices=[],
                 correct_choices=[]
             )
@@ -248,7 +244,7 @@ class TestAddQuestionFunction(APIQuestionsTestCase):
         with self.assertRaises(ValueError) as context:
             add_question(
                 text="Test",
-                question_type=QUESTION_MCQ,
+                question_type=settings.QUESTION_MCQ,
                 resource_type="InvalidResource",
                 choices=["A", "B"],
                 correct_choices=[0]
@@ -260,16 +256,16 @@ class TestAddQuestionFunction(APIQuestionsTestCase):
         """Test adding questions with all valid resource types."""
         # Note: QUESTION_RESOURCE_NONE is not accepted by database CHECK constraint
         resource_types = [
-            QUESTION_RESOURCE_WATER,
-            QUESTION_RESOURCE_EARTH,
-            QUESTION_RESOURCE_SUN,
-            QUESTION_RESOURCE_GENERAL
+            settings.QUESTION_RESOURCE_WATER,
+            settings.QUESTION_RESOURCE_EARTH,
+            settings.QUESTION_RESOURCE_SUN,
+            settings.QUESTION_RESOURCE_GENERAL
         ]
         
         for resource_type in resource_types:
             q_id = add_question(
                 text=f"Question for {resource_type}",
-                question_type=QUESTION_MCQ,
+                question_type=settings.QUESTION_MCQ,
                 resource_type=resource_type,
                 choices=["A", "B"],
                 correct_choices=[0]
@@ -288,8 +284,8 @@ class TestAPIAddQuestion(APIQuestionsTestCase):
             "/api/add-question",
             json={
                 "text": "What is photosynthesis?",
-                "question_type": QUESTION_MCQ,
-                "resource_type": QUESTION_RESOURCE_SUN,
+                "question_type": settings.QUESTION_MCQ,
+                "resource_type": settings.QUESTION_RESOURCE_SUN,
                 "choices": ["Energy production", "Water absorption", "Root growth"],
                 "correct_choices": [0]
             }
@@ -298,8 +294,8 @@ class TestAPIAddQuestion(APIQuestionsTestCase):
         self.assertEqual(response.status_code, 200)
         data = response.json()
         self.assertTrue(data["success"])
-        self.assertIn("questionID", data)
-        self.assertEqual(data["message"], "Question added successfully")
+        self.assertIn("questionID", data["data"])
+        self.assertEqual(data["data"]["message"], "Question added successfully")
     
     def test_add_question_missing_text(self):
         """Test that missing question text returns an error."""
@@ -308,15 +304,15 @@ class TestAPIAddQuestion(APIQuestionsTestCase):
         response = client.post(
             "/api/add-question",
             json={
-                "question_type": QUESTION_MCQ,
-                "resource_type": QUESTION_RESOURCE_GENERAL,
+                "question_type": settings.QUESTION_MCQ,
+                "resource_type": settings.QUESTION_RESOURCE_GENERAL,
                 "choices": ["A", "B"],
                 "correct_choices": [0]
             }
         )
         
-        self.assertEqual(response.status_code, 400)
-        self.assertIn("Question text is required", response.json()["detail"])
+        self.assertEqual(response.status_code, 422)
+        # FastAPI/Pydantic returns 422 for validation errors
     
     def test_add_question_invalid_type(self):
         """Test that invalid question type returns an error."""
@@ -327,7 +323,7 @@ class TestAPIAddQuestion(APIQuestionsTestCase):
             json={
                 "text": "Test question",
                 "question_type": "InvalidType",
-                "resource_type": QUESTION_RESOURCE_GENERAL,
+                "resource_type": settings.QUESTION_RESOURCE_GENERAL,
                 "choices": ["A", "B"],
                 "correct_choices": [0]
             }
@@ -342,8 +338,8 @@ class TestAPIAddQuestion(APIQuestionsTestCase):
         
         question_data = {
             "text": "What is H2O?",
-            "question_type": QUESTION_MCQ,
-            "resource_type": QUESTION_RESOURCE_WATER,
+            "question_type": settings.QUESTION_MCQ,
+            "resource_type": settings.QUESTION_RESOURCE_WATER,
             "choices": ["Water", "Air", "Fire"],
             "correct_choices": [0]
         }
@@ -363,8 +359,8 @@ class TestAPIAddQuestion(APIQuestionsTestCase):
         
         question_data = {
             "text": "Duplicate test",
-            "question_type": QUESTION_MCQ,
-            "resource_type": QUESTION_RESOURCE_GENERAL,
+            "question_type": settings.QUESTION_MCQ,
+            "resource_type": settings.QUESTION_RESOURCE_GENERAL,
             "choices": ["A", "B"],
             "correct_choices": [0]
         }
@@ -386,8 +382,8 @@ class TestAPIAddQuestion(APIQuestionsTestCase):
             "/api/add-question",
             json={
                 "text": "Select all renewable energy sources:",
-                "question_type": QUESTION_MULTI_SELECT,
-                "resource_type": QUESTION_RESOURCE_SUN,
+                "question_type": settings.QUESTION_MULTI_SELECT,
+                "resource_type": settings.QUESTION_RESOURCE_SUN,
                 "choices": ["Solar", "Coal", "Wind", "Oil"],
                 "correct_choices": [0, 2]  # Solar and Wind
             }
@@ -405,8 +401,8 @@ class TestAPIAddQuestion(APIQuestionsTestCase):
             "/api/add-question",
             json={
                 "text": "Describe the water cycle.",
-                "question_type": QUESTION_FREE_RESPONSE,
-                "resource_type": QUESTION_RESOURCE_WATER,
+                "question_type": settings.QUESTION_FREE_RESPONSE,
+                "resource_type": settings.QUESTION_RESOURCE_WATER,
                 "choices": [],
                 "correct_choices": []
             }
@@ -427,16 +423,16 @@ class TestGetQuestionEndpoint(APIQuestionsTestCase):
         # Add some test questions
         self.q1_id = add_question(
             text="What is photosynthesis?",
-            question_type=QUESTION_MCQ,
-            resource_type=QUESTION_RESOURCE_SUN,
+            question_type=settings.QUESTION_MCQ,
+            resource_type=settings.QUESTION_RESOURCE_SUN,
             choices=["Energy production", "Water absorption", "Root growth"],
             correct_choices=[0]
         )
         
         self.q2_id = add_question(
             text="Which are primary colors?",
-            question_type=QUESTION_MULTI_SELECT,
-            resource_type=QUESTION_RESOURCE_GENERAL,
+            question_type=settings.QUESTION_MULTI_SELECT,
+            resource_type=settings.QUESTION_RESOURCE_GENERAL,
             choices=["Red", "Green", "Blue", "Yellow"],
             correct_choices=[0, 2]
         )
@@ -451,13 +447,13 @@ class TestGetQuestionEndpoint(APIQuestionsTestCase):
         self.assertEqual(response.status_code, 200)
         data = response.json()
         self.assertTrue(data["success"])
-        self.assertIn("question", data)
+        self.assertIn("question", data["data"])
         
-        question = data["question"]
+        question = data["data"]["question"]
         self.assertEqual(question["questionID"], self.q1_id)
         self.assertEqual(question["text"], "What is photosynthesis?")
-        self.assertEqual(question["type"], QUESTION_MCQ)
-        self.assertEqual(question["resourceType"], QUESTION_RESOURCE_SUN)
+        self.assertEqual(question["type"], settings.QUESTION_MCQ)
+        self.assertEqual(question["resourceType"], settings.QUESTION_RESOURCE_SUN)
     
     def test_get_single_question_with_choices(self):
         """Test that question includes choice information."""
@@ -468,7 +464,7 @@ class TestGetQuestionEndpoint(APIQuestionsTestCase):
         
         self.assertEqual(response.status_code, 200)
         data = response.json()
-        question = data["question"]
+        question = data["data"]["question"]
         
         self.assertIn("choices", question)
         self.assertEqual(len(question["choices"]), 3)
@@ -515,9 +511,9 @@ class TestGetQuestionEndpoint(APIQuestionsTestCase):
         
         self.assertEqual(response.status_code, 200)
         data = response.json()
-        question = data["question"]
+        question = data["data"]["question"]
         
-        self.assertEqual(question["type"], QUESTION_MULTI_SELECT)
+        self.assertEqual(question["type"], settings.QUESTION_MULTI_SELECT)
         
         # Verify multiple correct answers
         correct_answers = [c["text"] for c in question["choices"] if c["isCorrect"]]
@@ -537,32 +533,32 @@ class TestGetQuestionsEndpoint(APIQuestionsTestCase):
         # Add various test questions
         self.water_q1 = add_question(
             text="What percentage of Earth is water?",
-            question_type=QUESTION_MCQ,
-            resource_type=QUESTION_RESOURCE_WATER,
+            question_type=settings.QUESTION_MCQ,
+            resource_type=settings.QUESTION_RESOURCE_WATER,
             choices=["50%", "71%", "90%"],
             correct_choices=[1]
         )
         
         self.water_q2 = add_question(
             text="Which are types of precipitation?",
-            question_type=QUESTION_MULTI_SELECT,
-            resource_type=QUESTION_RESOURCE_WATER,
+            question_type=settings.QUESTION_MULTI_SELECT,
+            resource_type=settings.QUESTION_RESOURCE_WATER,
             choices=["Rain", "Snow", "Hail", "Dust"],
             correct_choices=[0, 1, 2]
         )
         
         self.sun_q1 = add_question(
             text="Why do plants need sunlight?",
-            question_type=QUESTION_FREE_RESPONSE,
-            resource_type=QUESTION_RESOURCE_SUN,
+            question_type=settings.QUESTION_FREE_RESPONSE,
+            resource_type=settings.QUESTION_RESOURCE_SUN,
             choices=[],
             correct_choices=[]
         )
         
         self.earth_q1 = add_question(
             text="What is soil made of?",
-            question_type=QUESTION_MCQ,
-            resource_type=QUESTION_RESOURCE_EARTH,
+            question_type=settings.QUESTION_MCQ,
+            resource_type=settings.QUESTION_RESOURCE_EARTH,
             choices=["Sand", "Rock and organic matter", "Clay"],
             correct_choices=[1]
         )
@@ -593,7 +589,7 @@ class TestGetQuestionsEndpoint(APIQuestionsTestCase):
         """Test filtering questions by resource type."""
         response = self.client.post(
             "/api/get-questions",
-            json={"resourceType": QUESTION_RESOURCE_WATER}
+            json={"resourceType": settings.QUESTION_RESOURCE_WATER}
         )
         
         self.assertEqual(response.status_code, 200)
@@ -602,13 +598,13 @@ class TestGetQuestionsEndpoint(APIQuestionsTestCase):
         
         # Verify all returned questions are Water type
         for question in data["questions"]:
-            self.assertEqual(question["resourceType"], QUESTION_RESOURCE_WATER)
+            self.assertEqual(question["resourceType"], settings.QUESTION_RESOURCE_WATER)
     
     def test_get_questions_by_question_type(self):
         """Test filtering questions by question type."""
         response = self.client.post(
             "/api/get-questions",
-            json={"questionType": QUESTION_MCQ}
+            json={"questionType": settings.QUESTION_MCQ}
         )
         
         self.assertEqual(response.status_code, 200)
@@ -617,15 +613,15 @@ class TestGetQuestionsEndpoint(APIQuestionsTestCase):
         
         # Verify all returned questions are MCQ type
         for question in data["questions"]:
-            self.assertEqual(question["type"], QUESTION_MCQ)
+            self.assertEqual(question["type"], settings.QUESTION_MCQ)
     
     def test_get_questions_multi_filter(self):
         """Test filtering by multiple criteria."""
         response = self.client.post(
             "/api/get-questions",
             json={
-                "resourceType": QUESTION_RESOURCE_WATER,
-                "questionType": QUESTION_MCQ,
+                "resourceType": settings.QUESTION_RESOURCE_WATER,
+                "questionType": settings.QUESTION_MCQ,
                 "numQuestions": 5
             }
         )
@@ -635,14 +631,14 @@ class TestGetQuestionsEndpoint(APIQuestionsTestCase):
         self.assertEqual(len(data["questions"]), 1)  # Only 1 Water MCQ
         
         question = data["questions"][0]
-        self.assertEqual(question["resourceType"], QUESTION_RESOURCE_WATER)
-        self.assertEqual(question["type"], QUESTION_MCQ)
+        self.assertEqual(question["resourceType"], settings.QUESTION_RESOURCE_WATER)
+        self.assertEqual(question["type"], settings.QUESTION_MCQ)
     
     def test_get_questions_multiselect_type(self):
         """Test retrieving multi-select questions."""
         response = self.client.post(
             "/api/get-questions",
-            json={"questionType": QUESTION_MULTI_SELECT}
+            json={"questionType": settings.QUESTION_MULTI_SELECT}
         )
         
         self.assertEqual(response.status_code, 200)
@@ -650,13 +646,13 @@ class TestGetQuestionsEndpoint(APIQuestionsTestCase):
         self.assertGreater(data["count"], 0)
         
         for question in data["questions"]:
-            self.assertEqual(question["type"], QUESTION_MULTI_SELECT)
+            self.assertEqual(question["type"], settings.QUESTION_MULTI_SELECT)
     
     def test_get_questions_free_response_type(self):
         """Test retrieving free response questions."""
         response = self.client.post(
             "/api/get-questions",
-            json={"questionType": QUESTION_FREE_RESPONSE}
+            json={"questionType": settings.QUESTION_FREE_RESPONSE}
         )
         
         self.assertEqual(response.status_code, 200)
@@ -664,7 +660,7 @@ class TestGetQuestionsEndpoint(APIQuestionsTestCase):
         self.assertGreater(data["count"], 0)
         
         for question in data["questions"]:
-            self.assertEqual(question["type"], QUESTION_FREE_RESPONSE)
+            self.assertEqual(question["type"], settings.QUESTION_FREE_RESPONSE)
     
     def test_get_questions_randomization(self):
         """Test that multiple calls return different orders (randomization)."""
@@ -754,10 +750,10 @@ class TestGetQuestionsEndpoint(APIQuestionsTestCase):
     def test_get_questions_all_resource_types(self):
         """Test retrieving questions for each resource type separately."""
         resource_types = [
-            QUESTION_RESOURCE_WATER,
-            QUESTION_RESOURCE_EARTH,
-            QUESTION_RESOURCE_SUN,
-            QUESTION_RESOURCE_GENERAL
+            settings.QUESTION_RESOURCE_WATER,
+            settings.QUESTION_RESOURCE_EARTH,
+            settings.QUESTION_RESOURCE_SUN,
+            settings.QUESTION_RESOURCE_GENERAL
         ]
         
         for resource_type in resource_types:

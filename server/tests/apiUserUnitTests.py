@@ -18,8 +18,8 @@ from tests.apiQuestionsUnitTests import APIQuestionsTestCase
 from fastapi.testclient import TestClient
 
 # Import the modules to test
-from Database.getItemsFromDatabase import get_person
-from constants import ROLE_STUDENT
+from database.getItemsFromDatabase import get_person
+from config.settings import settings
 
 
 class TestUserAPIRoutes(APIQuestionsTestCase):
@@ -68,7 +68,7 @@ class TestUserAPIRoutes(APIQuestionsTestCase):
         self.assertEqual(user["username"], "test_student@example.com")
         self.assertEqual(user["displayName"], "Test Student")
         self.assertEqual(user["email"], "test_student@example.com")
-        self.assertIn(ROLE_STUDENT, user["roles"])
+        self.assertIn(settings.ROLE_STUDENT, user["roles"])
     
     def test_get_user_info_tree_has_resources(self):
         """Test that the tree in /api/get-user-info has resource levels."""

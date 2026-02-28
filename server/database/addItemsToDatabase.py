@@ -29,20 +29,13 @@ Functions - Class Management:
 import sqlite3
 import os
 from datetime import datetime
-from constants import (
-    DB_NAME, ROLE_STUDENT, ROLE_TEACHER, VALID_ROLES,
-    HEALTH_HEALTHY, VALID_HEALTH_STATUSES,
-    RESOURCE_WATER, RESOURCE_EARTH, RESOURCE_SUN, RESOURCE_ALL, RESOURCE_NONE,
-    VALID_QUESTION_TYPES, VALID_QUESTION_RESOURCE_TYPES,
-    ATTEMPT_RESOURCE_NONE, EVENT_LEVEL, EVENT_BONUS, EVENT_PENALTY, EVENT_NEUTRAL,
-    RESOURCE_MAX_LEVEL, RESOURCE_MIN_LEVEL, PASSIVE_DECAY_RATE
-)
-import dataRecords as dataclasses
+from config.settings import settings
+from schemas import Event
 import uuid
 
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-DB_PATH = os.path.join(BASE_DIR, DB_NAME)
+DB_PATH = os.path.join(BASE_DIR, settings.DB_NAME)
 
 
 def _execute(sql, params=(), commit=True):
@@ -79,8 +72,8 @@ def add_account(username: str, email: str, passwordHash: str, displayName: str,
         ValueError: If role is invalid or required fields are missing
         sqlite3.IntegrityError: If username already exists
     """
-    if role not in VALID_ROLES:
-        raise ValueError(f"Invalid role '{role}'. Must be one of {VALID_ROLES}")
+    if role not in settings.VALID_ROLES:
+        raise ValueError(f"Invalid role '{role}'. Must be one of {settings.VALID_ROLES}")
     
     if not all([username, email, passwordHash, accountReference]):
         raise ValueError("username, email, passwordHash, and accountReference are required")
@@ -104,7 +97,7 @@ def add_question(text: str, question_type: str, resource_type: str, choices: lis
     Args:
         text: The question text
         question_type: Type of question ('MCQ', 'FreeResponse', or 'MultiSelect')
-        resource_type: Resource type ('Water', 'Earth', 'Sun', 'General', or 'None')
+        resource_type: Resource type ('water', 'earth', 'sun', 'general', or 'none', case-insensitive)
         choices: List of choice texts
         correct_choices: List of indices indicating which choices are correct
         check_duplicates: Whether to check for duplicate questions (default: True)
@@ -115,11 +108,11 @@ def add_question(text: str, question_type: str, resource_type: str, choices: lis
     Raises:
         ValueError: If question_type or resource_type is invalid, or if duplicate exists
     """
-    if question_type not in VALID_QUESTION_TYPES:
-        raise ValueError(f"Invalid question type '{question_type}'. Must be one of {VALID_QUESTION_TYPES}")
+    if question_type not in settings.VALID_QUESTION_TYPES:
+        raise ValueError(f"Invalid question type '{question_type}'. Must be one of {settings.VALID_QUESTION_TYPES}")
     
-    if resource_type and resource_type not in VALID_QUESTION_RESOURCE_TYPES:
-        raise ValueError(f"Invalid resource type '{resource_type}'. Must be one of {VALID_QUESTION_RESOURCE_TYPES}")
+    if resource_type and resource_type.lower() not in settings.VALID_QUESTION_RESOURCE_TYPES:
+        raise ValueError(f"Invalid resource type '{resource_type}'. Must be one of {settings.VALID_QUESTION_RESOURCE_TYPES}")
     
     if not os.path.exists(DB_PATH):
         raise FileNotFoundError(f"Database {DB_PATH} does not exist. Please create it first.")
@@ -159,7 +152,7 @@ def add_question(text: str, question_type: str, resource_type: str, choices: lis
         # Insert Question
         cursor.execute(
             "INSERT INTO Question (questionID, text, type, difficulty, resourceType) VALUES (?, ?, ?, ?, ?)",
-            (q_id, text, question_type, 1, resource_type)
+            (q_id, text, question_type, 1, resource_type.lower() if resource_type else resource_type)
         )
         
         # Insert Choices (if any)
@@ -187,8 +180,8 @@ def add_role(username: str, role: str):
         ValueError: If role is invalid
         sqlite3.IntegrityError: If the role already exists for this account
     """
-    if role not in VALID_ROLES:
-        raise ValueError(f"Invalid role '{role}'. Must be one of {VALID_ROLES}")
+    if role not in settings.VALID_ROLES:
+        raise ValueError(f"Invalid role '{role}'. Must be one of {settings.VALID_ROLES}")
     
     sql = '''
         INSERT INTO AccountRole (username, role)
@@ -208,7 +201,7 @@ def add_question_alone(question_id: str, text: str, question_type: str, difficul
         text: The question text
         question_type: Type of question ('MCQ', 'FreeResponse', or 'MultiSelect')
         difficulty: Difficulty level (optional)
-        resource_type: Resource type ('Water', 'Earth', 'Sun', or 'General')
+        resource_type: Resource type ('water', 'earth', 'sun', or 'general', case-insensitive)
     
     Returns:
         str: The question ID
@@ -216,18 +209,18 @@ def add_question_alone(question_id: str, text: str, question_type: str, difficul
     Raises:
         ValueError: If question_type or resource_type is invalid
     """
-    if question_type not in VALID_QUESTION_TYPES:
-        raise ValueError(f"Invalid question type '{question_type}'. Must be one of {VALID_QUESTION_TYPES}")
+    if question_type not in settings.VALID_QUESTION_TYPES:
+        raise ValueError(f"Invalid question type '{question_type}'. Must be one of {settings.VALID_QUESTION_TYPES}")
     
-    if resource_type and resource_type not in VALID_QUESTION_RESOURCE_TYPES:
-        raise ValueError(f"Invalid resource type '{resource_type}'. Must be one of {VALID_QUESTION_RESOURCE_TYPES}")
+    if resource_type and resource_type.lower() not in settings.VALID_QUESTION_RESOURCE_TYPES:
+        raise ValueError(f"Invalid resource type '{resource_type}'. Must be one of {settings.VALID_QUESTION_RESOURCE_TYPES}")
     
     sql = '''
         INSERT INTO Question (questionID, text, type, difficulty, resourceType)
         VALUES (?, ?, ?, ?, ?)
     '''
     
-    _execute(sql, (question_id, text, question_type, difficulty, resource_type))
+    _execute(sql, (question_id, text, question_type, difficulty, resource_type.lower() if resource_type else resource_type))
     return question_id
 
 
@@ -252,8 +245,8 @@ def apply_passive_decay(tree_ID: str):
     """
     Apply passive decay to a tree's resources if enough time has passed since lastUpdated.
     
-    The decay is calculated based on PASSIVE_DECAY_RATE (in minutes). One level decays
-    every PASSIVE_DECAY_RATE minutes. The lastUpdated field is only updated if any
+    The decay is calculated based on settings.PASSIVE_DECAY_RATE (in minutes). One level decays
+    every settings.PASSIVE_DECAY_RATE minutes. The lastUpdated field is only updated if any
     resource values actually changed.
     
     Args:
@@ -262,7 +255,7 @@ def apply_passive_decay(tree_ID: str):
     Returns:
         bool: True if any resources were decayed, False otherwise
     """
-    from Database.getItemsFromDatabase import _query
+    from database.getItemsFromDatabase import _query
     
     # Fetch the tree data
     tree = _query(
@@ -283,7 +276,7 @@ def apply_passive_decay(tree_ID: str):
     elapsed_minutes = (current_time - last_updated).total_seconds() / 60
     
     # Calculate how many levels to decay (truncate to integer)
-    decay_amount = int(elapsed_minutes // PASSIVE_DECAY_RATE)
+    decay_amount = int(elapsed_minutes // settings.PASSIVE_DECAY_RATE)
     
     if decay_amount <= 0:
         return False  # Not enough time has passed
@@ -320,7 +313,7 @@ def apply_passive_decay(tree_ID: str):
     return False
 
 
-def do_event(tree_ID: str, event: dataclasses.Event, value: int):
+def do_event(tree_ID: str, event: Event, value: int):
     """
     Handle an event for a tree, updating its resources based on the event type.
     
@@ -334,17 +327,17 @@ def do_event(tree_ID: str, event: dataclasses.Event, value: int):
     """
     
     # Determine which resources to update
-    if event.resourceAffected == RESOURCE_ALL:
-        resources = [RESOURCE_WATER, RESOURCE_EARTH, RESOURCE_SUN]
-    elif event.resourceAffected == RESOURCE_NONE:
+    if event.resourceAffected == settings.RESOURCE_ALL:
+        resources = [settings.RESOURCE_WATER, settings.RESOURCE_EARTH, settings.RESOURCE_SUN]
+    elif event.resourceAffected == settings.RESOURCE_NONE:
         return  # No resources affected
     else:
         resources = [event.resourceAffected]
     
     # Calculate the change amount
-    if event.eventType == EVENT_BONUS:
+    if event.eventType == settings.EVENT_BONUS:
         change = abs(value)
-    elif event.eventType == EVENT_PENALTY:
+    elif event.eventType == settings.EVENT_PENALTY:
         change = -(abs(value))
     else:
         change = 0
@@ -366,7 +359,7 @@ def update_stat(tree_ID: str, stat_name: str, value: int):
     Raises:
         ValueError: If stat_name is invalid
     """
-    from Database.getItemsFromDatabase import _query
+    from database.getItemsFromDatabase import _query
 
     stat_name_lower = stat_name.lower()
     valid_stats = ['water', 'earth', 'sun']  # TODO: Consider converting this to be: VALID_RESOURCES
@@ -387,10 +380,10 @@ def update_stat(tree_ID: str, stat_name: str, value: int):
     
     # Calculate new value with clamping
     new_value = current_value + value
-    if new_value < RESOURCE_MIN_LEVEL:
-        new_value = RESOURCE_MIN_LEVEL
-    elif new_value > RESOURCE_MAX_LEVEL:
-        new_value = RESOURCE_MAX_LEVEL
+    if new_value < settings.RESOURCE_MIN_LEVEL:
+        new_value = settings.RESOURCE_MIN_LEVEL
+    elif new_value > settings.RESOURCE_MAX_LEVEL:
+        new_value = settings.RESOURCE_MAX_LEVEL
     
     # Only update if the value actually changes
     if new_value != current_value:
@@ -422,8 +415,8 @@ def update_health(tree_ID: str, health_status: str):
     Raises:
         ValueError: If health_status is invalid
     """
-    if health_status not in VALID_HEALTH_STATUSES:
-        raise ValueError(f"Invalid health status '{health_status}'. Must be one of {VALID_HEALTH_STATUSES}")
+    if health_status not in settings.VALID_HEALTH_STATUSES:
+        raise ValueError(f"Invalid health status '{health_status}'. Must be one of {settings.VALID_HEALTH_STATUSES}")
     
     sql = '''
         UPDATE Tree
@@ -557,7 +550,7 @@ def generate_tree(username: str) -> str:
         VALUES (?, ?, ?, ?)
     '''
     
-    _execute(sql_tree, (tree_id, username, HEALTH_HEALTHY, datetime.now().isoformat()))
+    _execute(sql_tree, (tree_id, username, settings.HEALTH_HEALTHY, datetime.now().isoformat()))
     _execute(sql_resources, (tree_id, 100, 100, 100))  # Default resources set to 100
     
     return tree_id

@@ -1,8 +1,10 @@
+"""Event-related data schemas."""
 from dataclasses import dataclass
-from typing import Optional, Literal
+from typing import Literal, Optional
 
 EventType = Literal["Decay", "Bonus", "Penalty"]
 Resource = Literal["Water", "Earth", "Sun", "None", "All"]
+
 
 @dataclass
 class Event:
@@ -13,6 +15,7 @@ class Event:
     percentChange: int
     conditions: Optional[str]
 
+
 # Simple dummy event for testing/demo usage.
 DUMMY_EVENT = Event(
     eventID="dummy-event-001",
@@ -22,10 +25,3 @@ DUMMY_EVENT = Event(
     percentChange=10,
     conditions="None"
 )
-
-@dataclass
-class Tree:
-    treeID: str
-    ownerUsername: str
-    resourceLevels: dict[str, int]  # {'water': int, 'earth': int, 'sun': int}
-    lastUpdated: str  # ISO formatted date string

@@ -136,7 +136,7 @@ describe("pushGameResults", () => {
     expect(fetchMock).toHaveBeenCalledWith(
       "/api/update-stat",
       expect.objectContaining({
-        method: "POST",
+        method: "PUT",
       })
     );
 

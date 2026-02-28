@@ -42,23 +42,16 @@ import uuid
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 # Import the modules to test using absolute imports
-from Database.createDatabase import create_schema
-from Database.addItemsToDatabase import (
+from database.createDatabase import create_schema
+from database.addItemsToDatabase import (
     add_account, add_role, add_question_alone, add_question_choice,
     update_stat, update_health, update_account, update_last_login,
     generate_tree, do_event, join_class, add_student_details
 )
-from Database.getItemsFromDatabase import get_person, get_tree
+from database.getItemsFromDatabase import get_person, get_tree
 
-from constants import (
-    DB_NAME, ROLE_STUDENT, ROLE_TEACHER,
-    HEALTH_HEALTHY, HEALTH_WITHERED, HEALTH_DEAD, HEALTH_UNHEALTHY,
-    RESOURCE_WATER, RESOURCE_EARTH, RESOURCE_SUN, RESOURCE_NONE, RESOURCE_ALL,
-    QUESTION_MCQ, QUESTION_FREE_RESPONSE, QUESTION_MULTI_SELECT,
-    QUESTION_RESOURCE_WATER, QUESTION_RESOURCE_GENERAL,
-    RESOURCE_MAX_LEVEL, RESOURCE_MIN_LEVEL, EVENT_BONUS, EVENT_PENALTY, EVENT_LEVEL, EVENT_NEUTRAL
-)
-import dataRecords as dataclasses
+from config.settings import settings
+from schemas import Event
 
 
 class DatabaseInteractTestCase(unittest.TestCase):
@@ -67,12 +60,12 @@ class DatabaseInteractTestCase(unittest.TestCase):
     def setUp(self):
         """Set up a fresh database before each test."""
         self.test_dir = tempfile.mkdtemp()
-        self.db_path = os.path.join(self.test_dir, DB_NAME)
+        self.db_path = os.path.join(self.test_dir, settings.DB_NAME)
         
         # Patch the database path in all imported modules
-        import Database.addItemsToDatabase as addItemsToDatabase
-        import Database.getItemsFromDatabase as getItemsFromDatabase
-        import Database.createDatabase as createDatabase
+        import database.addItemsToDatabase as addItemsToDatabase
+        import database.getItemsFromDatabase as getItemsFromDatabase
+        import database.createDatabase as createDatabase
         
         addItemsToDatabase.DB_PATH = self.db_path
         getItemsFromDatabase.DB_PATH = self.db_path
@@ -98,7 +91,7 @@ class TestAddAccount(DatabaseInteractTestCase):
             displayName="Student One",
             accountReference="ref_001",
             dateOfBirth="2010-05-15",
-            role=ROLE_STUDENT
+            role=settings.ROLE_STUDENT
         )
         
         self.assertEqual(username, "student1")
@@ -106,7 +99,7 @@ class TestAddAccount(DatabaseInteractTestCase):
         self.assertIsNotNone(person)
         self.assertEqual(person['email'], "student1@example.com")
         self.assertEqual(person['displayName'], "Student One")
-        self.assertIn(ROLE_STUDENT, person['roles'])
+        self.assertIn(settings.ROLE_STUDENT, person['roles'])
         self.assertNotIn('passwordHash', person)  # Should be removed
     
     def test_add_account_teacher(self):
@@ -118,13 +111,13 @@ class TestAddAccount(DatabaseInteractTestCase):
             displayName="Teacher One",
             accountReference="ref_002",
             dateOfBirth="1985-03-20",
-            role=ROLE_TEACHER
+            role=settings.ROLE_TEACHER
         )
         
         self.assertEqual(username, "teacher1")
         person = get_person("teacher1")
         self.assertIsNotNone(person)
-        self.assertIn(ROLE_TEACHER, person['roles'])
+        self.assertIn(settings.ROLE_TEACHER, person['roles'])
     
     def test_add_account_invalid_role(self):
         """Test adding account with invalid role raises ValueError."""
@@ -149,7 +142,7 @@ class TestAddAccount(DatabaseInteractTestCase):
                 displayName="Test",
                 accountReference="ref",
                 dateOfBirth="2000-01-01",
-                role=ROLE_STUDENT
+                role=settings.ROLE_STUDENT
             )
     
     def test_add_account_duplicate_username(self):
@@ -161,7 +154,7 @@ class TestAddAccount(DatabaseInteractTestCase):
             displayName="User 1",
             accountReference="ref1",
             dateOfBirth="2000-01-01",
-            role=ROLE_STUDENT
+            role=settings.ROLE_STUDENT
         )
         
         # Try to add another account with same username
@@ -173,7 +166,7 @@ class TestAddAccount(DatabaseInteractTestCase):
                 displayName="User 2",
                 accountReference="ref2",
                 dateOfBirth="2000-01-01",
-                role=ROLE_STUDENT
+                role=settings.ROLE_STUDENT
             )
 
 
@@ -189,15 +182,15 @@ class TestAddRole(DatabaseInteractTestCase):
             displayName="Dual Role",
             accountReference="ref",
             dateOfBirth="2000-01-01",
-            role=ROLE_STUDENT
+            role=settings.ROLE_STUDENT
         )
         
         # Add teacher role
-        add_role("dual_role_user", ROLE_TEACHER)
+        add_role("dual_role_user", settings.ROLE_TEACHER)
         
         person = get_person("dual_role_user")
-        self.assertIn(ROLE_STUDENT, person['roles'])
-        self.assertIn(ROLE_TEACHER, person['roles'])
+        self.assertIn(settings.ROLE_STUDENT, person['roles'])
+        self.assertIn(settings.ROLE_TEACHER, person['roles'])
     
     def test_add_invalid_role(self):
         """Test adding invalid role raises ValueError."""
@@ -208,7 +201,7 @@ class TestAddRole(DatabaseInteractTestCase):
             displayName="User",
             accountReference="ref",
             dateOfBirth="2000-01-01",
-            role=ROLE_STUDENT
+            role=settings.ROLE_STUDENT
         )
         
         with self.assertRaises(ValueError):
@@ -223,9 +216,9 @@ class TestQuestion(DatabaseInteractTestCase):
         question_id = add_question_alone(
             question_id="q1",
             text="What is 2+2?",
-            question_type=QUESTION_MCQ,
+            question_type=settings.QUESTION_MCQ,
             difficulty=1,
-            resource_type=QUESTION_RESOURCE_GENERAL
+            resource_type=settings.QUESTION_RESOURCE_GENERAL
         )
         
         self.assertEqual(question_id, "q1")
@@ -235,9 +228,9 @@ class TestQuestion(DatabaseInteractTestCase):
         question_id = add_question_alone(
             question_id="q_math",
             text="What is 2+2?",
-            question_type=QUESTION_MCQ,
+            question_type=settings.QUESTION_MCQ,
             difficulty=1,
-            resource_type=QUESTION_RESOURCE_WATER
+            resource_type=settings.QUESTION_RESOURCE_WATER
         )
         
         add_question_choice("choice1", question_id, "3", is_correct=False)
@@ -273,7 +266,7 @@ class TestQuestion(DatabaseInteractTestCase):
             add_question_alone(
                 question_id="q_invalid",
                 text="Test question",
-                question_type=QUESTION_MCQ,
+                question_type=settings.QUESTION_MCQ,
                 resource_type="InvalidResource"
             )
 
@@ -292,7 +285,7 @@ class TestTreeAndResources(DatabaseInteractTestCase):
             displayName="Tree Owner",
             accountReference="ref",
             dateOfBirth="2000-01-01",
-            role=ROLE_STUDENT
+            role=settings.ROLE_STUDENT
         )
     
     def test_generate_tree(self):
@@ -305,10 +298,10 @@ class TestTreeAndResources(DatabaseInteractTestCase):
         self.assertIsNotNone(tree)
         self.assertEqual(tree['treeID'], tree_id)
         self.assertEqual(tree['ownerUsername'], "tree_owner")
-        self.assertEqual(tree['health'], HEALTH_HEALTHY)
-        self.assertEqual(tree['resourceLevels']['water'], RESOURCE_MAX_LEVEL)
-        self.assertEqual(tree['resourceLevels']['earth'], RESOURCE_MAX_LEVEL)
-        self.assertEqual(tree['resourceLevels']['sun'], RESOURCE_MAX_LEVEL)
+        self.assertEqual(tree['health'], settings.HEALTH_HEALTHY)
+        self.assertEqual(tree['resourceLevels']['water'], settings.RESOURCE_MAX_LEVEL)
+        self.assertEqual(tree['resourceLevels']['earth'], settings.RESOURCE_MAX_LEVEL)
+        self.assertEqual(tree['resourceLevels']['sun'], settings.RESOURCE_MAX_LEVEL)
     
     def test_update_water_resource(self):
         """Test updating water resource."""
@@ -317,7 +310,7 @@ class TestTreeAndResources(DatabaseInteractTestCase):
         update_stat(tree_id, "water", 50)
         
         tree = get_tree("tree_owner")
-        self.assertEqual(tree['resourceLevels']['water'], RESOURCE_MAX_LEVEL)
+        self.assertEqual(tree['resourceLevels']['water'], settings.RESOURCE_MAX_LEVEL)
     
     def test_update_resource_negative(self):
         """Test subtracting from resources."""
@@ -336,7 +329,7 @@ class TestTreeAndResources(DatabaseInteractTestCase):
         update_stat(tree_id, "water", -200)
         
         tree = get_tree("tree_owner")
-        self.assertEqual(tree['resourceLevels']['water'], RESOURCE_MIN_LEVEL)
+        self.assertEqual(tree['resourceLevels']['water'], settings.RESOURCE_MIN_LEVEL)
     
     def test_update_resource_clamps_to_max(self):
         """Test that resources don't exceed maximum level."""
@@ -346,7 +339,7 @@ class TestTreeAndResources(DatabaseInteractTestCase):
         update_stat(tree_id, "water", 500)
         
         tree = get_tree("tree_owner")
-        self.assertEqual(tree['resourceLevels']['water'], RESOURCE_MAX_LEVEL)
+        self.assertEqual(tree['resourceLevels']['water'], settings.RESOURCE_MAX_LEVEL)
     
     def test_update_all_resources(self):
         """Test updating multiple resources."""
@@ -357,9 +350,9 @@ class TestTreeAndResources(DatabaseInteractTestCase):
         update_stat(tree_id, "sun", 75)
         
         tree = get_tree("tree_owner")
-        self.assertEqual(tree['resourceLevels']['water'], RESOURCE_MAX_LEVEL)
+        self.assertEqual(tree['resourceLevels']['water'], settings.RESOURCE_MAX_LEVEL)
         self.assertEqual(tree['resourceLevels']['earth'], 50)
-        self.assertEqual(tree['resourceLevels']['sun'], RESOURCE_MAX_LEVEL)
+        self.assertEqual(tree['resourceLevels']['sun'], settings.RESOURCE_MAX_LEVEL)
     
     def test_update_resource_invalid_stat(self):
         """Test updating invalid stat name raises ValueError."""
@@ -372,10 +365,10 @@ class TestTreeAndResources(DatabaseInteractTestCase):
         """Test updating tree health status."""
         tree_id = generate_tree("tree_owner")
         
-        update_health(tree_id, HEALTH_WITHERED)
+        update_health(tree_id, settings.HEALTH_WITHERED)
         
         tree = get_tree("tree_owner")
-        self.assertEqual(tree['health'], HEALTH_WITHERED)
+        self.assertEqual(tree['health'], settings.HEALTH_WITHERED)
     
     def test_update_health_invalid_status(self):
         """Test updating to invalid health status raises ValueError."""
@@ -399,17 +392,17 @@ class TestEvents(DatabaseInteractTestCase):
             displayName="Event User",
             accountReference="ref",
             dateOfBirth="2000-01-01",
-            role=ROLE_STUDENT
+            role=settings.ROLE_STUDENT
         )
         
         self.tree_id = generate_tree("event_user")
     
     def test_do_event_bonus_single_resource(self):
         """Test applying a bonus event to a single resource."""
-        event = dataclasses.Event(
+        event = Event(
             eventID="event1",
             eventType="Bonus",
-            resourceAffected=RESOURCE_WATER,
+            resourceAffected=settings.RESOURCE_WATER,
             description="Water bonus",
             percentChange=10,
             conditions=None
@@ -418,15 +411,15 @@ class TestEvents(DatabaseInteractTestCase):
         do_event(self.tree_id, event, 50)
         
         tree = get_tree("event_user")
-        self.assertEqual(tree['resourceLevels']['water'], RESOURCE_MAX_LEVEL)
-        self.assertEqual(tree['resourceLevels']['earth'], RESOURCE_MAX_LEVEL)  # Unchanged
+        self.assertEqual(tree['resourceLevels']['water'], settings.RESOURCE_MAX_LEVEL)
+        self.assertEqual(tree['resourceLevels']['earth'], settings.RESOURCE_MAX_LEVEL)  # Unchanged
     
     def test_do_event_penalty_single_resource(self):
         """Test applying a penalty event."""
-        event = dataclasses.Event(
+        event = Event(
             eventID="event2",
             eventType="Penalty",
-            resourceAffected=RESOURCE_EARTH,
+            resourceAffected=settings.RESOURCE_EARTH,
             description="Earth penalty",
             percentChange=-10,
             conditions=None
@@ -439,10 +432,10 @@ class TestEvents(DatabaseInteractTestCase):
     
     def test_do_event_bonus_all_resources(self):
         """Test applying a bonus to all resources."""
-        event = dataclasses.Event(
+        event = Event(
             eventID="event3",
             eventType="Bonus",
-            resourceAffected=RESOURCE_ALL,
+            resourceAffected=settings.RESOURCE_ALL,
             description="All resources bonus",
             percentChange=10,
             conditions=None
@@ -451,18 +444,18 @@ class TestEvents(DatabaseInteractTestCase):
         do_event(self.tree_id, event, 25)
         
         tree = get_tree("event_user")
-        self.assertEqual(tree['resourceLevels']['water'], RESOURCE_MAX_LEVEL)
-        self.assertEqual(tree['resourceLevels']['earth'], RESOURCE_MAX_LEVEL)
-        self.assertEqual(tree['resourceLevels']['sun'], RESOURCE_MAX_LEVEL)
+        self.assertEqual(tree['resourceLevels']['water'], settings.RESOURCE_MAX_LEVEL)
+        self.assertEqual(tree['resourceLevels']['earth'], settings.RESOURCE_MAX_LEVEL)
+        self.assertEqual(tree['resourceLevels']['sun'], settings.RESOURCE_MAX_LEVEL)
     
     def test_do_event_none_resource(self):
         """Test event with no resource affected doesn't change anything."""
         original_water = get_tree("event_user")['resourceLevels']['water']
         
-        event = dataclasses.Event(
+        event = Event(
             eventID="event4",
             eventType="Bonus",
-            resourceAffected=RESOURCE_NONE,
+            resourceAffected=settings.RESOURCE_NONE,
             description="No resource event",
             percentChange=10,
             conditions=None
@@ -488,7 +481,7 @@ class TestAccountUpdate(DatabaseInteractTestCase):
             displayName="Original Name",
             accountReference="ref",
             dateOfBirth="2000-01-01",
-            role=ROLE_STUDENT
+            role=settings.ROLE_STUDENT
         )
     
     def test_update_display_name(self):
@@ -544,7 +537,7 @@ class TestLastLogin(DatabaseInteractTestCase):
             displayName="Login User",
             accountReference="ref",
             dateOfBirth="2000-01-01",
-            role=ROLE_STUDENT
+            role=settings.ROLE_STUDENT
         )
     
     def test_update_last_login(self):
@@ -578,7 +571,7 @@ class TestStudentDetails(DatabaseInteractTestCase):
             displayName="Student",
             accountReference="ref",
             dateOfBirth="2010-05-15",
-            role=ROLE_STUDENT
+            role=settings.ROLE_STUDENT
         )
     
     def test_add_student_details(self):
@@ -621,7 +614,7 @@ class TestIntegration(DatabaseInteractTestCase):
             displayName="John Doe",
             accountReference="jd_001",
             dateOfBirth="2010-03-15",
-            role=ROLE_STUDENT
+            role=settings.ROLE_STUDENT
         )
         
         # Add student details
@@ -631,10 +624,10 @@ class TestIntegration(DatabaseInteractTestCase):
         tree_id = generate_tree("john_student")
         
         # Update tree resources through an event
-        event = dataclasses.Event(
+        event = Event(
             eventID="integration_event",
-            eventType=EVENT_BONUS,
-            resourceAffected=RESOURCE_ALL,
+            eventType=settings.EVENT_BONUS,
+            resourceAffected=settings.RESOURCE_ALL,
             description="Starting bonus",
             percentChange=50,
             conditions=None
@@ -647,30 +640,30 @@ class TestIntegration(DatabaseInteractTestCase):
         # Verify final state
         person = get_person("john_student")
         self.assertIsNotNone(person)
-        self.assertIn(ROLE_STUDENT, person['roles'])
+        self.assertIn(settings.ROLE_STUDENT, person['roles'])
         self.assertIsNotNone(person['lastLogin'])
         
         # The do_event function should enforce this.
         tree = get_tree("john_student")
         self.assertIsNotNone(tree)
-        self.assertEqual(tree['resourceLevels']['water'], RESOURCE_MAX_LEVEL)
-        self.assertEqual(tree['resourceLevels']['earth'], RESOURCE_MAX_LEVEL)
-        self.assertEqual(tree['resourceLevels']['sun'], RESOURCE_MAX_LEVEL)
+        self.assertEqual(tree['resourceLevels']['water'], settings.RESOURCE_MAX_LEVEL)
+        self.assertEqual(tree['resourceLevels']['earth'], settings.RESOURCE_MAX_LEVEL)
+        self.assertEqual(tree['resourceLevels']['sun'], settings.RESOURCE_MAX_LEVEL)
 
         # Tree Decays 10 of each resource:
-        do_event(tree['treeID'], dataclasses.Event(
+        do_event(tree['treeID'], Event(
             eventID="decay_event",
-            eventType=EVENT_PENALTY,
-            resourceAffected=RESOURCE_ALL,
+            eventType=settings.EVENT_PENALTY,
+            resourceAffected=settings.RESOURCE_ALL,
             description="Decay event",
             percentChange=10,
             conditions=None
         ), 10)
 
         tree_after_decay = get_tree("john_student")
-        self.assertEqual(tree_after_decay['resourceLevels']['water'], RESOURCE_MAX_LEVEL - 10)
-        self.assertEqual(tree_after_decay['resourceLevels']['earth'], RESOURCE_MAX_LEVEL - 10)
-        self.assertEqual(tree_after_decay['resourceLevels']['sun'], RESOURCE_MAX_LEVEL - 10)
+        self.assertEqual(tree_after_decay['resourceLevels']['water'], settings.RESOURCE_MAX_LEVEL - 10)
+        self.assertEqual(tree_after_decay['resourceLevels']['earth'], settings.RESOURCE_MAX_LEVEL - 10)
+        self.assertEqual(tree_after_decay['resourceLevels']['sun'], settings.RESOURCE_MAX_LEVEL - 10)
 
 
 if __name__ == '__main__':
