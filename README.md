@@ -16,7 +16,7 @@ This script will:
 
 Access the application at: http://localhost:5173/
 
-Press Ctrl+C to stop both servers.
+Press Ctrl+C **twice** to stop both servers.
 
 ## Initial Setup:
 
