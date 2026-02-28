@@ -14,8 +14,10 @@ import {
   type PlayerCommand,
   DIRECTION_DELTAS,
   SYMBOL_TO_ELEMENT,
-  DIRECTION_LABELS
+  DIRECTION_LABELS,
+  DEFAULT_MAP_SIZE
 } from '../types/Abstract.types';
+
 
 import {
   getNodeAt,
@@ -51,16 +53,16 @@ import {
 describe('GameHelper_REP', () => {
   describe('isValidPosition', () => {
     it('should return true for a valid position within bounds', () => {
-      expect(isValidPosition({ x: 0, y: 0 }, 5)).toBe(true);
-      expect(isValidPosition({ x: 2, y: 3 }, 5)).toBe(true);
-      expect(isValidPosition({ x: 4, y: 4 }, 5)).toBe(true);
+      expect(isValidPosition({ x: 0, y: 0 }, DEFAULT_MAP_SIZE)).toBe(true);
+      expect(isValidPosition({ x: 2, y: 3 }, DEFAULT_MAP_SIZE)).toBe(true);
+      expect(isValidPosition({ x: 4, y: 4 }, DEFAULT_MAP_SIZE)).toBe(true);
     });
 
     it('should return false for a position outside bounds', () => {
-      expect(isValidPosition({ x: -1, y: 0 }, 5)).toBe(false);
-      expect(isValidPosition({ x: 0, y: -1 }, 5)).toBe(false);
-      expect(isValidPosition({ x: 5, y: 0 }, 5)).toBe(false);
-      expect(isValidPosition({ x: 0, y: 5 }, 5)).toBe(false);
+      expect(isValidPosition({ x: -1, y: 0 }, DEFAULT_MAP_SIZE)).toBe(false);
+      expect(isValidPosition({ x: 0, y: -1 }, DEFAULT_MAP_SIZE)).toBe(false);
+      expect(isValidPosition({ x: 5, y: 0 }, DEFAULT_MAP_SIZE)).toBe(false);
+      expect(isValidPosition({ x: 0, y: 5 }, DEFAULT_MAP_SIZE)).toBe(false);
     });
 
     it('should use default MAP_SIZE of 5 when mapSize is not provided', () => {
@@ -69,38 +71,39 @@ describe('GameHelper_REP', () => {
     });
   });
 
+
   describe('getNextPosition', () => {
     it('should return the correct next position for valid moves', () => {
       const current = { x: 2, y: 2 };
-      expect(getNextPosition(current, 'w', 5)).toEqual({ x: 2, y: 1 }); // up
-      expect(getNextPosition(current, 'a', 5)).toEqual({ x: 1, y: 2 }); // left
-      expect(getNextPosition(current, 's', 5)).toEqual({ x: 2, y: 3 }); // down
-      expect(getNextPosition(current, 'd', 5)).toEqual({ x: 3, y: 2 }); // right
+      expect(getNextPosition(current, 'w', DEFAULT_MAP_SIZE)).toEqual({ x: 2, y: 1 }); // up
+      expect(getNextPosition(current, 'a', DEFAULT_MAP_SIZE)).toEqual({ x: 1, y: 2 }); // left
+      expect(getNextPosition(current, 's', DEFAULT_MAP_SIZE)).toEqual({ x: 2, y: 3 }); // down
+      expect(getNextPosition(current, 'd', DEFAULT_MAP_SIZE)).toEqual({ x: 3, y: 2 }); // right
     });
 
     it('should return null when moving outside bounds', () => {
-      expect(getNextPosition({ x: 0, y: 0 }, 'w', 5)).toBeNull(); // can't go up
-      expect(getNextPosition({ x: 0, y: 0 }, 'a', 5)).toBeNull(); // can't go left
-      expect(getNextPosition({ x: 4, y: 4 }, 's', 5)).toBeNull(); // can't go down
-      expect(getNextPosition({ x: 4, y: 4 }, 'd', 5)).toBeNull(); // can't go right
+      expect(getNextPosition({ x: 0, y: 0 }, 'w', DEFAULT_MAP_SIZE)).toBeNull(); // can't go up
+      expect(getNextPosition({ x: 0, y: 0 }, 'a', DEFAULT_MAP_SIZE)).toBeNull(); // can't go left
+      expect(getNextPosition({ x: 4, y: 4 }, 's', DEFAULT_MAP_SIZE)).toBeNull(); // can't go down
+      expect(getNextPosition({ x: 4, y: 4 }, 'd', DEFAULT_MAP_SIZE)).toBeNull(); // can't go right
     });
 
     it('should handle moves at all corners', () => {
       // Top-left corner
-      expect(getNextPosition({ x: 0, y: 0 }, 's', 5)).toEqual({ x: 0, y: 1 });
-      expect(getNextPosition({ x: 0, y: 0 }, 'd', 5)).toEqual({ x: 1, y: 0 });
+      expect(getNextPosition({ x: 0, y: 0 }, 's', DEFAULT_MAP_SIZE)).toEqual({ x: 0, y: 1 });
+      expect(getNextPosition({ x: 0, y: 0 }, 'd', DEFAULT_MAP_SIZE)).toEqual({ x: 1, y: 0 });
 
       // Top-right corner
-      expect(getNextPosition({ x: 4, y: 0 }, 's', 5)).toEqual({ x: 4, y: 1 });
-      expect(getNextPosition({ x: 4, y: 0 }, 'a', 5)).toEqual({ x: 3, y: 0 });
+      expect(getNextPosition({ x: 4, y: 0 }, 's', DEFAULT_MAP_SIZE)).toEqual({ x: 4, y: 1 });
+      expect(getNextPosition({ x: 4, y: 0 }, 'a', DEFAULT_MAP_SIZE)).toEqual({ x: 3, y: 0 });
 
       // Bottom-left corner
-      expect(getNextPosition({ x: 0, y: 4 }, 'w', 5)).toEqual({ x: 0, y: 3 });
-      expect(getNextPosition({ x: 0, y: 4 }, 'd', 5)).toEqual({ x: 1, y: 4 });
+      expect(getNextPosition({ x: 0, y: 4 }, 'w', DEFAULT_MAP_SIZE)).toEqual({ x: 0, y: 3 });
+      expect(getNextPosition({ x: 0, y: 4 }, 'd', DEFAULT_MAP_SIZE)).toEqual({ x: 1, y: 4 });
 
       // Bottom-right corner
-      expect(getNextPosition({ x: 4, y: 4 }, 'w', 5)).toEqual({ x: 4, y: 3 });
-      expect(getNextPosition({ x: 4, y: 4 }, 'a', 5)).toEqual({ x: 3, y: 4 });
+      expect(getNextPosition({ x: 4, y: 4 }, 'w', DEFAULT_MAP_SIZE)).toEqual({ x: 4, y: 3 });
+      expect(getNextPosition({ x: 4, y: 4 }, 'a', DEFAULT_MAP_SIZE)).toEqual({ x: 3, y: 4 });
     });
 
     it('should use default MAP_SIZE of 5 when mapSize is not provided', () => {
@@ -108,6 +111,7 @@ describe('GameHelper_REP', () => {
       expect(getNextPosition({ x: 0, y: 0 }, 'w')).toBeNull();
       expect(getNextPosition({ x: 4, y: 4 }, 'd')).toBeNull();
     });
+
 
     it('should work with different map sizes', () => {
       const mapSize = 10;
@@ -119,7 +123,7 @@ describe('GameHelper_REP', () => {
 
   describe('getPossibleMoves', () => {
     it('should return all direction labels for a center position with all moves available', () => {
-      const moves = getPossibleMoves({ x: 2, y: 2 }, 5);
+      const moves = getPossibleMoves({ x: 2, y: 2 }, DEFAULT_MAP_SIZE);
       // expect(moves).toContain('w');
       // expect(moves).toContain('a');
       // expect(moves).toContain('s');
@@ -131,7 +135,7 @@ describe('GameHelper_REP', () => {
     });
 
     it('should exclude direction labels for blocked moves at top-left corner', () => {
-      const moves = getPossibleMoves({ x: 0, y: 0 }, 5);
+      const moves = getPossibleMoves({ x: 0, y: 0 }, DEFAULT_MAP_SIZE);
       // expect(moves).toContain('s');
       // expect(moves).toContain('d');
       expect(moves).toContain('Down');
@@ -141,7 +145,7 @@ describe('GameHelper_REP', () => {
     });
 
     it('should exclude direction labels for blocked moves at top-right corner', () => {
-      const moves = getPossibleMoves({ x: 4, y: 0 }, 5);
+      const moves = getPossibleMoves({ x: 4, y: 0 }, DEFAULT_MAP_SIZE);
       // expect(moves).toContain('s');
       // expect(moves).toContain('a');
       expect(moves).toContain('Down');
@@ -151,7 +155,7 @@ describe('GameHelper_REP', () => {
     });
 
     it('should exclude direction labels for blocked moves at bottom-left corner', () => {
-      const moves = getPossibleMoves({ x: 0, y: 4 }, 5);
+      const moves = getPossibleMoves({ x: 0, y: 4 }, DEFAULT_MAP_SIZE);
       // expect(moves).toContain('w');
       // expect(moves).toContain('d');
       expect(moves).toContain('Up');
@@ -161,7 +165,7 @@ describe('GameHelper_REP', () => {
     });
 
     it('should exclude direction labels for blocked moves at bottom-right corner', () => {
-      const moves = getPossibleMoves({ x: 4, y: 4 }, 5);
+      const moves = getPossibleMoves({ x: 4, y: 4 }, DEFAULT_MAP_SIZE);
       // expect(moves).toContain('w');
       // expect(moves).toContain('a');
       expect(moves).toContain('Up');
@@ -172,6 +176,7 @@ describe('GameHelper_REP', () => {
 
     it('should use default MAP_SIZE=5 when mapSize is not provided', () => {
       const moves = getPossibleMoves({ x: 2, y: 2 });
+
       // expect(moves).toContain('w');
       // expect(moves).toContain('a');
       // expect(moves).toContain('s');
@@ -300,10 +305,11 @@ describe('GameHelper_REP', () => {
         { moleculeName: "Water", moleculeFormula: "H2O", required: { "H": 2, "O": 1 }, submitted: {}, completed: false, incorrect: {} }
       ];
       const map: Node[][] = generateMap(questList);
-      expect(map.length).toBe(5);
-      expect(map[0].length).toBe(5);
+      expect(map.length).toBe(DEFAULT_MAP_SIZE);
+      expect(map[0].length).toBe(DEFAULT_MAP_SIZE);
     });
   });
+
 
   describe('createEmptyInventory', () => {
     it('creates an inventory with all counts zero', () => {
