@@ -13,10 +13,6 @@ export default function SoilMinigame() {
     startGame(); // This initializes the map and switches phase to 'playing'
   };
 
-  const handleRestart = () => {
-    setPhase('title');
-  };
-
   return (
     <div className={styles.gameContainer}>
       {/* 1. Title Screen */}
@@ -36,7 +32,11 @@ export default function SoilMinigame() {
 
       {/* 4. Completion Popup Overlay */}
       {state.showCompletionPopup && (
-        <CompletionPopup onRestart={handleRestart} />
+        <CompletionPopup 
+          questsCompleted={state.quests.filter(q => q.completed).length} 
+          totalQuests={state.quests.length} 
+          score={state.score} 
+        />
       )}
 
       {/* 5. Loading State when user clicks on soil on the frontpage */}

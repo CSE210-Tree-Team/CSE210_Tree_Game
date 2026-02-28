@@ -7,6 +7,7 @@ import { QuestSection } from './QuestSection';
 interface SidebarProps {
     quests: Quest[];
     inventory: Inventory;
+    inventoryCapacity: number;
 }
 
 /**
@@ -16,11 +17,11 @@ interface SidebarProps {
  *   - InventorySection: current element counts
  *   - CommandsSection: static list of available key commands
  */
-export function Sidebar({ quests, inventory }: SidebarProps) {
+export function Sidebar({ quests, inventory, inventoryCapacity }: SidebarProps) {
     return (
         <div className={styles.sidebarContainer}>
             <QuestSection quests={quests} />
-            <InventorySection inventory={inventory} />
+            <InventorySection inventory={inventory} inventoryCapacity={inventoryCapacity} />
             <CommandsSection />
         </div>
     );

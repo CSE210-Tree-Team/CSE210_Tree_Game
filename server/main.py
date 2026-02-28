@@ -3,15 +3,37 @@ import uvicorn
 import asyncio
 from fastapi import FastAPI, Request, Depends, HTTPException, status
 from fastapi.staticfiles import StaticFiles
-from fastapi.responses import FileResponse, RedirectResponse
+from fastapi.responses import FileResponse, RedirectResponse, JSONResponse
 from starlette.middleware.sessions import SessionMiddleware
 from dotenv import load_dotenv
-from Database.getItemsFromDatabase import get_person, get_tree, get_question, get_questions, get_all_trees
-from Database.addItemsToDatabase import add_account, generate_tree, add_question, update_last_login, apply_passive_decay, update_stat
-from constants import ROLE_STUDENT, PASSIVE_DECAY_RATE
-from dataRecords import Tree, Event, DUMMY_EVENT
-from email.message import EmailMessage
-import smtplib
+from pydantic import BaseModel
+from Database.getItemsFromDatabase import (
+    get_person,
+    get_tree,
+    get_question,
+    get_questions,
+    get_all_trees,
+    get_student_details,
+)
+from Database.addItemsToDatabase import (
+    add_account,
+    generate_tree,
+    add_question,
+    update_last_login,
+    apply_passive_decay,
+    update_stat,
+    update_account,
+    add_student_details,
+    upsert_student_details,
+)
+from constants import (
+    ROLE_STUDENT,
+    PASSIVE_DECAY_RATE,
+    DEFAULT_EDUCATION_LEVEL_CODE,
+    EDUCATION_LEVEL_CODE_TO_LABEL,
+    EDUCATION_LEVEL_LABEL_TO_CODE,
+)
+from dataRecords import Tree, Event
 
 
 ############################################
@@ -27,8 +49,8 @@ CARRIERS = {
 }
 
 load_dotenv()
-app = FastAPI()
 MIDDLEWARE_SECRET_KEY = os.getenv("MIDDLEWARE_SECRET_KEY")
+app = FastAPI()
 app.add_middleware(SessionMiddleware, secret_key=MIDDLEWARE_SECRET_KEY)
 decay_task = None
 
@@ -36,6 +58,7 @@ decay_task = None
 frontend_path = os.path.join("..", "client", "dist")
 if os.path.exists(frontend_path):
     app.mount("/assets", StaticFiles(directory=os.path.join(frontend_path, "assets")), name="static")
+
 # TODO: Need to fix log out process so that session is properly cleared.
 
 async def run_passive_decay_loop():
@@ -85,6 +108,11 @@ class NeedLoginException(Exception):
 
 @app.exception_handler(NeedLoginException)
 async def redirect_to_login(request: Request, exc: NeedLoginException):
+    if request.url.path.startswith("/api/"):
+        return JSONResponse(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            content={"success": False, "detail": "Not authenticated"},
+        )
     return RedirectResponse(url="/?autoLogin=true")
     
 def is_student(username: str) -> bool:
@@ -128,6 +156,7 @@ def create_account(username: str, user_data: dict):
         )
 
         output_tree_id = generate_tree(username)
+        add_student_details(student_username=username, student_level="3-6", student_stats='{"xp": 0}', parent_email=None)
 
         print(f"Created new account for {username} with tree ID {output_tree_id}")
 
@@ -185,8 +214,8 @@ async def get_current_user(request: Request):
         raise NeedLoginException()
 
     person = get_person(username)
-    if not person or 'Student' not in person.get('roles', []):
-        raise HTTPException(status_code=403, detail="Student role required")
+    if not person:
+        raise HTTPException(status_code=403, detail="User not found")
         
     return person
 
@@ -227,6 +256,34 @@ def manage_account(account=Depends(get_current_user)):
 #               API Endpoints              #
 ############################################
 
+class AccountProfilePayload(BaseModel):
+    name: str | None = None
+    email: str | None = None
+    parentEmail: str | None = None
+    educationLevel: int | str | None = None
+
+
+def _education_level_label(value) -> str:
+    """
+    Normalize DB-stored education level (int code) into the UI/API label (e.g. "3-6").
+    Falls back to the default label when missing or unrecognized.
+    """
+    if value is None:
+        return EDUCATION_LEVEL_CODE_TO_LABEL[DEFAULT_EDUCATION_LEVEL_CODE]
+    if isinstance(value, int):
+        return EDUCATION_LEVEL_CODE_TO_LABEL.get(
+            value, EDUCATION_LEVEL_CODE_TO_LABEL[DEFAULT_EDUCATION_LEVEL_CODE]
+        )
+    try:
+        trimmed = str(value).strip()
+        if trimmed.isdigit():
+            return _education_level_label(int(trimmed))
+        if trimmed in EDUCATION_LEVEL_LABEL_TO_CODE:
+            return trimmed
+    except Exception:
+        pass
+    return EDUCATION_LEVEL_CODE_TO_LABEL[DEFAULT_EDUCATION_LEVEL_CODE]
+
 @app.post("/api/auth/verify")
 async def verify_auth(request: Request):
     """Verify Auth0 token and establish backend session."""
@@ -253,6 +310,8 @@ async def verify_auth(request: Request):
             return {"success": True, "message": "Session established"}
         
         return {"success": False, "message": "No user data provided"}
+    except HTTPException:
+        raise
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
 
@@ -302,6 +361,59 @@ def get_user_info(request: Request, student=Depends(student_required)):
             "resourceLevels": tree.get('resourceLevels') if tree else None
         }
     }
+
+@app.get("/api/account/profile")
+def api_get_account_profile(student=Depends(student_required)):
+    """
+    Returns the student's editable profile fields.
+
+    Response:
+    {
+        "success": True,
+        "profile": { "name": str, "email": str, "parentEmail": str, "educationLevel": str }
+    }
+    """
+    username = student.get("username") if student else None
+    if not username:
+        raise HTTPException(status_code=400, detail="Missing username")
+
+    student_details = get_student_details(username) or {}
+    education_level = _education_level_label(student_details.get("studentLevel"))
+    parent_email = student_details.get("parentEmail") or ""
+
+    return {
+        "success": True,
+        "username": username,
+        "roles": student.get("roles", []),
+        "profile": {
+            "name": student.get("displayName") or "",
+            "email": student.get("email") or "",
+            "parentEmail": parent_email,
+            "educationLevel": education_level,
+        },
+    }
+
+@app.put("/api/account/profile")
+def api_update_account_profile(payload: AccountProfilePayload, student=Depends(student_required)):
+    """
+    Updates the student's editable profile fields.
+
+    Request body:
+    { "name"?: str, "email"?: str, "parentEmail"?: str, "educationLevel"?: str }
+    """
+    username = student.get("username") if student else None
+    if not username:
+        raise HTTPException(status_code=400, detail="Missing username")
+
+    try:
+        update_account(username, display_name=payload.name, email=payload.email)
+        upsert_student_details(username, parent_email=payload.parentEmail, education_level=payload.educationLevel)
+        updated = get_person(username) or {}
+        return {"success": True, "username": username, "roles": updated.get("roles", [])}
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to update profile: {str(e)}")
 
 @app.post("/api/update-stat")
 async def api_update_stat(request: Request, student=Depends(student_required)):

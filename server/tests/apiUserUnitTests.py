@@ -13,8 +13,11 @@ import sys
 # Add parent directory to path to import constants and other modules
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-# Import the test base class
-from tests.apiQuestionsUnitTests import APIQuestionsTestCase
+# Import the test base class (support both package and flat discovery imports)
+try:
+    from .apiQuestionsUnitTests import APIQuestionsTestCase
+except ImportError:
+    from apiQuestionsUnitTests import APIQuestionsTestCase
 from fastapi.testclient import TestClient
 
 # Import the modules to test
@@ -105,24 +108,10 @@ class TestUserAPIRoutes(APIQuestionsTestCase):
         # Clear any dependency overrides to test actual authentication
         app.dependency_overrides.clear()
         
-        # Without authentication, the endpoint will redirect to login
-        # FastAPI/TestClient follows redirects by default, so we need to check
+        # Without authentication, API endpoints should return 401 (not a redirect)
         response = client.get("/api/get-user-info", follow_redirects=False)
         
-        # Should get a redirect response (307) or the login page
-        self.assertIn(response.status_code, [200, 307])
-        
-        # If it's 200, it should have redirected to the login page
-        if response.status_code == 200:
-            # The response should be the login/home page, not user info
-            # We can verify by checking the response doesn't have success: true
-            try:
-                data = response.json()
-                # If we get JSON, it shouldn't be the successful user info response
-                self.assertNotEqual(data.get("success"), True)
-            except:
-                # Not JSON response is also fine (could be HTML)
-                pass
+        self.assertEqual(response.status_code, 401)
     
     def test_auth_verify_creates_new_account(self):
         """Test that /api/auth/verify creates a new account if it doesn't exist."""
@@ -184,8 +173,46 @@ class TestUserAPIRoutes(APIQuestionsTestCase):
         self.assertFalse(data["success"])
         self.assertEqual(data["message"], "No user data provided")
 
+    def test_get_account_profile_defaults(self):
+        """Test that /api/account/profile returns defaults when no custom profile is stored."""
+        client = self.get_authenticated_client()
+
+        response = client.get("/api/account/profile")
+        self.assertEqual(response.status_code, 200)
+
+        data = response.json()
+        self.assertTrue(data["success"])
+        profile = data["profile"]
+
+        self.assertEqual(profile["name"], "Test Student")
+        self.assertEqual(profile["email"], "test_student@example.com")
+        self.assertEqual(profile["parentEmail"], "")
+        self.assertEqual(profile["educationLevel"], "3-6")
+
+    def test_update_account_profile_persists(self):
+        """Test that /api/account/profile can be updated and is persisted in the database."""
+        client = self.get_authenticated_client()
+
+        update_payload = {
+            "name": "Updated Student",
+            "email": "updated@example.com",
+            "parentEmail": "parent@example.com",
+            "educationLevel": "6-8",
+        }
+        response = client.put("/api/account/profile", json=update_payload)
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(response.json()["success"])
+
+        response = client.get("/api/account/profile")
+        self.assertEqual(response.status_code, 200)
+
+        profile = response.json()["profile"]
+        self.assertEqual(profile["name"], "Updated Student")
+        self.assertEqual(profile["email"], "updated@example.com")
+        self.assertEqual(profile["parentEmail"], "parent@example.com")
+        self.assertEqual(profile["educationLevel"], "6-8")
+
 
 if __name__ == '__main__':
     import unittest
     unittest.main()
-

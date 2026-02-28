@@ -13,8 +13,11 @@ import sys
 # Add parent directory to path to import constants and other modules
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-# Import the test base class
-from tests.apiQuestionsUnitTests import APIQuestionsTestCase
+# Import the test base class (support both package and flat discovery imports)
+try:
+    from .apiQuestionsUnitTests import APIQuestionsTestCase
+except ImportError:
+    from apiQuestionsUnitTests import APIQuestionsTestCase
 from fastapi.testclient import TestClient
 
 # Import the modules to test

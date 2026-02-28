@@ -29,14 +29,14 @@ test("does not render elements with value 0", () => {
 
 test("displays correct count for each element", () => {
   const inventory: Inventory = { Nitrogen: 3, Hydrogen: 0, Carbon: 1, Oxygen: 0 };
-  render(<InventorySection inventory={inventory} />);
+  render(<InventorySection inventory={inventory} inventoryCapacity={10} />);
   expect(screen.getByText("3")).toBeInTheDocument();
   expect(screen.getByText("1")).toBeInTheDocument();
 });
 
 test("element with count > 0 renders with success color and bold weight", () => {
   const inventory: Inventory = { ...emptyInventory, Nitrogen: 2 };
-  render(<InventorySection inventory={inventory} />);
+  render(<InventorySection inventory={inventory} inventoryCapacity={10} />);
   const countSpan = screen.getByText("2");
   expect(countSpan).toHaveStyle({ color: "var(--color-success)", fontWeight: "bold" });
 });

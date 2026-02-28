@@ -40,8 +40,8 @@ export const TREE_IMAGES = {
 // >= 70: Healthy earth
 // >= 40: Typical/Unhealthy earth
 // < 40: Withered/Dry earth
-export const EARTH_HEALTH_THRESHOLD = 75;    
-export const EARTH_UNHEALTHY_THRESHOLD = 45;  
+export const EARTH_HEALTH_THRESHOLD = 70;    
+export const EARTH_UNHEALTHY_THRESHOLD = 40;  
 
 // Earth Image Paths
 export const EARTH_IMAGES = {

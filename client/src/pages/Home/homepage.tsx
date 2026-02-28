@@ -1,5 +1,5 @@
 import { useAuth0 } from '@auth0/auth0-react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Tree } from "../../components/Tree";
 import { Earth } from "../../components/Earth";
@@ -9,11 +9,10 @@ import styles from "../../components/homepage.module.css"
 import fontStyles from "../../components/Popup.module.css"
 import buttonStyles from "../../components/Button.module.css"
 import Tutorial from "./Tutorial"
-import { type UserInfo } from "./hooks/ServerCalls"
-import { useFetchUserInfo } from "./hooks/ServerCalls"
+import { type UserInfoResponse } from "../ServerCalls/ServerCalls"
+import { establishAuthSession, fetchUserInfo } from "../ServerCalls/ServerCalls"
 
-
-const userInfoMock: UserInfo = {
+const userInfoMock: UserInfoResponse = {
     success: true,
     user: {
         username: "AA",
@@ -27,7 +26,7 @@ const userInfoMock: UserInfo = {
         growthStage: 1,
         resourceLevels: {
             water: 70,
-            earth: 50,
+            earth: 40,
             sun: 100,
         }
     }
@@ -35,14 +34,33 @@ const userInfoMock: UserInfo = {
 }
 
 export const Homepage = () => {
-    const { logout } = useAuth0();
+    const { user, logout, getAccessTokenSilently } = useAuth0();
     const navigate = useNavigate();
+    const [userInfo, setUserInfo] = useState<UserInfoResponse | null>(null);
     const [showTutorial, setShowTutorial] = useState<boolean>(() => {
         const hasSeenTutorial = sessionStorage.getItem('hasSeenTutorial');
         return !hasSeenTutorial; // Show tutorial if user hasn't seen it before
     });
+    useEffect(() => {
+        const establishSession = async () => {
+            if (!user) {
+                return;
+            }
+            try {
+                const token = await getAccessTokenSilently();
+                const authSuccess = await establishAuthSession(token, user);
+                if (!authSuccess) {
+                    throw new Error("Failed to verify the authentication");
+                }
+                const data = await fetchUserInfo();
+                setUserInfo(data);
+            } catch  {
+                throw new Error("Failed to establish backend session");
+            }
+        }
+        establishSession();
+    },[user, getAccessTokenSilently]);
 
-    const { userInfo } = useFetchUserInfo();
 
     const handleLogout = () => {
         sessionStorage.removeItem('hasSeenTutorial');
@@ -62,6 +80,9 @@ export const Homepage = () => {
         sessionStorage.setItem('hasSeenTutorial', 'true');
     }
 
+    const handleSettings = () => {
+        navigate('/account');
+    };
 
     return (
         <div className={styles.homepageWrapper}>
@@ -83,7 +104,10 @@ export const Homepage = () => {
                     Logout
                     </button>
 
-                    <button className={`${buttonStyles.button} ${buttonStyles.grass} ${styles.buttonSingle} ${styles.buttonSetting}`} onClick={() => navigate("/")}>
+                    <button
+                        className={`${buttonStyles.button} ${buttonStyles.grass} ${styles.buttonSingle} ${styles.buttonSetting}`}
+                        onClick={handleSettings}
+                    >
                     Settings
                     </button>
                 </div>
