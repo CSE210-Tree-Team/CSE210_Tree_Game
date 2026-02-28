@@ -71,14 +71,21 @@ class APIQuestionsTestCase(unittest.TestCase):
     
     def get_authenticated_client(self):
         """Helper method to get a test client with authentication bypassed."""
-        from main import app, student_required
+        from main import app
+        from api.dependencies import get_current_user, student_required
         
         username = self.create_test_student()
+        user_data = get_person(username)
         
-        # Mock the student_required dependency
-        async def mock_student_required():
-            return get_person(username)
+        # Mock the get_current_user dependency (used by /api/add-question endpoint)
+        async def mock_get_current_user(request=None):
+            return user_data
         
+        # Mock the student_required dependency (used by other endpoints)
+        async def mock_student_required(request=None, person=None):
+            return user_data
+        
+        app.dependency_overrides[get_current_user] = mock_get_current_user
         app.dependency_overrides[student_required] = mock_student_required
         client = TestClient(app)
         return client
