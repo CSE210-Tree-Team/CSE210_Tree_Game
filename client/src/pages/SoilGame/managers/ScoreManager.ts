@@ -14,9 +14,9 @@ import type {
 } from '../types/Abstract.types';
 
 // Scoring constants - soil game configuration
-const POINTS_PER_QUEST = 25;
-const POINTS_PER_INCORRECT = -5;
-const MINIMUM_SCORE = 0;
+export const POINTS_PER_QUEST = 25;
+export const POINTS_PER_INCORRECT = -5;
+export const MINIMUM_SCORE = 0;
 
 /**
  * Manages score calculation and submission for the soil game
@@ -76,24 +76,33 @@ export class ScoreManager {
 
   /**
    * Calculate total score based on quests completed and incorrect elements collected
-   * Score is never negative (minimum is 0)
-   * @returns Total score value
+   * This is the raw score that can be negative during gameplay
+   * @returns Raw score value (can be negative)
    */
-  calculateScore(): number {
+  calculateRawScore(): number {
     const correctProgress = this.questsCompleted * POINTS_PER_QUEST;
     const incorrectPenalty = this.incorrectElementsCollected * POINTS_PER_INCORRECT;
-    const totalProgress = correctProgress + incorrectPenalty;
-    return Math.max(totalProgress, MINIMUM_SCORE);
+    return correctProgress + incorrectPenalty;
+  }
+
+  /**
+   * Calculate final score with minimum bound applied
+   * Use this for final/submitted scores only
+   * @returns Final score value (minimum is 0)
+   */
+  calculateScore(): number {
+    return Math.max(this.calculateRawScore(), MINIMUM_SCORE);
   }
 
   /**
    * Get the current score state snapshot
-   * @returns Object containing questsCompleted and calculated score
+   * Returns raw score (can be negative) for gameplay display
+   * @returns Object containing questsCompleted and raw score
    */
   getScoreState() {
     return {
       questsCompleted: this.questsCompleted,
-      score: this.calculateScore(),
+      score: this.calculateRawScore(),
     };
   }
 

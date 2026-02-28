@@ -48,6 +48,7 @@ export function generateMap(quests: Quest[], size: number = DEFAULT_MAP_SIZE): N
   }
 
   const requiredElements: ElementType[] = []
+  const incorrectElements: ElementType[] = []
 
   // Uses input list of elements to propagate requiredElements
   for (const quest of quests) {
@@ -55,6 +56,14 @@ export function generateMap(quests: Quest[], size: number = DEFAULT_MAP_SIZE): N
       const element = SYMBOL_TO_ELEMENT[symbol] || symbol;
       for (let i = 0; i < count; i++) {
         requiredElements.push(element);
+      }
+    }
+    
+    // Also collect incorrect elements from this quest
+    for (const [symbol, count] of Object.entries(quest.incorrect)) {
+      const element = SYMBOL_TO_ELEMENT[symbol] || symbol;
+      for (let i = 0; i < count; i++) {
+        incorrectElements.push(element);
       }
     }
   }
@@ -66,6 +75,16 @@ export function generateMap(quests: Quest[], size: number = DEFAULT_MAP_SIZE): N
       currNode.resources = { [requiredElements[i]]: 1 } as Record<ElementType, number>;
     } else {
       currNode.resources[requiredElements[i]] = (currNode.resources[requiredElements[i]] ?? 0) + 1;;
+    }
+  }
+
+  // Place incorrect/unnecessary elements on the map
+  for (let i = incorrectElements.length - 1; i >= 0; i--) {
+    const currNode = map[randomInt(0, size - 1)][randomInt(0, size - 1)]
+    if (currNode.resources === null) {
+      currNode.resources = { [incorrectElements[i]]: 1 } as Record<ElementType, number>;
+    } else {
+      currNode.resources[incorrectElements[i]] = (currNode.resources[incorrectElements[i]] ?? 0) + 1;
     }
   }
 

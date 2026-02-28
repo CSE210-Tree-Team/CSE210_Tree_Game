@@ -80,7 +80,7 @@ describe('SoilGame_REP.type exports', () => {
   });
 
   it('can create Quest, Inventory and GameState shapes', () => {
-    const quest: Quest = { moleculeName: 'Test', moleculeFormula: 'T', required: { Nitrogen: 1 }, submitted: { Nitrogen: 0 }, completed: false };
+    const quest: Quest = { moleculeName: 'Test', moleculeFormula: 'T', required: { Nitrogen: 1 }, submitted: { Nitrogen: 0 }, completed: false, incorrect: {} };
     const inv: Inventory = { Nitrogen: 0, Hydrogen: 0, Carbon: 0, Oxygen: 0 };
     const state: GameState = {
       phase: 'playing',
@@ -89,8 +89,12 @@ describe('SoilGame_REP.type exports', () => {
       quests: [quest],
       playerPosition: { x: 0, y: 0 },
       inventory: inv,
+      inventoryCapacity: 10,
       terminalLog: [],
       questsCompleted: 0,
+      score: 0,
+      showCompletionPopup: false,
+      requiredElements: new Set<string>(),
     };
     expect(state.phase).toBe('playing');
     expect(state.mapSize).toBe(1);

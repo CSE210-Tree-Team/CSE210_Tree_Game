@@ -32,7 +32,11 @@ export default function SoilMinigame() {
 
       {/* 4. Completion Popup Overlay */}
       {state.showCompletionPopup && (
-        <CompletionPopup questsCompleted={state.questsCompleted} totalQuests={state.quests.length} score={state.score} />
+        <CompletionPopup 
+          questsCompleted={state.quests.filter(q => q.completed).length} 
+          totalQuests={state.quests.length} 
+          score={state.score} 
+        />
       )}
 
       {/* 5. Loading State when user clicks on soil on the frontpage */}

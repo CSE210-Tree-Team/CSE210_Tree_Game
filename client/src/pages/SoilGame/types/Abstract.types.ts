@@ -36,6 +36,7 @@ export interface Node {
  * moleculeFormula: The chemical formula of the molecule to construct
  * required: Element-Value pairs representing the required amount of each element
  * submitted: The number of each element the player has submitted so far
+ * incorrect: Element-Value pairs for incorrect/unnecessary elements (not part of the molecule)
  */
 export interface Quest {
   moleculeName: string;
@@ -43,6 +44,7 @@ export interface Quest {
   required: Record<string, number>; // e.g. { Nitrogen: 1, Hydrogen: 3 }
   submitted: Record<string, number>; // elements submitted so far
   completed: boolean;
+  incorrect: Record<string, number>; // incorrect elements that can appear on the map
 }
 
 /**
@@ -54,7 +56,8 @@ export interface Quest {
  * playerPosition: Tuple position of player in Map
  * inventory: <ElementType, number> dictionary
  * terminalLog: List of strings representing the terminal log
- * questsCompleted: Number of quests completed so far
+ * score: Current score (managed by ScoreManager, cached here for display)
+ * requiredElements: Set of all element names needed for any quest
  */
 export interface GameState {
   phase: GamePhase;
@@ -65,9 +68,9 @@ export interface GameState {
   inventory: Inventory;
   inventoryCapacity: number;
   terminalLog: string[];
-  questsCompleted: number;
   score: number;
   showCompletionPopup: boolean;
+  requiredElements: Set<string>;
 }
 
 export interface CompleteGameRequest {
@@ -113,6 +116,7 @@ export const SYMBOL_TO_ELEMENT: Record<string, string> = {
   O: 'Oxygen',
   C: 'Carbon',
   N: 'Nitrogen',
+  Fe: 'Iron',
   Cl: 'Chlorine',
   Na: 'Sodium',
   P: 'Phosphorus',

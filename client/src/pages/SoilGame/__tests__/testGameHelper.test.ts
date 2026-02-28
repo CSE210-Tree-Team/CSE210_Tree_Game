@@ -302,7 +302,7 @@ describe('GameHelper_REP', () => {
   describe('generateMap', () => {
     it('generates a DEFAULT = 5 x 5 size map', () => {
       const questList: Quest[] = [
-        { moleculeName: "Water", moleculeFormula: "H2O", required: { "H": 2, "O": 1 }, submitted: {}, completed: false }
+        { moleculeName: "Water", moleculeFormula: "H2O", required: { "H": 2, "O": 1 }, submitted: {}, completed: false, incorrect: {} }
       ];
       const map: Node[][] = generateMap(questList);
       expect(map.length).toBe(DEFAULT_MAP_SIZE);
@@ -358,7 +358,7 @@ describe('GameHelper_REP', () => {
 
   describe('getNextNeededElement', () => {
     it('returns the next needed element and remaining count', () => {
-      const quest: Quest = { moleculeName: 'Test', moleculeFormula: '', required: { Nitrogen: 1, Hydrogen: 2 }, submitted: { Nitrogen: 0, Hydrogen: 1 }, completed: false };
+      const quest: Quest = { moleculeName: 'Test', moleculeFormula: '', required: { Nitrogen: 1, Hydrogen: 2 }, submitted: { Nitrogen: 0, Hydrogen: 1 }, completed: false, incorrect: {} };
       const next = getNextNeededElement(quest);
       expect(next).not.toBeNull();
       expect(next?.element).toBe('Nitrogen');
@@ -366,14 +366,14 @@ describe('GameHelper_REP', () => {
     });
 
     it('returns null when quest is complete', () => {
-      const quest: Quest = { moleculeName: 'Done', moleculeFormula: '', required: { Carbon: 1 }, submitted: { Carbon: 1 }, completed: true };
+      const quest: Quest = { moleculeName: 'Done', moleculeFormula: '', required: { Carbon: 1 }, submitted: { Carbon: 1 }, completed: true, incorrect: {} };
       expect(getNextNeededElement(quest)).toBeNull();
     });
   });
 
   describe('checkAndCompleteQuest', () => {
     it('successfully completes a quest when elements are exactly sufficient', () => {
-      const quest: Quest = { moleculeName: 'Water', moleculeFormula: 'H2O', required: { H: 2, O: 1 }, submitted: { H: 0, O: 0 }, completed: false };
+      const quest: Quest = { moleculeName: 'Water', moleculeFormula: 'H2O', required: { H: 2, O: 1 }, submitted: { H: 0, O: 0 }, completed: false, incorrect: {} };
       const inventory = { Hydrogen: 2, Oxygen: 1, Carbon: 0, Nitrogen: 0 } as Inventory;
       const result = checkAndCompleteQuest(quest, inventory);
 
@@ -384,7 +384,7 @@ describe('GameHelper_REP', () => {
     });
 
     it('returns null when items are insufficient', () => {
-      const quest: Quest = { moleculeName: 'Water', moleculeFormula: 'H2O', required: { H: 2, O: 1 }, submitted: { H: 0, O: 0 }, completed: false };
+      const quest: Quest = { moleculeName: 'Water', moleculeFormula: 'H2O', required: { H: 2, O: 1 }, submitted: { H: 0, O: 0 }, completed: false, incorrect: {} };
       const inventory = { Hydrogen: 1, Oxygen: 1 } as Inventory;
       const result = checkAndCompleteQuest(quest, inventory);
       expect(result).toBeNull();
@@ -407,7 +407,7 @@ describe('GameHelper_REP', () => {
   // describe('formatLocationInfo', () => {});
   describe('formatQuestProgress', () => {
     it('formats quest progress as submitted/required pairs', () => {
-      const quest: Quest = { moleculeName: 'X', moleculeFormula: '', required: { Nitrogen: 1, Hydrogen: 2 }, submitted: { Nitrogen: 1, Hydrogen: 1 }, completed: false };
+      const quest: Quest = { moleculeName: 'X', moleculeFormula: '', required: { Nitrogen: 1, Hydrogen: 2 }, submitted: { Nitrogen: 1, Hydrogen: 1 }, completed: false, incorrect: {} };
       const formatted = formatQuestProgress(quest);
       expect(formatted).toBe('1/1 Nitrogen, 1/2 Hydrogen');
     });

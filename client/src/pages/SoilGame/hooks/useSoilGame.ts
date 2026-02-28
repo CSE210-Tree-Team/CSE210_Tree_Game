@@ -1,18 +1,12 @@
 import { useState, useCallback, useEffect } from 'react';
 
 import {
-  type ElementType,
   type GamePhase,
   type Inventory,
   type Position,
-  type Node,
   type Quest,
   type GameState,
-  type CompleteGameRequest,
-  type CompleteGameResponse,
   type Direction,
-  type PlayerCommand,
-  DIRECTION_DELTAS,
   SYMBOL_TO_ELEMENT,
   DIRECTION_LABELS,
   DEFAULT_MAP_SIZE
@@ -21,7 +15,6 @@ import {
 
 import {
   getNodeAt,
-  hasUncollectedResource,
   generateMap
 } from '../utils/MapHelper'
 
@@ -33,8 +26,6 @@ import {
 
 import {
   checkAndCompleteQuest,
-  formatQuestProgress,
-  getElementSymbol,
   formatLocationInfo,
   isValidCommand,
   parseCommand
@@ -43,9 +34,7 @@ import {
 
 
 import {
-  isValidPosition,
   getNextPosition,
-  getPossibleMoves
 } from '../utils/PositionHelper';
 
 import {
@@ -55,6 +44,7 @@ import {
 import { toSoilQuest } from '../utils/QuestionAdapter'
 
 import {
+  POINTS_PER_INCORRECT,
   ScoreManager,
 } from '../managers/ScoreManager';
 
@@ -78,9 +68,9 @@ function createInitialState(): GameState {
     inventory: {},
     inventoryCapacity: 0,
     terminalLog: [],
-    questsCompleted: 0,
     score: 0,
     showCompletionPopup: false,
+    requiredElements: new Set<string>(),
   };
 }
 
@@ -135,6 +125,18 @@ export function useSoilGame() {
       ...formatLocationInfo(startPos, map),
     ];
 
+    // Build set of all required elements across all quests.
+    // Note: An element is collectible if it's required by ANY quest, even if it's
+    // marked as incorrect in other quests (e.g., H might be incorrect for Quest 1
+    // but required for Quest 2's Water/H2O).
+    const requiredElementsSet = new Set<string>();
+    fetchedQuests.forEach(quest => {
+      Object.keys(quest.required).forEach(symbol => {
+        const elementName = SYMBOL_TO_ELEMENT[symbol] || symbol;
+        requiredElementsSet.add(elementName);
+      });
+    });
+
     setGameState((prev) => ({
       ...prev,
       phase: 'playing',
@@ -144,9 +146,9 @@ export function useSoilGame() {
       inventory: createEmptyInventory(Array.from(uniqueElements)),
       inventoryCapacity: calculatedCap,
       terminalLog: initialLog,
-      questsCompleted: 0,
       score: 0,
       showCompletionPopup: false,
+      requiredElements: requiredElementsSet,
     }));
   }, [scoreManager]);
 
@@ -196,52 +198,90 @@ export function useSoilGame() {
    * Collect specific resource at the current player position
    */
   const collectResources = useCallback((elementName: string, amountToCollect: number) => {
+    // Read current state to perform validation
+    if (state.phase !== 'playing') return;
+
+    const node = getNodeAt(state.map, state.playerPosition);
+    if (!node || !node.resources || node.collected) {
+      setGameState((prev) => ({
+        ...prev,
+        terminalLog: [
+          ...prev.terminalLog,
+          '',
+          'There are no resources to collect here.',
+        ],
+      }));
+      return;
+    }
+
+    const properElement = Object.values(SYMBOL_TO_ELEMENT).find(e => e.toLowerCase() === elementName.toLowerCase()) || elementName;
+
+    if (!node.resources[properElement] || node.resources[properElement] < amountToCollect) {
+      setGameState((prev) => ({
+        ...prev,
+        terminalLog: [
+          ...prev.terminalLog,
+          '',
+          `> Not enough ${properElement} here to collect that amount.`,
+        ],
+      }));
+      return;
+    }
+
+    const requiredElementsForValidation =
+      state.requiredElements.size > 0
+        ? state.requiredElements
+        : new Set(
+          state.quests.flatMap((quest) =>
+            Object.keys(quest.required).map((symbol) => SYMBOL_TO_ELEMENT[symbol] || symbol)
+          )
+        );
+
+    const hasRequirementContext = requiredElementsForValidation.size > 0;
+
+    // Only enforce unnecessary-resource penalties when quest requirements are available.
+    // Elements are penalized only if not needed by any quest.
+    if (hasRequirementContext && !requiredElementsForValidation.has(properElement)) {
+      // This is an incorrect/unnecessary element - penalize and block pickup
+      // Update ScoreManager OUTSIDE of setGameState to prevent double-counting
+      scoreManager.collectIncorrectElement();
+      const newScore = scoreManager.calculateRawScore();
+      
+      setGameState((prev) => ({
+        ...prev,
+        score: newScore,
+        terminalLog: [
+          ...prev.terminalLog,
+          '',
+          `${properElement} is not needed for any quest! ${POINTS_PER_INCORRECT} points penalty.`,
+          'You cannot collect unnecessary nutrients.',
+        ],
+      }));
+      return;
+    }
+
+    // Check inventory capacity
+    const currentInventoryCount = Object.values(state.inventory).reduce((sum, count) => sum + count, 0);
+
+    if (currentInventoryCount + amountToCollect > state.inventoryCapacity) {
+      setGameState((prev) => ({
+        ...prev,
+        terminalLog: [
+          ...prev.terminalLog,
+          '',
+          '> Inventory full! You cannot carry more elements.',
+        ],
+      }));
+      return;
+    }
+
+    // Add resource to inventory and update map
     setGameState((prev) => {
-      if (prev.phase !== 'playing') return prev;
-
       const node = getNodeAt(prev.map, prev.playerPosition);
-      if (!node || !node.resources || node.collected) {
-        return {
-          ...prev,
-          terminalLog: [
-            ...prev.terminalLog,
-            '',
-            'There are no resources to collect here.',
-          ],
-        };
-      }
+      if (!node) return prev;
 
-      const properElement = Object.values(SYMBOL_TO_ELEMENT).find(e => e.toLowerCase() === elementName.toLowerCase()) || elementName;
+      const newInventory = addToInventory(prev.inventory, properElement, amountToCollect);
 
-      if (!node.resources[properElement] || node.resources[properElement] < amountToCollect) {
-        return {
-          ...prev,
-          terminalLog: [
-            ...prev.terminalLog,
-            '',
-            `> Not enough ${properElement} here to collect that amount.`,
-          ],
-        };
-      }
-
-      // Check inventory capacity
-      const currentInventoryCount = Object.values(prev.inventory).reduce((sum, count) => sum + count, 0);
-
-      if (currentInventoryCount + amountToCollect > prev.inventoryCapacity) {
-        return {
-          ...prev,
-          terminalLog: [
-            ...prev.terminalLog,
-            '',
-            '> Inventory full! You cannot carry more elements.',
-          ],
-        };
-      }
-
-      // Add resource to inventory
-      let newInventory = addToInventory(prev.inventory, properElement, amountToCollect);
-
-      // Update node
       const newMap = prev.map.map((row) =>
         row.map((n) => {
           if (n.x === node.x && n.y === node.y) {
@@ -267,7 +307,7 @@ export function useSoilGame() {
         ],
       };
     });
-  }, []);
+  }, [state, scoreManager]);
 
   const dropResources = useCallback((elementName: string, amountToDrop: number) => {
     setGameState((prev) => {
@@ -370,45 +410,45 @@ export function useSoilGame() {
       dropResources(parts[1], parseInt(parts[2], 10));
     } else if (['1', '2', '3'].includes(baseCmd)) {
       const questIndex = parseInt(baseCmd) - 1;
-      setGameState((prev) => {
-        if (prev.phase !== 'playing') return prev;
-        const quest = prev.quests[questIndex];
-        if (!quest) return prev;
+      
+      // Read current state to validate and process quest completion
+      if (state.phase !== 'playing') return;
+      
+      const quest = state.quests[questIndex];
+      if (!quest) return;
 
-        if (quest.completed) {
-          return {
-            ...prev,
-            terminalLog: [...prev.terminalLog, '', 'You have already completed this quest!']
-          };
-        }
+      if (quest.completed) {
+        setGameState(prev => ({
+          ...prev,
+          terminalLog: [...prev.terminalLog, '', 'You have already completed this quest!']
+        }));
+        return;
+      }
 
-        const result = checkAndCompleteQuest(quest, prev.inventory);
-        if (result) {
-          const newQuests = [...prev.quests];
-          newQuests[questIndex] = result.updatedQuest;
+      const result = checkAndCompleteQuest(quest, state.inventory);
+      if (result) {
+        // Calculate new quest completion state
+        const newQuests = [...state.quests];
+        newQuests[questIndex] = result.updatedQuest;
+        const completedQuestCount = newQuests.filter((q) => q.completed).length;
+        
+        // Update ScoreManager OUTSIDE of setGameState to prevent double-counting
+        scoreManager.setQuestsCompleted(completedQuestCount);
+        const newScore = scoreManager.calculateRawScore();
 
-          // Sync score manager from authoritative quest completion state
-          const completedQuestCount = newQuests.filter((q) => q.completed).length;
-          scoreManager.setQuestsCompleted(completedQuestCount);
-          const scoreState = scoreManager.getScoreState();
-
-          let nextLog = [...prev.terminalLog, '', 'GOOD job you completed a quest!'];
-
-          return {
-            ...prev,
-            inventory: result.updatedInventory,
-            quests: newQuests,
-            questsCompleted: scoreState.questsCompleted,
-            score: scoreState.score,
-            terminalLog: nextLog
-          };
-        } else {
-          return {
-            ...prev,
-            terminalLog: [...prev.terminalLog, '', 'Incorrect formula. keep searching.']
-          };
-        }
-      });
+        setGameState((prev) => ({
+          ...prev,
+          inventory: result.updatedInventory,
+          quests: newQuests,
+          score: newScore,
+          terminalLog: [...prev.terminalLog, '', 'GOOD job you completed a quest!']
+        }));
+      } else {
+        setGameState(prev => ({
+          ...prev,
+          terminalLog: [...prev.terminalLog, '', 'Incorrect formula. keep searching.']
+        }));
+      }
     } else if (baseCmd === 'exit') {
       setGameState(prev => ({
         ...prev,
@@ -417,17 +457,19 @@ export function useSoilGame() {
       completeGame();
     }
 
-  }, [movePlayer, collectResources, dropResources, scoreManager]);
+  }, [movePlayer, collectResources, dropResources, scoreManager, state]);
 
 
   const completeGame = useCallback(async () => {
     const result = await scoreManager.submitScore();
+    const finalScore = scoreManager.calculateScore(); // Ensure minimum 0 is applied
 
     if (result.success) {
       console.log('Database updated successfully!');
       setGameState(prev => ({
         ...prev,
         phase: 'complete',
+        score: finalScore,
         showCompletionPopup: true,
         terminalLog: [...prev.terminalLog, '', 'Database updated successfully!']
       }));
@@ -435,6 +477,7 @@ export function useSoilGame() {
       console.error('Failed to submit progress:', result.error);
       setGameState(prev => ({
         ...prev,
+        score: finalScore,
         terminalLog: [...prev.terminalLog, '', `Error saving progress: ${result.error}`]
       }));
     }
@@ -468,16 +511,16 @@ export function useSoilGame() {
     }
   }, [state.map, state.playerPosition]);
 
-  // Use for testing completion - updates both state and scoreManager
+  // Use for testing - updates ScoreManager and syncs score to state
   const setQuestsCompleted = (value: number) => {
-    // Sync scoreManager to desired count
+    // Update ScoreManager (single source of truth)
     scoreManager.setQuestsCompleted(value);
 
-    const scoreState = scoreManager.getScoreState();
+    // Sync score to state for display
+    const newScore = scoreManager.calculateRawScore();
     setGameState(prev => ({
       ...prev,
-      questsCompleted: scoreState.questsCompleted,
-      score: scoreState.score
+      score: newScore
     }));
   };
 
