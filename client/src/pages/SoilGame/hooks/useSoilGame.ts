@@ -14,8 +14,10 @@ import {
   type PlayerCommand,
   DIRECTION_DELTAS,
   SYMBOL_TO_ELEMENT,
-  DIRECTION_LABELS
+  DIRECTION_LABELS,
+  DEFAULT_MAP_SIZE
 } from '../types/Abstract.types';
+
 
 import {
   getNodeAt,
@@ -58,9 +60,8 @@ import {
 
 // import { audioSystem } from '../AudioSystem';
 
-const MAP_SIZE = 5;
-
 const isValidQuest = (quest: Quest | null): quest is Quest => quest != null;
+
 
 // ========================
 // Initial State
@@ -70,8 +71,9 @@ function createInitialState(): GameState {
   return {
     phase: 'title',
     map: [],
-    mapSize: MAP_SIZE,
+    mapSize: DEFAULT_MAP_SIZE,
     quests: [],
+
     playerPosition: { x: 0, y: 0 },
     inventory: {},
     inventoryCapacity: 0,

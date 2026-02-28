@@ -5,11 +5,10 @@ import {
   type Position,
   type Quest,
   SYMBOL_TO_ELEMENT,
+  DEFAULT_MAP_SIZE,
 } from "../types/Abstract.types";
 
 import { isValidPosition } from "./PositionHelper";
-
-const MAP_SIZE = 5;
 
 /**
  * Random number generator 
@@ -35,7 +34,8 @@ export function hasUncollectedResource(map: Node[][], pos: Position): boolean {
   return node !== null && node.resources !== null && !node.collected;
 }
 
-export function generateMap(quests: Quest[], size: number = MAP_SIZE): Node[][] {
+export function generateMap(quests: Quest[], size: number = DEFAULT_MAP_SIZE): Node[][] {
+
   const map: Node[][] = [];
 
   // Initialize empty grid

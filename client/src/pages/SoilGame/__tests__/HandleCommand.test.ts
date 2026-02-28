@@ -1,7 +1,8 @@
 import { describe, it, expect, beforeEach, vi, afterEach } from 'vitest';
 import { renderHook, act } from '@testing-library/react';
 import { useSoilGame } from '../hooks/useSoilGame';
-import type { Node } from '../types/Abstract.types';
+import { type Node, DEFAULT_MAP_SIZE } from '../types/Abstract.types';
+
 
 // Mock audio system (avoid side effects)
 // vi.mock('../AudioSystem', () => ({
@@ -31,7 +32,8 @@ describe('handleCommand - movement & collection', () => {
     ];
   }
 
-  function setupPlayingState(capacity = 5) {
+  function setupPlayingState(capacity = DEFAULT_MAP_SIZE) {
+
     const { result } = renderHook(() => useSoilGame());
 
     act(() => {
@@ -131,8 +133,8 @@ describe('handleCommand - movement & collection', () => {
     });
 
     const terminalLog = result.current.state.terminalLog;
-    // Map is 5x5, so the last 5 logs should be the map rows
-    expect(terminalLog.slice(-5)).toEqual([
+    // Map last N lines should be the map rows
+    expect(terminalLog.slice(-DEFAULT_MAP_SIZE)).toEqual([
       '[ * ]   [   ]   [   ]   [   ]   [   ]',
       '[   ]   [   ]   [   ]   [   ]   [   ]',
       '[   ]   [   ]   [   ]   [   ]   [   ]',
@@ -140,6 +142,7 @@ describe('handleCommand - movement & collection', () => {
       '[   ]   [   ]   [   ]   [   ]   [   ]',
     ]);
   });
+
 
   it('prevents collection if it exceeds inventory capacity', () => {
     // Map has Nitrogen: 2 at (0,0), so this exceeds a capacity of 1

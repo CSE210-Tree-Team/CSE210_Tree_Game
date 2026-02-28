@@ -1,4 +1,6 @@
+export const DEFAULT_MAP_SIZE = 5;
 export type ElementType = string;
+
 
 // Ordered finite states the game can take
 export type GamePhase = 'loading' | 'title' | 'tutorial' | 'playing' | 'complete';
