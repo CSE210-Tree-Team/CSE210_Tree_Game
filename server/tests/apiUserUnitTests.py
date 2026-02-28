@@ -105,24 +105,11 @@ class TestUserAPIRoutes(APIQuestionsTestCase):
         # Clear any dependency overrides to test actual authentication
         app.dependency_overrides.clear()
         
-        # Without authentication, the endpoint will redirect to login
-        # FastAPI/TestClient follows redirects by default, so we need to check
+        # Without authentication, the endpoint should return 401 Unauthorized
         response = client.get("/api/get-user-info", follow_redirects=False)
         
-        # Should get a redirect response (307) or the login page
-        self.assertIn(response.status_code, [200, 307])
-        
-        # If it's 200, it should have redirected to the login page
-        if response.status_code == 200:
-            # The response should be the login/home page, not user info
-            # We can verify by checking the response doesn't have success: true
-            try:
-                data = response.json()
-                # If we get JSON, it shouldn't be the successful user info response
-                self.assertNotEqual(data.get("success"), True)
-            except:
-                # Not JSON response is also fine (could be HTML)
-                pass
+        # Should get an unauthorized response (401) or a redirect (307)
+        self.assertIn(response.status_code, [401, 307])
     
     def test_auth_verify_creates_new_account(self):
         """Test that /api/auth/verify creates a new account if it doesn't exist."""
