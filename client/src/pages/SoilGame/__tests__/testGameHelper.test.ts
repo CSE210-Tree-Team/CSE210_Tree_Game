@@ -413,6 +413,8 @@ describe('GameHelper_REP', () => {
       expect(isValidCommand('W')).toBe(true);
       expect(isValidCommand('collect Nitrogen 1')).toBe(true);
       expect(isValidCommand('drop Nitrogen 1')).toBe(true);
+      expect(isValidCommand('exit')).toBe(true);
+      expect(isValidCommand('EXIT')).toBe(true);
       expect(isValidCommand('foo')).toBe(false);
       expect(isValidCommand('collect')).toBe(false);
     });

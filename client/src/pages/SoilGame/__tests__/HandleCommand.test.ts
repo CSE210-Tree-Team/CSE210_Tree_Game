@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { describe, it, expect, beforeEach, vi, afterEach } from 'vitest';
 import { renderHook, act } from '@testing-library/react';
 import { useSoilGame } from '../hooks/useSoilGame';
 import type { Node } from '../types/Abstract.types';
@@ -174,5 +174,28 @@ describe('handleCommand - movement & collection', () => {
     expect(
       result.current.state.terminalLog.at(-1)
     ).toContain('Dropped 1 Nitrogen. Space freed.');
+  });
+
+  it('exits the game with "exit" command', async () => {
+    const result = setupPlayingState();
+
+    // Complete a quest first to have non-zero score
+    act(() => {
+      result.current.setQuestsCompleted(1);
+    });
+
+    const initialScoreState = result.current.getScoreState();
+    expect(initialScoreState.score).toBe(25); // 1 quest * 25 points
+
+    await act(async () => {
+      result.current.handleCommand('exit');
+      // Give async operation time to complete
+      await new Promise(resolve => setTimeout(resolve, 50));
+    });
+
+    // Should trigger game completion
+    expect(result.current.state.terminalLog).toContain('Exiting game. Calculating final score...');
+    // Phase should change to 'complete' when completeGame finishes
+    expect(result.current.state.phase).toBe('complete');
   });
 });

@@ -64,6 +64,7 @@ export interface GameState {
   inventoryCapacity: number;
   terminalLog: string[];
   questsCompleted: number;
+  score: number;
   showCompletionPopup: boolean;
 }
 
@@ -77,6 +78,15 @@ export interface CompleteGameResponse {
   new_soil_level: number;
 }
 
+/**
+ * Result of a score submission attempt to the server
+ * Used by ScoreManager to indicate submission success/failure
+ */
+export interface ScoreSubmissionResult {
+  success: boolean;
+  scoreAdded: number;
+  error?: string;
+}
 
 /** TODO: Delete the following types and direction layout. 
  *        We want to have directions tied to arrow keys

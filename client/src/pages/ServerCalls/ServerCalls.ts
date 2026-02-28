@@ -83,15 +83,17 @@ export async function fetchQuestions(
 /**
  * Pushes the game results to server (increments Tree's resource levels).
  * @param progress - Game result value to add to the resource level
- * @param gameType - Resource type to update: "water", "earth", or "sun"
+ * @param gameType - Resource type to update: "Water", "Earth", or "Sun"
  * @returns Promise<boolean> - true if update was successful
  */
 export async function pushGameResults(progress: number, gameType: string): Promise<boolean> {
-    const statName = gameType.toLowerCase();
-    
-    if (!['water', 'earth', 'sun'].includes(statName)) {
-        throw new Error(`Invalid gameType: ${gameType}. Must be "water", "earth", or "sun"`);
+    // Validate gameType as a properly capitalized resource
+    const validGameTypes = ['Water', 'Earth', 'Sun'];
+    if (!validGameTypes.includes(gameType)) {
+        throw new Error(`Invalid gameType: ${gameType}. Must be "Water", "Earth", or "Sun"`);
     }
+    
+    const statName = gameType.toLowerCase();
 
     const response = await fetch('/api/update-stat', {
         method: 'POST',

@@ -2,7 +2,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
-import { fetchSoilQuestions, SOIL_QUESTION_COUNT, SOIL_QUESTION_TYPE } from "../client/src/pages/SoilGame/SoilGameQuestionManager";
+import { fetchSoilQuestions, SOIL_QUESTION_COUNT, SOIL_QUESTION_TYPE } from "../client/src/pages/SoilGame/managers/SoilGameQuestionManager";
 import { toSoilQuest } from "../client/src/pages/SoilGame/utils/QuestionAdapter";
 import type { Question } from "../client/src/pages/ServerCalls/ServerCalls";
 

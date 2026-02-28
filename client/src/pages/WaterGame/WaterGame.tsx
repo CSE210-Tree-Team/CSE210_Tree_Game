@@ -369,7 +369,7 @@ export const WaterGame = () => {
             buttonText="Go Back to Home"
             onClick={async () => {
               try {
-                await pushGameResults(correctCount * 10, "water");
+                await pushGameResults(correctCount * 10, "Water");
               } catch {
                 console.error("Failed to update water resource.");
               } finally {
