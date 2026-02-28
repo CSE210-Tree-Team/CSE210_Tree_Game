@@ -28,6 +28,23 @@ describe('QuestionAdapter', () => {
     expect(quest?.required).toEqual({ H: 2, O: 1 });
     expect(quest?.submitted).toEqual({});
     expect(quest?.completed).toBe(false);
+    expect(quest?.incorrect).toEqual({ Fe: 2 });
+  });
+
+  it('parses incorrect choices into the incorrect field', () => {
+    const quest = toSoilQuest(
+      makeQuestion({
+        choices: [
+          { text: '2H', isCorrect: true },
+          { text: '1O', isCorrect: true },
+          { text: '3N', isCorrect: false },
+          { text: '1C', isCorrect: false },
+        ],
+      })
+    );
+    expect(quest).not.toBeNull();
+    expect(quest?.required).toEqual({ H: 2, O: 1 });
+    expect(quest?.incorrect).toEqual({ N: 3, C: 1 });
   });
 
   it('accepts resourceType case-insensitively', () => {

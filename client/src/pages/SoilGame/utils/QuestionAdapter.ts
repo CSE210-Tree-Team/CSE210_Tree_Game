@@ -76,9 +76,11 @@ export const toSoilQuest = (question: Question): Quest | null => {
   }
 
   const required: Record<string, number> = {};
+  const incorrect: Record<string, number> = {};
+  
   if (Array.isArray(question.choices)) {
     for (const choice of question.choices) {
-      if (!choice.isCorrect || typeof choice.text !== "string") { // Currently skipping all other choices.
+      if (typeof choice.text !== "string") {
         continue;
       }
 
@@ -87,8 +89,13 @@ export const toSoilQuest = (question: Question): Quest | null => {
         return null;
       }
 
-      // Accumulate counts for each element symbol.
-      required[parsed.symbol] = (required[parsed.symbol] ?? 0) + parsed.count;
+      if (choice.isCorrect) {
+        // Accumulate counts for each element symbol.
+        required[parsed.symbol] = (required[parsed.symbol] ?? 0) + parsed.count;
+      } else {
+        // Track incorrect elements separately
+        incorrect[parsed.symbol] = (incorrect[parsed.symbol] ?? 0) + parsed.count;
+      }
     }
   }
 
@@ -103,5 +110,6 @@ export const toSoilQuest = (question: Question): Quest | null => {
     required,
     submitted: {},
     completed: false,
+    incorrect,
   };
 };
