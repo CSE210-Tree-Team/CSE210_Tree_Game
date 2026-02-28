@@ -16,7 +16,6 @@ describe('ResourceBoard Component', () => {
         expect(screen.getByText(/Growth Progress/i)).toBeInTheDocument()
         expect(screen.getByText('Water')).toBeInTheDocument()
         expect(screen.getByText('Earth')).toBeInTheDocument()
-        //expect(screen.getByText('Sun')).toBeInTheDocument()
     })
 
     it('displays correct percentage values', () => {
@@ -24,7 +23,6 @@ describe('ResourceBoard Component', () => {
 
         expect(screen.getByText('50%')).toBeInTheDocument()
         expect(screen.getByText('75%')).toBeInTheDocument()
-        //expect(screen.getByText('30%')).toBeInTheDocument()
     })
 
     it('renders resource icons with correct paths', () => {
@@ -32,11 +30,9 @@ describe('ResourceBoard Component', () => {
 
         const waterIcon = screen.getByAltText('Water Resource Icon') as HTMLImageElement
         const earthIcon = screen.getByAltText('Earth Resource Icon') as HTMLImageElement
-        //const sunIcon = screen.getByAltText('Sun Resource Icon') as HTMLImageElement
 
         expect(waterIcon.src).toContain(RESOURCE_ICONS.WATER)
         expect(earthIcon.src).toContain(RESOURCE_ICONS.EARTH)
-        //expect(sunIcon.src).toContain(RESOURCE_ICONS.SUN)
     })
 
     it('progress bars have correct width styles', () => {
