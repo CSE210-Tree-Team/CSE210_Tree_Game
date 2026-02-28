@@ -21,7 +21,7 @@ export function GameScreen({ state, onCommand }: GameScreenProps) {
                 <Terminal logs={state.terminalLog} onCommand={onCommand} />
             </div>
             <div className={styles.sidebarContainer}>
-                <Sidebar quests={state.quests} inventory={state.inventory} />
+                <Sidebar quests={state.quests} inventory={state.inventory} inventoryCapacity={state.inventoryCapacity} />
             </div>
         </div>
     );

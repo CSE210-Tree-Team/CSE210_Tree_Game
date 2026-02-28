@@ -20,11 +20,10 @@ const mockQuest: Quest = {
 };
 
 
-test("renders quest name and formula", () => {
+test("renders quest name", () => {
   render(<QuestSection quests={[mockQuest]} />);
-  // Name and formula are in the same div so match with regex
   expect(screen.getByText(/Water/)).toBeInTheDocument();
-  expect(screen.getByText(/H2O/)).toBeInTheDocument();
+  expect(screen.queryByText(/H2O/)).not.toBeInTheDocument();
 });
 
 test("shows incomplete icon for an incomplete quest", () => {
@@ -38,15 +37,9 @@ test("shows completed icon for a completed quest", () => {
   expect(screen.getByAltText("completed")).toBeInTheDocument();
 });
 
-test("shows progress string for an incomplete quest", () => {
+test("does not show progress string for an incomplete quest", () => {
   render(<QuestSection quests={[mockQuest]} />);
-  expect(screen.getByText("0 / 2 H • 0 / 1 O")).toBeInTheDocument();
-});
-
-test("reflects partial submission in progress string", () => {
-  const partial = { ...mockQuest, submitted: { H: 1, O: 0 } };
-  render(<QuestSection quests={[partial]} />);
-  expect(screen.getByText("1 / 2 H • 0 / 1 O")).toBeInTheDocument();
+  expect(screen.queryByText(/0 \/ 2 H/)).not.toBeInTheDocument();
 });
 
 test("hides progress string for a completed quest", () => {

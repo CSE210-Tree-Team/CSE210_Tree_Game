@@ -4,17 +4,15 @@ import {
   type Direction,
   DIRECTION_DELTAS,
   DIRECTION_LABELS,
+  DEFAULT_MAP_SIZE,
 } from '../types/Abstract.types';
-  
-// Default Map size
-const MAP_SIZE = 5;
 
 // ========================
 // Movement Helpers
 // ========================
 
 /** Check if a position is within the grid bounds */
-export function isValidPosition(pos: Position, mapSize: number = MAP_SIZE): boolean {
+export function isValidPosition(pos: Position, mapSize: number = DEFAULT_MAP_SIZE): boolean {
   return pos.x >= 0 && pos.x < mapSize && pos.y >= 0 && pos.y < mapSize;
 }
 
@@ -22,7 +20,7 @@ export function isValidPosition(pos: Position, mapSize: number = MAP_SIZE): bool
 export function getNextPosition(
   current: Position,
   direction: Direction,
-  mapSize: number = MAP_SIZE
+  mapSize: number = DEFAULT_MAP_SIZE
 ): Position | null {
   const delta = DIRECTION_DELTAS[direction];
   const next: Position = {
@@ -33,7 +31,8 @@ export function getNextPosition(
 }
 
 /** Get list of possible move directions from a position */
-export function getPossibleMoves(pos: Position, mapSize: number = MAP_SIZE): string[] {
+export function getPossibleMoves(pos: Position, mapSize: number = DEFAULT_MAP_SIZE): string[] {
+
   const moves: string[] = [];
   const directions: Direction[] = ['w', 'a', 's', 'd'];
 

@@ -1,5 +1,5 @@
 /**
- * This file manages the fetching and structuring of questions for the Soil Game. It depends
+ * Manages the fetching and structuring of questions for the Soil Game. It depends
  * on ServerCalls.ts to fetch questions from the server and on QuestionAdapter.ts to convert those questions
  * 
  * It currently is barebones and simply fetches questions from the server and defines a type alias for SoilQuestion.
@@ -12,7 +12,7 @@
  *   "text": "Water/H2O",
  *   "type": "MultiSelect",
  *   "difficulty": 1,
- *   "resourceType": "earth",
+ *   "resourceType": "Earth",
  *   "choices": [
  *     { "text": "2H", "isCorrect": true },
  *     { "text": "1O", "isCorrect": true },
@@ -21,7 +21,7 @@
  * }
  */
 
-import { fetchQuestions, type Question } from "../ServerCalls/ServerCalls";
+import { fetchQuestions, type Question } from "../../ServerCalls/ServerCalls";
 
 export type SoilQuestion = Question;
 
@@ -34,7 +34,7 @@ const mockQuestions: SoilQuestion[] = [
     text: "Water/H2O",
     type: "MultiSelect",
     difficulty: 1,
-    resourceType: "earth",
+    resourceType: "Earth",
     choices: [
       { text: "2H", isCorrect: true },
       { text: "1O", isCorrect: true },
@@ -47,7 +47,7 @@ const mockQuestions: SoilQuestion[] = [
     text: "Carbon Dioxide/CO2",
     type: "MultiSelect",
     difficulty: 1,
-    resourceType: "earth",
+    resourceType: "Earth",
     choices: [
       { text: "1C", isCorrect: true },
       { text: "2O", isCorrect: true },
@@ -60,7 +60,7 @@ const mockQuestions: SoilQuestion[] = [
     text: "Glucose/C6H12O6",
     type: "MultiSelect",
     difficulty: 1,
-    resourceType: "earth",
+    resourceType: "Earth",
     choices: [
       { text: "6C", isCorrect: true },
       { text: "12H", isCorrect: true },

@@ -131,7 +131,7 @@ describe("pushGameResults", () => {
       }),
     } as any);
 
-    const result = await pushGameResults(10, "water");
+    const result = await pushGameResults(10, "Water");
 
     expect(fetchMock).toHaveBeenCalledWith(
       "/api/update-stat",
@@ -155,7 +155,7 @@ describe("pushGameResults", () => {
       statusText: "Server Error",
     } as any);
 
-    await expect(pushGameResults(10, "water")).rejects.toThrow(
+    await expect(pushGameResults(10, "Water")).rejects.toThrow(
       "Failed to update stat"
     );
   });
@@ -169,7 +169,7 @@ describe("pushGameResults", () => {
       }),
     } as any);
 
-    const result = await pushGameResults(5, "earth");
+    const result = await pushGameResults(5, "Earth");
     expect(result).toBe(false);
   });
 });

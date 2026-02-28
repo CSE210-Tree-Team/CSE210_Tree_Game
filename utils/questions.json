@@ -45,35 +45,35 @@
         "text": "Carbon Dioxide/CO2",
         "question_type": "MultiSelect",
         "resource_type": "Earth",
-        "choices": ["C", "2O", "H"],
+        "choices": ["C", "2O", "H", "Fe"],
         "correct_choices": [0, 1]
     },
     {
         "text": "Ammonia/NH3",
         "question_type": "MultiSelect",
         "resource_type": "Earth",
-        "choices": ["N", "3H", "O"],
+        "choices": ["N", "3H", "O", "Fe"],
         "correct_choices": [0, 1]
     },
     {
         "text": "Methane/CH4",
         "question_type": "MultiSelect",
         "resource_type": "Earth",
-        "choices": ["C", "4H", "O"],
+        "choices": ["C", "4H", "O", "Fe"],
         "correct_choices": [0, 1]
     },
     {
         "text": "Sodium Chloride/NaCl",
         "question_type": "MultiSelect",
         "resource_type": "Earth",
-        "choices": ["Na", "Cl", "2O"],
+        "choices": ["Na", "Cl", "2O", "Fe"],
         "correct_choices": [0, 1]
     },
     {
         "text": "Glucose/C6H12O6",
         "question_type": "MultiSelect",
         "resource_type": "Earth",
-        "choices": ["6C", "12H", "6O", "2N"],
+        "choices": ["6C", "12H", "6O", "2N", "3Fe"],
         "correct_choices": [0, 1, 2]
     }
 ]
