@@ -7,6 +7,14 @@
     align-items: center;
     justify-content: center;
     z-index: 1000;
+
+    background-size: cover;
+    background-position: center center;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+    overflow-x: hidden;
+    overflow-y: hidden;
+    position: relative;
 }
 
 .gameScreen {
@@ -25,10 +33,11 @@
 }
 
 .arrow {
-    position: relative;
-    top: -17rem;
-    left: 8rem;
+    position: absolute;
+    top: 3rem;
+    left: 3rem;
     width: 4rem;
     height: 4rem;
     cursor: pointer;
+    z-index:1002;
 }

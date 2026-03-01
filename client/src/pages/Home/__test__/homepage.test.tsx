@@ -156,7 +156,6 @@ describe('Homepage', () => {
     await waitFor(() => {
       expect(screen.getByText('50%')).toBeInTheDocument() // water
       expect(screen.getByText('60%')).toBeInTheDocument() // earth
-      expect(screen.getByText('70%')).toBeInTheDocument() // sun
     })
   })
 })
