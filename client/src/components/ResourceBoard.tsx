@@ -15,7 +15,6 @@ interface ResourceConfig {
 const resourceConfigs: ResourceConfig[] = [
     { type: "water", label: "Water"},
     { type: "earth", label: "Earth"},
-    //{ type: "sun", label: "Sun"},
 ];
 
 export const ResourceBoard = ({ resources }: ResourceBoardProps) => {
