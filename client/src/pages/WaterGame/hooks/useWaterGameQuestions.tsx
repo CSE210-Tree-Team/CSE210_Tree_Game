@@ -10,6 +10,8 @@ import { useState, useEffect } from "react";
 import { fetchQuestions } from "../../ServerCalls/ServerCalls";
 import type { Question } from "../../ServerCalls/ServerCalls";
 import { NUM_QUESTIONS } from "../constants";
+import { audioSystem } from "../../../AudioSystem";
+import audioFile from "../audio/test_audio.mp3"
 
 interface UseWaterGameQuestionsResult {
   questions: Question[];
@@ -36,6 +38,16 @@ export const useWaterGameQuestions = (): UseWaterGameQuestionsResult => {
 
     loadQuestions();
   }, []);
+
+  useEffect(() => {
+    if (!isLoading && !error) {
+      audioSystem.playAmbient(audioFile);
+    }
+
+    return () => {
+      audioSystem.stopAmbient();
+    };
+  }, [isLoading, error]);
 
   return { questions, isLoading, error };
 };
