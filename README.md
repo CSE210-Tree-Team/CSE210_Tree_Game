@@ -84,11 +84,11 @@ To add questions, populate `server/utils/questions.json`. Then, run `python -m u
 
 The tree will gradually decay with time; this rate can be configured in the server settings, but will typically be a 1 percent decay every 30 minutes.
 
-Decaying currently occurs passively and is done directly through update_stats, without the explicit addition of Events to the database, although this functionality may be updated to account for updating events. Tests for updating stats can be run by going into the server folder and running `python -m unittest tests.databaseStatUpdateUnitTests -v`.
+Decaying currently occurs passively and is done directly through update_stats, without the explicit addition of Events to the database, although this functionality may be updated to account for updating events. Tests for updating stats can be run by going into the server folder and running `python -m unittest regression_tests.databaseStatUpdateRegressionTests -v`.
 
 ## API Calls:
 
-From the server directory, API tests can be run with `python -m unittest tests.apiQuestionsUnitTests -v`, `python -m unittest tests.apiStatUnitTests -v`, and `python -m unittest tests.apiUserUnitTests -v`. **Note that all API calls besides /api/auth/verify require the user to be authenticated.**
+From the server directory, the old API tests can be run with `python -m unittest regression_tests.apiQuestionsRegressionTests -v`, `python -m unittest regression_tests.apiStatRegressionTests -v`, and `python -m unittest regression_tests.apiUserRegressionTests -v`. Router-level unit tests can be run with `python -m unittest api.__test__.questionsUnitTest -v`, `python -m unittest api.__test__.statsUnitTest -v`, and `python -m unittest api.__test__.usersUnitTest -v`. **Note that all API calls besides /api/auth/verify require the user to be authenticated.**
 
 **Note:** Some endpoints currently use POST for data retrieval (e.g., `/api/get-question`, `/api/get-questions`). As a TODO, these should be refactored to use GET requests with query parameters or path parameters instead of POST with JSON bodies.
 

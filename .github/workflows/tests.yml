@@ -26,29 +26,77 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
-      - name: Run Database Schema Unit Tests
+      # Regression Tests
+      - name: Run Database Schema Regression Tests
         run: |
-          python -m unittest tests.databaseUnitTests -v
+          python -m unittest regression_tests.databaseRegressionTests -v
 
-      - name: Run Database Interaction Unit Tests
+      - name: Run Database Interaction Regression Tests
         run: |
-          python -m unittest tests.databaseInteractUnitTests -v
+          python -m unittest regression_tests.databaseInteractRegressionTests -v
 
-      - name: Run Update Tree Stat Tests
+      - name: Run Update Tree Stat Regression Tests
         run: |
-          python -m unittest tests.databaseStatUpdateUnitTests -v
+          python -m unittest regression_tests.databaseStatUpdateRegressionTests -v
 
-      - name: Run API Questions Tests
+      - name: Run API Questions Regression Tests
         run: |
-          python -m unittest tests.apiQuestionsUnitTests -v
+          python -m unittest regression_tests.apiQuestionsRegressionTests -v
 
-      - name: Run API User Tests
+      - name: Run API User Regression Tests
         run: |
-          python -m unittest tests.apiUserUnitTests -v
+          python -m unittest regression_tests.apiUserRegressionTests -v
 
-      - name: Run API Stat Update Tests
+      - name: Run API Stat Update Regression Tests
         run: |
-          python -m unittest tests.apiStatUnitTests -v
+          python -m unittest regression_tests.apiStatRegressionTests -v
+
+      # API Unit Tests
+      - name: Run Auth Router Unit Tests
+        run: |
+          python -m unittest api.__test__.authUnitTest -v
+
+      - name: Run Questions Router Unit Tests
+        run: |
+          python -m unittest api.__test__.questionsUnitTest -v
+
+      - name: Run Stats Router Unit Tests
+        run: |
+          python -m unittest api.__test__.statsUnitTest -v
+
+      - name: Run Users Router Unit Tests
+        run: |
+          python -m unittest api.__test__.usersUnitTest -v
+
+      - name: Run Dependencies Unit Tests
+        run: |
+          python -m unittest api.__test__.dependenciesUnitTest -v
+
+      # Service Unit Tests
+      - name: Run Auth Service Unit Tests
+        run: |
+          python -m unittest services.__test__.authServiceUnitTest -v
+
+      - name: Run Question Service Unit Tests
+        run: |
+          python -m unittest services.__test__.questionServiceUnitTest -v
+
+      - name: Run Tree Service Unit Tests
+        run: |
+          python -m unittest services.__test__.treeServiceUnitTest -v
+
+      - name: Run Decay Service Unit Tests
+        run: |
+          python -m unittest services.__test__.decayServiceUnitTest -v
+
+      # Integration Tests
+      - name: Run Backend Integration Tests
+        run: |
+          python -m unittest integration_tests.serverIntegrationTests -v
+
+      - name: Run API Integration Tests
+        run: |
+          python -m unittest integration_tests.apiIntegrationTest -v
 
 
 
