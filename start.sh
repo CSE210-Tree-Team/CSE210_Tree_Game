@@ -16,6 +16,8 @@ source .venv/bin/activate
 pip install -q --upgrade pip
 pip install -q -r requirements.txt
 
+export PYTHONPATH="${PYTHONPATH}:$(pwd)"
+
 echo "Removing old database..."
 rm -f database/game_database.db
 
