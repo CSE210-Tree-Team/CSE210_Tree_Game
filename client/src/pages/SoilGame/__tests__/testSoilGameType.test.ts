@@ -36,9 +36,9 @@ import {
   formatQuestProgress,
   getElementSymbol,
   formatLocationInfo,
-  isValidCommand,
-  parseCommand
 } from '../utils/QuestListHelper';
+
+import { isValidCommand, parseCommand } from '../utils/CommandParser';
 
 import {
   isValidPosition,

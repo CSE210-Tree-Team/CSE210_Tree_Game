@@ -8,6 +8,27 @@ import {
   DEFAULT_MAP_SIZE,
 } from "../types/Abstract.types";
 
+// ========================
+// Map Display
+// ========================
+
+/** Build the lines for the ASCII map grid display (used by the 'i' command) */
+export function renderMapLines(mapSize: number, playerPosition: Position): string[] {
+  const lines: string[] = [];
+  for (let y = 0; y < mapSize; y++) {
+    let rowStr = '';
+    for (let x = 0; x < mapSize; x++) {
+      if (x === playerPosition.x && y === playerPosition.y) {
+        rowStr += '[ * ]   ';
+      } else {
+        rowStr += '[   ]   ';
+      }
+    }
+    lines.push(rowStr.trimEnd());
+  }
+  return lines;
+}
+
 import { isValidPosition } from "./PositionHelper";
 
 /**
