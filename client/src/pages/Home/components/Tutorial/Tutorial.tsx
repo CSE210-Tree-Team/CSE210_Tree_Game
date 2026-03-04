@@ -4,7 +4,7 @@
  * It should provide a brief overview of the game mechanics and how to play.
  */
 
-import { Popup } from "../../components/Popup"
+import { Popup } from "../../../../components/Popup"
 import { useState } from "react"
 import styles from "./popup.module.css"
 

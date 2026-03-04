@@ -1,14 +1,16 @@
-import { useAuth0 } from '@auth0/auth0-react';
+﻿import { useAuth0 } from '@auth0/auth0-react';
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Tree } from "../../components/Tree";
-import { Earth } from "../../components/Earth";
-import { WateringCan } from "../../components/WateringCan";
-import { ResourceBoard } from "../../components/ResourceBoard"
-import styles from "../../components/homepage.module.css"
+import { Tree } from "./components/Tree/Tree";
+import { Earth } from "./components/Earth/Earth";
+import { WateringCan } from "./components/WateringCan/WateringCan";
+import { ResourceBoard } from "./components/ResourceBoard/ResourceBoard"
+
+import styles from "./homepage.module.css"
 import fontStyles from "../../components/Popup.module.css"
 import buttonStyles from "../../components/Button.module.css"
-import Tutorial from "./Tutorial"
+
+import Tutorial from "./components/Tutorial/Tutorial"
 import { type UserInfoResponse } from "../ServerCalls/ServerCalls"
 import { establishAuthSession, fetchUserInfo } from "../ServerCalls/ServerCalls"
 
@@ -53,8 +55,9 @@ export const Homepage = () => {
                     throw new Error("Failed to verify the authentication");
                 }
                 const data = await fetchUserInfo();
+
                 setUserInfo(data);
-            } catch  {
+            } catch {
                 throw new Error("Failed to establish backend session");
             }
         }
@@ -84,17 +87,19 @@ export const Homepage = () => {
         navigate('/account');
     };
 
+
+
     return (
         <div className={styles.homepageWrapper}>
             {showTutorial && (<Tutorial onClose={handleCloseTutorial} />)}
                     <h1 className={`${fontStyles.title} ${styles.helloTitle}`}>
-                        Hello, {userInfo?.user.displayName || 'User'}
+                        Hello, {userInfo?.user.displayName ?? 'User'}
                     </h1>
                 <ResourceBoard resources={userInfo?.tree.resourceLevels || userInfoMock.tree.resourceLevels} />
 
                 <div className={styles.treeEarthContainer}>
-                    <Tree water={userInfo?.tree.resourceLevels.water || userInfoMock.tree.resourceLevels.water} />
-                    <Earth earth={userInfo?.tree.resourceLevels.earth || userInfoMock.tree.resourceLevels.earth} onClick={handleSoilGame} />
+                <Tree water={userInfo?.tree.resourceLevels.water ?? userInfoMock.tree.resourceLevels.water} />
+                    <Earth earth={userInfo?.tree.resourceLevels.earth ?? userInfoMock.tree.resourceLevels.earth} onClick={handleSoilGame} />
                     <WateringCan onClick={handleWaterGame} />
                 </div>
 

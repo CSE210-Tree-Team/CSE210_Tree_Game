@@ -1,0 +1,92 @@
+
+.homepageWrapper {
+    width: 100vw;
+    min-height: 100vh;
+    background-image: url('/assets/bg.svg');
+    background-size: cover;
+    background-position: center center;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+    overflow-x: hidden;
+    overflow-y:hidden;
+    position: relative;
+}
+
+
+
+.treeEarthContainer {
+    position: absolute;
+    width: 40vw;
+    height: 40vw;
+    left: 40%;
+    top: 40%;
+    transform: translate(-50%, -30%);
+    /*border: 2px dashed red;*/
+}
+
+.homepageWrapper .helloTitle {
+    font-size: 4vw;
+    font-weight: 600;
+    user-select: none;
+    text-align: left;
+    margin: 1.5rem;
+    letter-spacing: 4px;
+    padding-bottom: 2rem;
+    color: var(--color-lightGreen);
+    -webkit-text-stroke-color: var(--color-darkGreen);
+    -webkit-text-stroke-width: 0.15rem;
+    text-shadow: 0 0.5rem 0.5rem rgba(0, 0, 0, 0.25);
+    position:relative;
+    z-index:15;
+}
+
+
+.homepageWrapper .gameTitle {
+    font-size: 5rem;
+    font-weight: 700;
+    letter-spacing: 4px;
+    user-select: none;
+    padding-top: 2rem;
+    padding-bottom: 2rem;
+    margin: auto;
+    text-align: center;
+    color: var(--color-lightGreen);
+    -webkit-text-stroke-color: var(--color-darkGreen);
+    -webkit-text-stroke-width: 0.15rem;
+    text-shadow: 0 0.5rem 0.5rem rgba(0, 0, 0, 0.25);
+}
+
+.homepageWrapper .gameIntro {
+    display: flex;
+    justify-content: center;
+    text-align: center;
+    padding:0;
+    font-size: 2rem;
+}
+.buttonContainer {
+    display: flex;
+    gap: 40px;
+    flex-wrap: wrap;
+    margin: auto;
+    justify-content: center;
+    padding-top: clamp(20px, 4vw, 40px);
+}
+
+.homepageWrapper .buttonSingle {
+    min-width: 6rem;
+    font-size: 2rem;
+    padding: 1rem 3rem;
+}
+
+
+.homepageWrapper .buttonLogout {
+    position: fixed;
+    bottom: clamp(20px, 4vw, 40px);
+    right: clamp(20px, 4vw, 40px);
+}
+
+.homepageWrapper .buttonSetting {
+    position: fixed;
+    bottom: clamp(20px, 4vw, 40px);
+    right: clamp(200px, 20vw, 240px);
+}

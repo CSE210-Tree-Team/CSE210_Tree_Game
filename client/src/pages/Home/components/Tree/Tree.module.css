@@ -1,0 +1,16 @@
+.treeContainer {
+    position: absolute;
+    top: -10%;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 40vw;
+    height: 40vh;
+    z-index: 2;
+    pointer-events: none;
+}
+.treeImage {
+    width: 100%;
+    height: auto;
+    object-fit: contain;
+    display: block;
+}

@@ -1,14 +1,14 @@
 import { useNavigate } from 'react-router-dom';
-import styles from "../../components/homepage.module.css"
+import styles from "./homepage.module.css"
 import buttonStyles from "../../components/Button.module.css"
 import fontStyles from "../../components/Popup.module.css"
-import { WelcomePagePopup } from "../../components/WelcomePagePopup"
-import test from "../../components/WelcomePopup.module.css"
+import { WelcomePagePopup } from "./components/WelcomePagePopup/WelcomePagePopup"
+import welcomeStyles from "./components/WelcomePagePopup/WelcomePopup.module.css"
 export const Welcome = () => {
     const navigate = useNavigate();
 
     return (
-        <div className={`${styles.homepageWrapper} ${test.welcomeContainer}`}>
+        <div className={`${styles.homepageWrapper} ${welcomeStyles.welcomeContainer}`}>
                 <h1 className={`${fontStyles.title} ${styles.gameTitle}`}>
                     Welcome to Bristlecone
                 </h1>

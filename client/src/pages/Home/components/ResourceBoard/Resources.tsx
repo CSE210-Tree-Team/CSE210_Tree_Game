@@ -1,5 +1,5 @@
-import styles from "./homepage.module.css"
-import { RESOURCE_ICONS } from "./constant";
+import styles from "./ResourceBoard.module.css"
+import { RESOURCE_ICONS } from "../../constant";
 
 export interface Resources {
     water: number;
@@ -21,6 +21,7 @@ const RESOURCE_CONFIG = {
 
 export const ResourceItem = ({ type, value, label }: ResourceItemProps) => {
     const config = RESOURCE_CONFIG[type];
+    console.log(type, value);
     
     return (
         <div className={styles.resourceItem}>

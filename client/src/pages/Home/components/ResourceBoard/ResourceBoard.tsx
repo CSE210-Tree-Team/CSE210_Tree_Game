@@ -1,6 +1,6 @@
 ﻿import { type Resources } from "./Resources";
-import styles from "./homepage.module.css"
-import { RESOURCE_BOARD_BG} from "./constant";
+import styles from "./ResourceBoard.module.css"
+import { RESOURCE_BOARD_BG} from "../../constant";
 import { ResourceItem, type ResourceType } from "./Resources";
 
 interface ResourceBoardProps {

@@ -1,5 +1,5 @@
-import styles from "./homepage.module.css"
-import { WATER_CAN_IMAGE } from "./constant"
+import styles from "./WateringCan.module.css"
+import { WATER_CAN_IMAGE } from "../../constant"
 interface WateringCanProps {
     onClick: () => void;
 }

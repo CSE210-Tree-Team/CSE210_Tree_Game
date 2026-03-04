@@ -1,4 +1,4 @@
-import styles from "./homepage.module.css";
+import styles from "./Tree.module.css";
 import {
     TREE_HEALTH_THRESHOLD,
     TREE_UNHEALTHY_THRESHOLD,
@@ -6,7 +6,7 @@ import {
     HEALTH_HEALTHY,
     HEALTH_UNHEALTHY,
     HEALTH_WITHERED
-} from "./constant";
+} from "../../constant";
 
 interface TreeProps {
     water: number;
@@ -16,7 +16,7 @@ interface TreeProps {
 
 
 export const Tree = ({ water }: TreeProps) => {
-    //TODO: add status pic for DEAD
+    console.log(water);
     const getTreeImage = () => {
         if (water >= TREE_HEALTH_THRESHOLD) {
             return TREE_IMAGES.HEALTHY;
