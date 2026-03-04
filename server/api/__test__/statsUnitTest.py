@@ -30,14 +30,12 @@ class TestUpdateStat(unittest.TestCase):
 
     def test_update_stat_water_success(self):
         """Test successfully updating water stat."""
-        with patch('api.routers.stats.TreeService') as mock_tree_service, \
-             patch('api.routers.stats.student_required') as mock_student_required:
+        with patch('api.routers.stats.TreeService') as mock_tree_service:
             
             mock_tree_service.get_tree_id.return_value = "tree-uuid-123"
             mock_tree_service.update_tree_stat.return_value = None
-            mock_student_required.return_value = self.mock_student
             
-            app = create_test_app()
+            app = create_test_app(user_data=self.mock_student)
             from api.routers.stats import router
             app.include_router(router)
             
@@ -55,14 +53,12 @@ class TestUpdateStat(unittest.TestCase):
 
     def test_update_stat_earth_success(self):
         """Test successfully updating earth stat."""
-        with patch('api.routers.stats.TreeService') as mock_tree_service, \
-             patch('api.routers.stats.student_required') as mock_student_required:
+        with patch('api.routers.stats.TreeService') as mock_tree_service:
             
             mock_tree_service.get_tree_id.return_value = "tree-uuid-123"
             mock_tree_service.update_tree_stat.return_value = None
-            mock_student_required.return_value = self.mock_student
             
-            app = create_test_app()
+            app = create_test_app(user_data=self.mock_student)
             from api.routers.stats import router
             app.include_router(router)
             
@@ -79,14 +75,12 @@ class TestUpdateStat(unittest.TestCase):
 
     def test_update_stat_sun_success(self):
         """Test successfully updating sun stat."""
-        with patch('api.routers.stats.TreeService') as mock_tree_service, \
-             patch('api.routers.stats.student_required') as mock_student_required:
+        with patch('api.routers.stats.TreeService') as mock_tree_service:
             
             mock_tree_service.get_tree_id.return_value = "tree-uuid-123"
             mock_tree_service.update_tree_stat.return_value = None
-            mock_student_required.return_value = self.mock_student
             
-            app = create_test_app()
+            app = create_test_app(user_data=self.mock_student)
             from api.routers.stats import router
             app.include_router(router)
             
@@ -103,14 +97,12 @@ class TestUpdateStat(unittest.TestCase):
 
     def test_update_stat_all_resources(self):
         """Test updating all valid resource types."""
-        with patch('api.routers.stats.TreeService') as mock_tree_service, \
-             patch('api.routers.stats.student_required') as mock_student_required:
+        with patch('api.routers.stats.TreeService') as mock_tree_service:
             
             mock_tree_service.get_tree_id.return_value = "tree-uuid-123"
             mock_tree_service.update_tree_stat.return_value = None
-            mock_student_required.return_value = self.mock_student
             
-            app = create_test_app()
+            app = create_test_app(user_data=self.mock_student)
             from api.routers.stats import router
             app.include_router(router)
             
@@ -126,14 +118,12 @@ class TestUpdateStat(unittest.TestCase):
 
     def test_update_stat_case_insensitive(self):
         """Test that stat_name is case-insensitive."""
-        with patch('api.routers.stats.TreeService') as mock_tree_service, \
-             patch('api.routers.stats.student_required') as mock_student_required:
+        with patch('api.routers.stats.TreeService') as mock_tree_service:
             
             mock_tree_service.get_tree_id.return_value = "tree-uuid-123"
             mock_tree_service.update_tree_stat.return_value = None
-            mock_student_required.return_value = self.mock_student
             
-            app = create_test_app()
+            app = create_test_app(user_data=self.mock_student)
             from api.routers.stats import router
             app.include_router(router)
             
@@ -154,14 +144,12 @@ class TestUpdateStat(unittest.TestCase):
 
     def test_update_stat_max_value(self):
         """Test updating stat with maximum allowed value."""
-        with patch('api.routers.stats.TreeService') as mock_tree_service, \
-             patch('api.routers.stats.student_required') as mock_student_required:
+        with patch('api.routers.stats.TreeService') as mock_tree_service:
             
             mock_tree_service.get_tree_id.return_value = "tree-uuid-123"
             mock_tree_service.update_tree_stat.return_value = None
-            mock_student_required.return_value = self.mock_student
             
-            app = create_test_app()
+            app = create_test_app(user_data=self.mock_student)
             from api.routers.stats import router
             app.include_router(router)
             
@@ -176,14 +164,12 @@ class TestUpdateStat(unittest.TestCase):
 
     def test_update_stat_min_value(self):
         """Test updating stat with minimum allowed value."""
-        with patch('api.routers.stats.TreeService') as mock_tree_service, \
-             patch('api.routers.stats.student_required') as mock_student_required:
+        with patch('api.routers.stats.TreeService') as mock_tree_service:
             
             mock_tree_service.get_tree_id.return_value = "tree-uuid-123"
             mock_tree_service.update_tree_stat.return_value = None
-            mock_student_required.return_value = self.mock_student
             
-            app = create_test_app()
+            app = create_test_app(user_data=self.mock_student)
             from api.routers.stats import router
             app.include_router(router)
             
@@ -198,14 +184,12 @@ class TestUpdateStat(unittest.TestCase):
 
     def test_update_stat_negative_value(self):
         """Test updating stat with negative value."""
-        with patch('api.routers.stats.TreeService') as mock_tree_service, \
-             patch('api.routers.stats.student_required') as mock_student_required:
+        with patch('api.routers.stats.TreeService') as mock_tree_service:
             
             mock_tree_service.get_tree_id.return_value = "tree-uuid-123"
             mock_tree_service.update_tree_stat.return_value = None
-            mock_student_required.return_value = self.mock_student
             
-            app = create_test_app()
+            app = create_test_app(user_data=self.mock_student)
             from api.routers.stats import router
             app.include_router(router)
             
@@ -222,13 +206,11 @@ class TestUpdateStat(unittest.TestCase):
 
     def test_update_stat_missing_stat_name(self):
         """Test that missing stat_name returns 400 error."""
-        with patch('api.routers.stats.TreeService') as mock_tree_service, \
-             patch('api.routers.stats.student_required') as mock_student_required:
+        with patch('api.routers.stats.TreeService') as mock_tree_service:
             
             mock_tree_service.get_tree_id.return_value = "tree-uuid-123"
-            mock_student_required.return_value = self.mock_student
             
-            app = create_test_app()
+            app = create_test_app(user_data=self.mock_student)
             from api.routers.stats import router
             app.include_router(router)
             
@@ -242,13 +224,11 @@ class TestUpdateStat(unittest.TestCase):
 
     def test_update_stat_missing_value(self):
         """Test that missing value returns 400 error."""
-        with patch('api.routers.stats.TreeService') as mock_tree_service, \
-             patch('api.routers.stats.student_required') as mock_student_required:
+        with patch('api.routers.stats.TreeService') as mock_tree_service:
             
             mock_tree_service.get_tree_id.return_value = "tree-uuid-123"
-            mock_student_required.return_value = self.mock_student
             
-            app = create_test_app()
+            app = create_test_app(user_data=self.mock_student)
             from api.routers.stats import router
             app.include_router(router)
             
@@ -262,13 +242,11 @@ class TestUpdateStat(unittest.TestCase):
 
     def test_update_stat_invalid_value_type(self):
         """Test that non-integer value returns 400 error."""
-        with patch('api.routers.stats.TreeService') as mock_tree_service, \
-             patch('api.routers.stats.student_required') as mock_student_required:
+        with patch('api.routers.stats.TreeService') as mock_tree_service:
             
             mock_tree_service.get_tree_id.return_value = "tree-uuid-123"
-            mock_student_required.return_value = self.mock_student
             
-            app = create_test_app()
+            app = create_test_app(user_data=self.mock_student)
             from api.routers.stats import router
             app.include_router(router)
             
@@ -284,13 +262,11 @@ class TestUpdateStat(unittest.TestCase):
 
     def test_update_stat_tree_not_found(self):
         """Test that missing tree returns 404 error."""
-        with patch('api.routers.stats.TreeService') as mock_tree_service, \
-             patch('api.routers.stats.student_required') as mock_student_required:
+        with patch('api.routers.stats.TreeService') as mock_tree_service:
             
             mock_tree_service.get_tree_id.return_value = None
-            mock_student_required.return_value = self.mock_student
             
-            app = create_test_app()
+            app = create_test_app(user_data=self.mock_student)
             from api.routers.stats import router
             app.include_router(router)
             
@@ -305,14 +281,12 @@ class TestUpdateStat(unittest.TestCase):
 
     def test_update_stat_service_error(self):
         """Test that service error returns 500."""
-        with patch('api.routers.stats.TreeService') as mock_tree_service, \
-             patch('api.routers.stats.student_required') as mock_student_required:
+        with patch('api.routers.stats.TreeService') as mock_tree_service:
             
             mock_tree_service.get_tree_id.return_value = "tree-uuid-123"
             mock_tree_service.update_tree_stat.side_effect = Exception("Database error")
-            mock_student_required.return_value = self.mock_student
             
-            app = create_test_app()
+            app = create_test_app(user_data=self.mock_student)
             from api.routers.stats import router
             app.include_router(router)
             
@@ -327,14 +301,12 @@ class TestUpdateStat(unittest.TestCase):
 
     def test_update_stat_value_error(self):
         """Test that ValueError from service returns 400."""
-        with patch('api.routers.stats.TreeService') as mock_tree_service, \
-             patch('api.routers.stats.student_required') as mock_student_required:
+        with patch('api.routers.stats.TreeService') as mock_tree_service:
             
             mock_tree_service.get_tree_id.return_value = "tree-uuid-123"
             mock_tree_service.update_tree_stat.side_effect = ValueError("Invalid stat name")
-            mock_student_required.return_value = self.mock_student
             
-            app = create_test_app()
+            app = create_test_app(user_data=self.mock_student)
             from api.routers.stats import router
             app.include_router(router)
             
@@ -349,14 +321,12 @@ class TestUpdateStat(unittest.TestCase):
 
     def test_update_stat_calls_service_with_correct_params(self):
         """Test that update_stat calls TreeService with correct parameters."""
-        with patch('api.routers.stats.TreeService') as mock_tree_service, \
-             patch('api.routers.stats.student_required') as mock_student_required:
+        with patch('api.routers.stats.TreeService') as mock_tree_service:
             
             mock_tree_service.get_tree_id.return_value = "tree-uuid-123"
             mock_tree_service.update_tree_stat.return_value = None
-            mock_student_required.return_value = self.mock_student
             
-            app = create_test_app()
+            app = create_test_app(user_data=self.mock_student)
             from api.routers.stats import router
             app.include_router(router)
             

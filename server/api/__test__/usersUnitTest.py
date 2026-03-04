@@ -41,17 +41,15 @@ class TestGetUserInfo(unittest.TestCase):
 
     def test_get_user_info_success(self):
         """Test successfully retrieving user information."""
-        with patch('api.routers.users.TreeService') as mock_tree_service, \
-             patch('api.routers.users.student_required') as mock_student_required:
+        with patch('api.routers.users.TreeService') as mock_tree_service:
             
             mock_tree_service.get_tree_with_decay.return_value = self.mock_tree
-            mock_student_required.return_value = self.mock_student
             
-            self.app = FastAPI()
+            app = create_test_app(user_data=self.mock_student)
             from api.routers.users import router
-            self.app.include_router(router)
+            app.include_router(router)
             
-            client = TestClient(self.app)
+            client = TestClient(app)
             
             response = client.get("/api/get-user-info")
             
@@ -63,17 +61,15 @@ class TestGetUserInfo(unittest.TestCase):
 
     def test_get_user_info_contains_user_data(self):
         """Test that response contains correct user data."""
-        with patch('api.routers.users.TreeService') as mock_tree_service, \
-             patch('api.routers.users.student_required') as mock_student_required:
+        with patch('api.routers.users.TreeService') as mock_tree_service:
             
             mock_tree_service.get_tree_with_decay.return_value = self.mock_tree
-            mock_student_required.return_value = self.mock_student
             
-            self.app = FastAPI()
+            app = create_test_app(user_data=self.mock_student)
             from api.routers.users import router
-            self.app.include_router(router)
+            app.include_router(router)
             
-            client = TestClient(self.app)
+            client = TestClient(app)
             
             response = client.get("/api/get-user-info")
             data = response.json()
@@ -86,17 +82,15 @@ class TestGetUserInfo(unittest.TestCase):
 
     def test_get_user_info_contains_tree_data(self):
         """Test that response contains correct tree data."""
-        with patch('api.routers.users.TreeService') as mock_tree_service, \
-             patch('api.routers.users.student_required') as mock_student_required:
+        with patch('api.routers.users.TreeService') as mock_tree_service:
             
             mock_tree_service.get_tree_with_decay.return_value = self.mock_tree
-            mock_student_required.return_value = self.mock_student
             
-            self.app = FastAPI()
+            app = create_test_app(user_data=self.mock_student)
             from api.routers.users import router
-            self.app.include_router(router)
+            app.include_router(router)
             
-            client = TestClient(self.app)
+            client = TestClient(app)
             
             response = client.get("/api/get-user-info")
             data = response.json()
@@ -110,16 +104,13 @@ class TestGetUserInfo(unittest.TestCase):
 
     def test_get_user_info_tree_health_states(self):
         """Test that tree can have different health states."""
-        with patch('api.routers.users.TreeService') as mock_tree_service, \
-             patch('api.routers.users.student_required') as mock_student_required:
+        with patch('api.routers.users.TreeService') as mock_tree_service:
             
-            mock_student_required.return_value = self.mock_student
-            
-            self.app = FastAPI()
+            app = create_test_app(user_data=self.mock_student)
             from api.routers.users import router
-            self.app.include_router(router)
+            app.include_router(router)
             
-            client = TestClient(self.app)
+            client = TestClient(app)
             
             # Test each valid health status
             for health_status in settings.VALID_HEALTH_STATUSES:
@@ -135,8 +126,7 @@ class TestGetUserInfo(unittest.TestCase):
 
     def test_get_user_info_resource_levels_within_bounds(self):
         """Test that resource levels are within valid bounds."""
-        with patch('api.routers.users.TreeService') as mock_tree_service, \
-             patch('api.routers.users.student_required') as mock_student_required:
+        with patch('api.routers.users.TreeService') as mock_tree_service:
             
             tree_data = {
                 "treeID": "tree-uuid-123",
@@ -149,13 +139,12 @@ class TestGetUserInfo(unittest.TestCase):
                 }
             }
             mock_tree_service.get_tree_with_decay.return_value = tree_data
-            mock_student_required.return_value = self.mock_student
             
-            self.app = FastAPI()
+            app = create_test_app(user_data=self.mock_student)
             from api.routers.users import router
-            self.app.include_router(router)
+            app.include_router(router)
             
-            client = TestClient(self.app)
+            client = TestClient(app)
             
             response = client.get("/api/get-user-info")
             data = response.json()
@@ -168,17 +157,15 @@ class TestGetUserInfo(unittest.TestCase):
 
     def test_get_user_info_no_tree(self):
         """Test that endpoint handles case when tree is None."""
-        with patch('api.routers.users.TreeService') as mock_tree_service, \
-             patch('api.routers.users.student_required') as mock_student_required:
+        with patch('api.routers.users.TreeService') as mock_tree_service:
             
             mock_tree_service.get_tree_with_decay.return_value = None
-            mock_student_required.return_value = self.mock_student
             
-            self.app = FastAPI()
+            app = create_test_app(user_data=self.mock_student)
             from api.routers.users import router
-            self.app.include_router(router)
+            app.include_router(router)
             
-            client = TestClient(self.app)
+            client = TestClient(app)
             
             response = client.get("/api/get-user-info")
             
@@ -189,17 +176,15 @@ class TestGetUserInfo(unittest.TestCase):
 
     def test_get_user_info_applies_decay(self):
         """Test that get_user_info calls get_tree_with_decay."""
-        with patch('api.routers.users.TreeService') as mock_tree_service, \
-             patch('api.routers.users.student_required') as mock_student_required:
+        with patch('api.routers.users.TreeService') as mock_tree_service:
             
             mock_tree_service.get_tree_with_decay.return_value = self.mock_tree
-            mock_student_required.return_value = self.mock_student
             
-            self.app = FastAPI()
+            app = create_test_app(user_data=self.mock_student)
             from api.routers.users import router
-            self.app.include_router(router)
+            app.include_router(router)
             
-            client = TestClient(self.app)
+            client = TestClient(app)
             
             client.get("/api/get-user-info")
             
@@ -210,17 +195,15 @@ class TestGetUserInfo(unittest.TestCase):
 
     def test_get_user_info_resource_levels_structure(self):
         """Test that resource levels have correct structure."""
-        with patch('api.routers.users.TreeService') as mock_tree_service, \
-             patch('api.routers.users.student_required') as mock_student_required:
+        with patch('api.routers.users.TreeService') as mock_tree_service:
             
             mock_tree_service.get_tree_with_decay.return_value = self.mock_tree
-            mock_student_required.return_value = self.mock_student
             
-            self.app = FastAPI()
+            app = create_test_app(user_data=self.mock_student)
             from api.routers.users import router
-            self.app.include_router(router)
+            app.include_router(router)
             
-            client = TestClient(self.app)
+            client = TestClient(app)
             
             response = client.get("/api/get-user-info")
             data = response.json()
@@ -232,8 +215,7 @@ class TestGetUserInfo(unittest.TestCase):
 
     def test_get_user_info_no_username(self):
         """Test that endpoint handles missing username gracefully."""
-        with patch('api.routers.users.TreeService') as mock_tree_service, \
-             patch('api.routers.users.student_required') as mock_student_required:
+        with patch('api.routers.users.TreeService') as mock_tree_service:
             
             student_no_username = {
                 "email": "student@example.com",
@@ -242,13 +224,12 @@ class TestGetUserInfo(unittest.TestCase):
             }
             
             mock_tree_service.get_tree_with_decay.return_value = self.mock_tree
-            mock_student_required.return_value = student_no_username
             
-            self.app = FastAPI()
+            app = create_test_app(user_data=student_no_username)
             from api.routers.users import router
-            self.app.include_router(router)
+            app.include_router(router)
             
-            client = TestClient(self.app)
+            client = TestClient(app)
             
             response = client.get("/api/get-user-info")
             
@@ -258,8 +239,7 @@ class TestGetUserInfo(unittest.TestCase):
 
     def test_get_user_info_teacher_role(self):
         """Test that endpoint works with teacher role."""
-        with patch('api.routers.users.TreeService') as mock_tree_service, \
-             patch('api.routers.users.student_required') as mock_student_required:
+        with patch('api.routers.users.TreeService') as mock_tree_service:
             
             teacher = {
                 "username": "teacher@example.com",
@@ -269,13 +249,12 @@ class TestGetUserInfo(unittest.TestCase):
             }
             
             mock_tree_service.get_tree_with_decay.return_value = self.mock_tree
-            mock_student_required.return_value = teacher
             
-            self.app = FastAPI()
+            app = create_test_app(user_data=teacher)
             from api.routers.users import router
-            self.app.include_router(router)
+            app.include_router(router)
             
-            client = TestClient(self.app)
+            client = TestClient(app)
             
             response = client.get("/api/get-user-info")
             
@@ -299,15 +278,13 @@ class TestUpdateUser(unittest.TestCase):
 
     def test_update_user_not_implemented(self):
         """Test that update_user returns not implemented message."""
-        with patch('api.routers.users.student_required') as mock_student_required:
+        with patch('api.routers.users.TreeService'):
             
-            mock_student_required.return_value = self.mock_student
-            
-            self.app = FastAPI()
+            app = create_test_app(user_data=self.mock_student)
             from api.routers.users import router
-            self.app.include_router(router)
+            app.include_router(router)
             
-            client = TestClient(self.app)
+            client = TestClient(app)
             
             response = client.post("/api/update-user", json={
                 "displayName": "Updated Name"
@@ -320,15 +297,13 @@ class TestUpdateUser(unittest.TestCase):
 
     def test_update_user_endpoint_exists(self):
         """Test that update_user endpoint is accessible."""
-        with patch('api.routers.users.student_required') as mock_student_required:
+        with patch('api.routers.users.TreeService'):
             
-            mock_student_required.return_value = self.mock_student
-            
-            self.app = FastAPI()
+            app = create_test_app(user_data=self.mock_student)
             from api.routers.users import router
-            self.app.include_router(router)
+            app.include_router(router)
             
-            client = TestClient(self.app)
+            client = TestClient(app)
             
             # Should not return 404
             response = client.post("/api/update-user", json={})
