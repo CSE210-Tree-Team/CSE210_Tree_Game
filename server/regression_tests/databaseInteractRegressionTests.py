@@ -580,7 +580,7 @@ class TestStudentDetails(DatabaseInteractTestCase):
         
         add_student_details(
             student_username="student_detail_user",
-            student_level=3,
+            student_level="3-6",
             student_stats=student_stats,
             parent_email="parent@example.com"
         )
@@ -596,7 +596,7 @@ class TestStudentDetails(DatabaseInteractTestCase):
             )
             result = dict(cursor.fetchone())
             
-            self.assertEqual(result['studentLevel'], 3)
+            self.assertEqual(result['studentLevel'], 1)
             self.assertEqual(result['studentStats'], student_stats)
             self.assertEqual(result['parentEmail'], "parent@example.com")
 
@@ -618,7 +618,7 @@ class TestIntegration(DatabaseInteractTestCase):
         )
         
         # Add student details
-        add_student_details("john_student", student_level=1)
+        add_student_details("john_student", student_level="3-6")
         
         # Generate tree
         tree_id = generate_tree("john_student")

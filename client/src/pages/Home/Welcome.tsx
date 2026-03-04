@@ -18,8 +18,8 @@ export const Welcome = () => {
                 />
 
             <div className={styles.buttonContainer}>
-                <button className={`${buttonStyles.button} ${buttonStyles.grass} ${styles.buttonSingle}`} onClick={() => navigate("/signup")}>Sign Up</button>
-                <button className={`${buttonStyles.button} ${buttonStyles.grass} ${styles.buttonSingle}`} onClick={() => navigate("/login")}>Log In</button>
+                <button className={`${buttonStyles.button} ${buttonStyles.grass} `} onClick={() => navigate("/signup")}>Sign Up</button>
+                <button className={`${buttonStyles.button} ${buttonStyles.grass} `} onClick={() => navigate("/login")}>Log In</button>
             </div>
         </div>
     );

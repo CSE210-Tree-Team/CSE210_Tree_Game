@@ -141,7 +141,7 @@ def print_condensed_user_info(db_path=DB_PATH):
         status_parts = []
         if username in student_map:
             level, stats = student_map[username]
-            status_parts.append(f"Level {level}")
+            status_parts.append(f"Education Level: {level}")
             if stats:
                 status_parts.append(f"Stats: {stats}")
         if last_login:

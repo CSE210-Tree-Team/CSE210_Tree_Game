@@ -20,3 +20,18 @@ class UserWithTree(BaseModel):
     success: bool
     user: UserInfo
     tree: Optional[TreeInfo] = None
+
+
+class AccountProfile(BaseModel):
+    """Account profile information that can be edited by users."""
+    name: str
+    email: EmailStr
+    parentEmail: Optional[str] = None
+    educationLevel: Optional[str] = None
+
+
+class AccountProfileResponse(BaseModel):
+    """Response for account profile endpoints."""
+    success: bool
+    profile: Optional[AccountProfile] = None
+    message: Optional[str] = None

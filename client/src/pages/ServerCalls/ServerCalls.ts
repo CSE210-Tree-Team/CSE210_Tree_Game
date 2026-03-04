@@ -36,6 +36,108 @@ interface GetQuestionsResponse {
 }
 
 interface UpdateStatResponse {
+  success: boolean;
+  message: string;
+}
+
+export type AuthVerifyResponse = {
+  success?: boolean;
+};
+
+export async function establishAuthSession(
+  token: string,
+  user: unknown,
+): Promise<boolean> {
+  const response = await fetch("/api/auth/verify", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    credentials: "include",
+    body: JSON.stringify({ user }),
+  });
+
+  return response.ok;
+}
+
+export type UserInfoResponse = {
+  success: boolean;
+  user: {
+    username: string;
+    displayName: string;
+    email: string;
+    roles: string[];
+  };
+  tree: {
+    treeID: string;
+    health: string;
+    growthStage: number;
+    resourceLevels: {
+      water: number;
+      earth: number;
+      sun: number;
+    };
+  };
+};
+
+export async function fetchUserInfo(): Promise<UserInfoResponse> {
+  const response = await fetch("/api/get-user-info", {
+    credentials: "include",
+  });
+
+  if (!response.ok) {
+    throw new Error("Failed to fetch user info");
+  }
+
+  return (await response.json()) as UserInfoResponse;
+}
+
+export type AccountProfile = {
+  name: string;
+  email: string;
+  parentEmail: string;
+  educationLevel: string;
+};
+
+export type AccountProfileResponse = {
+  success: boolean;
+  profile?: Partial<AccountProfile>;
+};
+
+export async function fetchAccountProfile(): Promise<AccountProfileResponse> {
+  const response = await fetch("/api/account/profile", {
+    credentials: "include",
+  });
+
+  if (!response.ok) {
+    throw new Error("Failed to fetch account profile");
+  }
+
+  return (await response.json()) as AccountProfileResponse;
+}
+
+export async function updateAccountProfile(
+  profile: Partial<AccountProfile>,
+): Promise<boolean> {
+  const response = await fetch("/api/account/profile", {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    credentials: "include",
+    body: JSON.stringify(profile),
+  });
+
+  return response.ok;
+}
+
+/**
+ * Fetches questions list from Server. Refer to main.py for more.
+ * @param numQuestions - Max number of questions to return
+ * @param resourceType - Filter by resource (Defines the minigame the pulled questions pertained to)
+ * @param questionType - Filter by question type (MCQ, etc.)
+interface UpdateStatResponse {
     success: boolean;
     message: string;
 }

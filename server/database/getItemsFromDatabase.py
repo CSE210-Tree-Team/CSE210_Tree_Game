@@ -36,6 +36,19 @@ def _query(sql, params=(), fetchone=False):
             return dict(res) if res else None
         return [dict(row) for row in cursor.fetchall()]
 
+def get_student_details(username):
+    """
+    Retrieve student details by username.
+
+    Returns:
+        dict | None: Example: { 'studentUsername': '...', 'studentLevel': 1, 'studentStats': '{...}', 'parentEmail': '...' }
+    """
+    return _query(
+        "SELECT studentUsername, studentLevel, studentStats, parentEmail FROM StudentDetails WHERE studentUsername = ?",
+        (username,),
+        fetchone=True,
+    )
+
 def get_person(username):
     """
     Retrieve user information by username (user identifier).
