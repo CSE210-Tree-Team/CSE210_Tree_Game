@@ -218,6 +218,7 @@ class TestGetUserInfo(unittest.TestCase):
         with patch('api.routers.users.TreeService') as mock_tree_service:
             
             student_no_username = {
+                "username": "",
                 "email": "student@example.com",
                 "displayName": "Test Student",
                 "roles": [settings.ROLE_STUDENT]
