@@ -27,18 +27,10 @@ const isValidOptionalEmail = (value: string) => {
     return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmed);
 };
 
-const isValidRequiredEmail = (value: string) => {
-    const trimmed = value.trim();
-    if (!trimmed) return false;
-    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmed);
-};
-
 const useProfileDefaults = (user: ReturnType<typeof useAuth0>['user']) => {
     const defaultName = user?.name || user?.nickname || user?.email || 'Player';
 
-    const defaultEmail = user?.email || 'Email not provided';
-
-    return { defaultName, defaultEmail };
+    return { defaultName };
 };
 
 export const AccountSettings = () => {
@@ -46,7 +38,7 @@ export const AccountSettings = () => {
     const navigate = useNavigate();
     const [profile, setProfile] = useState<UserInfoResponse['user'] | null>(null);
 
-    const { defaultName, defaultEmail } = useProfileDefaults(user);
+    const { defaultName } = useProfileDefaults(user);
 
     useEffect(() => {
         const load = async () => {
@@ -73,7 +65,6 @@ export const AccountSettings = () => {
     const displayName = profile?.displayName || defaultName;
     const contactEmail = profile?.contactEmail || '';
     const educationLevel = profile?.educationLevel || DEFAULT_EDUCATION_LEVEL;
-    const email = profile?.email || defaultEmail;
 
     return (
         <div className={styles.page}>
@@ -92,10 +83,6 @@ export const AccountSettings = () => {
                     <div className={styles.row}>
                         <p className={styles.label}>Contact Email:</p>
                         <div className={styles.value}>{contactEmail || '(not set)'}</div>
-                    </div>
-                    <div className={styles.row}>
-                        <p className={styles.label}>Email:</p>
-                        <div className={styles.value}>{email}</div>
                     </div>
                     <div className={styles.row}>
                         <p className={styles.label}>Education Level:</p>
@@ -125,16 +112,14 @@ export const AccountSettings = () => {
 export const AccountSettingsEdit = () => {
     const { user, getAccessTokenSilently } = useAuth0();
     const navigate = useNavigate();
-    const { defaultName, defaultEmail } = useProfileDefaults(user);
+    const { defaultName } = useProfileDefaults(user);
     const isDirtyRef = useRef(false);
     const [isSaving, setIsSaving] = useState(false);
     const [saveError, setSaveError] = useState<string | null>(null);
     const [isContactEmailTouched, setIsContactEmailTouched] = useState(false);
-    const [isEmailTouched, setIsEmailTouched] = useState(false);
 
     const [formData, setFormData] = useState<Partial<UserInfoResponse['user']>>({
         displayName: defaultName,
-        email: defaultEmail,
         contactEmail: '',
         educationLevel: DEFAULT_EDUCATION_LEVEL,
     });
@@ -158,7 +143,6 @@ export const AccountSettingsEdit = () => {
                     ...prev,
                     username: data.user.username,
                     displayName: data.user.displayName,
-                    email: data.user.email,
                     contactEmail: data.user.contactEmail || '',
                     educationLevel: data.user.educationLevel || DEFAULT_EDUCATION_LEVEL,
                 }));
@@ -176,21 +160,9 @@ export const AccountSettingsEdit = () => {
             ? 'Please enter a valid contact email address (example: name@example.com).'
             : null;
 
-    const emailIsValid = isValidRequiredEmail(formData.email || '');
-    const emailError =
-        isEmailTouched && !emailIsValid
-            ? 'Please enter a valid email address (example: name@example.com).'
-            : null;
-
     const handleSave = async (event: FormEvent<HTMLFormElement>) => {
         event.preventDefault();
         setSaveError(null);
-
-        if (!emailIsValid) {
-            setIsEmailTouched(true);
-            setSaveError('Please enter a valid email address.');
-            return;
-        }
 
         if (!contactEmailIsValid) {
             setIsContactEmailTouched(true);
@@ -273,31 +245,6 @@ export const AccountSettingsEdit = () => {
                     ) : null}
 
                     <div className={styles.row}>
-                        <label htmlFor="email" className={styles.label}>Email:</label>
-                        <input
-                            id="email"
-                            className={styles.input}
-                            type="email"
-                            inputMode="email"
-                            autoComplete="email"
-                            value={formData.email}
-                            aria-invalid={!emailIsValid}
-                            aria-describedby={emailError ? 'emailError' : undefined}
-                            onChange={(event) => {
-                                isDirtyRef.current = true;
-                                if (!isEmailTouched) setIsEmailTouched(true);
-                                setFormData({ ...formData, email: event.target.value });
-                            }}
-                            onBlur={() => setIsEmailTouched(true)}
-                        />
-                    </div>
-                    {emailError ? (
-                        <p id="emailError" role="alert" className={styles.fieldError}>
-                            {emailError}
-                        </p>
-                    ) : null}
-
-                    <div className={styles.row}>
                         <label htmlFor="educationLevel" className={styles.label}>Education Level:</label>
                         <div className={styles.selectWrap}>
                             <select
@@ -325,7 +272,7 @@ export const AccountSettingsEdit = () => {
                             label="SAVE"
                             className={styles.actionButton}
                             type="submit"
-                            disabled={isSaving || !contactEmailIsValid || !emailIsValid}
+                            disabled={isSaving || !contactEmailIsValid}
                         />
                         <Button
                             variant="grass"

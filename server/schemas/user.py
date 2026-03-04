@@ -17,6 +17,14 @@ class UserInfo(BaseModel):
     educationLevel: Optional[str] = None
 
 
+class UserUpdate(BaseModel):
+    """Partial user profile update payload for /api/update-user."""
+    email: Optional[EmailStr] = None
+    displayName: Optional[str] = None
+    contactEmail: Optional[str] = None
+    educationLevel: Optional[str] = None
+
+
 class UserWithTree(BaseModel):
     """Combined user and tree information for /api/get-user-info."""
     success: bool

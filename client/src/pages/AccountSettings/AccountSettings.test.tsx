@@ -61,7 +61,6 @@ describe('AccountSettings', () => {
         expect(screen.getByText('ACCOUNT SETTINGS')).toBeInTheDocument();
         expect(screen.getByText('Name:')).toBeInTheDocument();
         expect(screen.getByText('Contact Email:')).toBeInTheDocument();
-        expect(screen.getByText('ada@example.com')).toBeInTheDocument();
         expect(screen.getByText('3-6')).toBeInTheDocument();
     });
 
@@ -91,6 +90,5 @@ describe('AccountSettings', () => {
         renderPage();
 
         expect(screen.getByText('Player')).toBeInTheDocument();
-        expect(screen.getByText('Email not provided')).toBeInTheDocument();
     });
 });

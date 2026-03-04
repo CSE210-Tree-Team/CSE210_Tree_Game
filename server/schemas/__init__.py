@@ -2,7 +2,7 @@
 from typing import Any, Optional, List
 from pydantic import BaseModel
 from schemas.tree import TreeInfo, StatUpdateRequest, StatUpdateResponse
-from schemas.user import UserInfo, UserWithTree
+from schemas.user import UserInfo, UserUpdate, UserWithTree
 from schemas.question import (
     QuestionChoice,
     QuestionCreate,
@@ -40,6 +40,7 @@ __all__ = [
     "StatUpdateRequest",
     "StatUpdateResponse",
     "UserInfo",
+    "UserUpdate",
     "UserWithTree",
     "QuestionChoice",
     "QuestionCreate",

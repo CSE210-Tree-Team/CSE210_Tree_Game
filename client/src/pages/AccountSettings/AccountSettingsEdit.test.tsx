@@ -59,7 +59,6 @@ describe('AccountSettingsEdit', () => {
         expect(screen.getByText('ACCOUNT SETTINGS')).toBeInTheDocument();
         expect(screen.getByLabelText('Name:')).toHaveValue('Ada Lovelace');
         expect(screen.getByLabelText('Contact Email:')).toHaveValue('');
-        expect(screen.getByLabelText('Email:')).toHaveValue('ada@example.com');
         expect(screen.getByLabelText('Education Level:')).toHaveValue('3-6');
     });
 
@@ -109,8 +108,8 @@ describe('AccountSettingsEdit', () => {
         const user = userEvent.setup();
         renderPage();
 
-        await user.clear(screen.getByLabelText('Email:'));
-        await user.type(screen.getByLabelText('Email:'), 'invalid');
+        await user.clear(screen.getByLabelText('Contact Email:'));
+        await user.type(screen.getByLabelText('Contact Email:'), 'invalid');
         await user.click(screen.getByRole('button', { name: 'SAVE' }));
 
         const putCall = fetchMock.mock.calls.find(
@@ -122,7 +121,7 @@ describe('AccountSettingsEdit', () => {
             .getAllByRole('alert')
             .map((node) => node.textContent ?? '')
             .join(' ');
-        expect(alertText).toMatch(/valid email/i);
+        expect(alertText).toMatch(/valid contact email/i);
         expect(navigateMock).not.toHaveBeenCalledWith('/account');
     });
 
