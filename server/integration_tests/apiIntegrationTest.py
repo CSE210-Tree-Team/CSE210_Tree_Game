@@ -910,8 +910,48 @@ class TestErrorHandling(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         """Set up class-level fixtures."""
-        # Use the same database as APIIntegrationTests
+        # Create an isolated temporary database for this test class
+        cls.test_db_dir = tempfile.mkdtemp()
+        cls.test_db_path = os.path.join(cls.test_db_dir, settings.DB_NAME)
+
+        # Monkey-patch database module paths
+        db_create_module.DB_PATH = cls.test_db_path
+        db_add_module.DB_PATH = cls.test_db_path
+
+        import database.getItemsFromDatabase as db_get_module
+        db_get_module.DB_PATH = cls.test_db_path
+
+        # Initialize schema
+        create_schema(cls.test_db_path)
+
         cls.client = TestClient(app)
+
+    @classmethod
+    def tearDownClass(cls):
+        """Clean up class-level fixtures."""
+        import database.createDatabase as db_create
+        import database.addItemsToDatabase as db_add
+        import database.getItemsFromDatabase as db_get
+
+        # Restore original paths
+        original_path = os.path.join(
+            os.path.dirname(os.path.abspath(db_create.__file__)),
+            settings.DB_NAME
+        )
+        db_create.DB_PATH = original_path
+        db_add.DB_PATH = original_path
+        db_get.DB_PATH = original_path
+
+        if os.path.exists(cls.test_db_path):
+            try:
+                os.remove(cls.test_db_path)
+            except OSError:
+                pass
+
+        try:
+            os.rmdir(cls.test_db_dir)
+        except OSError:
+            pass
     
     def test_invalid_json_payload(self):
         """Test handling of invalid JSON."""
@@ -934,10 +974,8 @@ class TestErrorHandling(unittest.TestCase):
 
     def test_concurrent_stat_updates(self):
         """Test that multiple stat updates work correctly."""
-        client = TestClient(app)
-        
         # Authenticate
-        client.post(
+        auth_response = self.client.post(
             "/api/auth/verify",
             json={
                 "user": {
@@ -948,11 +986,12 @@ class TestErrorHandling(unittest.TestCase):
                 }
             }
         )
+        self.assertEqual(auth_response.status_code, 200)
         
         # Perform multiple updates
         responses = []
         for i in range(5):
-            response = client.put(
+            response = self.client.put(
                 "/api/update-stat",
                 json={"stat_name": "water", "value": 10}
             )
