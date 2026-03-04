@@ -27,10 +27,6 @@ export interface UpdateStatResponse {
   message: string;
 }
 
-export interface AuthVerifyResponse {
-  success?: boolean;
-}
-
 export interface UserInfoResponse {
   success: boolean;
   message?: string;

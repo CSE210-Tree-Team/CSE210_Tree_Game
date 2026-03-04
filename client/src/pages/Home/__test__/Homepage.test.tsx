@@ -1,4 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
+import type { Mock } from 'vitest'
 import { render, screen, waitFor } from '../../../test/test-utils'
 import userEvent from '@testing-library/user-event'
 import { Homepage } from '../homepage'
@@ -15,7 +16,7 @@ vi.mock('@auth0/auth0-react', () => ({
 }))
 
 // Mock fetch
-global.fetch = vi.fn()
+global.fetch = vi.fn() as Mock<typeof fetch>
 
 const mockNavigate = vi.fn()
 vi.mock('react-router-dom', async () => {
@@ -29,7 +30,7 @@ vi.mock('react-router-dom', async () => {
 describe('Homepage', () => {
   beforeEach(() => {
     vi.clearAllMocks()
-    ;(global.fetch as any).mockResolvedValue({
+    ;(global.fetch as Mock).mockResolvedValue({
       ok: true,
       json: async () => ({
         success: true,
@@ -146,7 +147,7 @@ describe('Homepage', () => {
     render(<Homepage />)
     
     await waitFor(() => {
-      const hasUserInfoCall = (global.fetch as any).mock.calls.some(
+      const hasUserInfoCall = (global.fetch as Mock).mock.calls.some(
         (call: unknown[]) => call[0] === '/api/get-user-info'
       )
       expect(hasUserInfoCall).toBe(true)

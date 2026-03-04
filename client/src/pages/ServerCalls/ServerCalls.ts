@@ -21,11 +21,10 @@ import type {
   Question,
   GetQuestionsResponse,
   UpdateStatResponse,
-  AuthVerifyResponse,
   UserInfoResponse,
 } from './types';
 
-export type { Question, UserInfoResponse, AuthVerifyResponse };
+export type { Question, UserInfoResponse };
 
 export async function establishAuthSession(
   token: string,
@@ -51,7 +50,13 @@ export async function establishAuthSession(
     throw new Error(error);
   }
 
-  return response.ok;
+  const data = await response.json();
+
+  if (!data.success) {
+    throw new Error(data.message || 'Server returned unsuccessful response');
+  }
+
+  return true;
 }
 
 export async function fetchUserInfo(): Promise<UserInfoResponse> {
@@ -69,7 +74,13 @@ export async function fetchUserInfo(): Promise<UserInfoResponse> {
     throw new Error(error);
   }
 
-  return (await response.json()) as UserInfoResponse;
+  const data: UserInfoResponse = await response.json();
+
+  if (!data.success) {
+    throw new Error('Server returned unsuccessful response');
+  }
+
+  return data;
 }
 
 export async function updateAccountProfile(
@@ -106,7 +117,13 @@ export async function updateAccountProfile(
     throw new Error(error);
   }
 
-  return response.ok;
+  const data = await response.json();
+
+  if (!data.success) {
+    throw new Error(data.message || 'Server returned unsuccessful response');
+  }
+
+  return true;
 }
 
 /**

@@ -60,7 +60,7 @@ export const AccountSettings = () => {
         };
 
         load();
-    }, [user]);
+    }, [user, getAccessTokenSilently]);
 
     const displayName = profile?.displayName || defaultName;
     const contactEmail = profile?.contactEmail || '';
