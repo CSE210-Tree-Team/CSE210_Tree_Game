@@ -63,13 +63,16 @@ export async function establishAuthSession(
 
 export type UserInfoResponse = {
   success: boolean;
+  message?: string;
   user: {
     username: string;
     displayName: string;
     email: string;
     roles: string[];
+    contactEmail?: string;
+    educationLevel?: string;
   };
-  tree: {
+  tree?: {
     treeID: string;
     health: string;
     growthStage: number;
@@ -93,40 +96,26 @@ export async function fetchUserInfo(): Promise<UserInfoResponse> {
   return (await response.json()) as UserInfoResponse;
 }
 
-export type AccountProfile = {
-  name: string;
-  email: string;
-  parentEmail: string;
-  educationLevel: string;
-};
-
-export type AccountProfileResponse = {
-  success: boolean;
-  profile?: Partial<AccountProfile>;
-};
-
-export async function fetchAccountProfile(): Promise<AccountProfileResponse> {
-  const response = await fetch("/api/account/profile", {
-    credentials: "include",
-  });
-
-  if (!response.ok) {
-    throw new Error("Failed to fetch account profile");
-  }
-
-  return (await response.json()) as AccountProfileResponse;
-}
-
 export async function updateAccountProfile(
-  profile: Partial<AccountProfile>,
+  profile: Partial<UserInfoResponse['user']>,
 ): Promise<boolean> {
-  const response = await fetch("/api/account/profile", {
+  // Map user data to update schema
+  const userUpdate = {
+    username: "",  // Will be ignored by server
+    displayName: profile.displayName || "",
+    email: profile.email || "",
+    roles: [],  // Will be ignored by server
+    contactEmail: profile.contactEmail,
+    educationLevel: profile.educationLevel,
+  };
+
+  const response = await fetch("/api/update-user", {
     method: "PUT",
     headers: {
       "Content-Type": "application/json",
     },
     credentials: "include",
-    body: JSON.stringify(profile),
+    body: JSON.stringify(userUpdate),
   });
 
   return response.ok;

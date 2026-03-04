@@ -362,7 +362,7 @@ class APIIntegrationTests(unittest.TestCase):
         
         # Update user
         update_data = {"displayName": "Updated Test User"}
-        response = self.client.post("/api/update-user", json=update_data)
+        response = self.client.put("/api/update-user", json=update_data)
         
         # Should return 200 or handle gracefully
         self.assertIn(response.status_code, [200, 501, 404])

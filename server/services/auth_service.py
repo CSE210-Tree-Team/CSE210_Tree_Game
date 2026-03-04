@@ -1,7 +1,7 @@
 """Authentication and authorization service."""
 from typing import Optional, Dict
 from database.getItemsFromDatabase import get_person
-from database.addItemsToDatabase import add_account, generate_tree, update_last_login
+from database.addItemsToDatabase import add_account, generate_tree, update_last_login, upsert_student_details
 from config.settings import settings
 
 
@@ -62,7 +62,8 @@ class AuthService:
                     'email': str,
                     'name': str (optional),
                     'nickname': str (optional),
-                    'sub': str (Auth0 unique ID)
+                    'sub': str (Auth0 unique ID),
+                    'contactEmail': str (optional)
                 }
             
         Returns:
@@ -89,6 +90,15 @@ class AuthService:
             
             # Generate tree for the user
             tree_id = generate_tree(username)
+            
+            # Create student details with contactEmail if provided
+            contact_email = user_data.get("email")
+            if contact_email:
+                upsert_student_details(
+                    student_username=username,
+                    parent_email=contact_email,
+                    education_level=None
+                )
             
             print(f"Created new account for {username} with tree ID {tree_id}")
             return username, tree_id

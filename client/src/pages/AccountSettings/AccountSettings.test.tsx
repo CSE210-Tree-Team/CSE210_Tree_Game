@@ -48,7 +48,7 @@ describe('AccountSettings', () => {
             if (url === '/api/auth/verify') {
                 return { ok: true, json: async () => ({ success: true }) } as Response;
             }
-            if (url === '/api/account/profile') {
+            if (url === '/api/get-user-info') {
                 return { ok: false, json: async () => ({}) } as Response;
             }
             return { ok: false, json: async () => ({}) } as Response;
@@ -60,7 +60,7 @@ describe('AccountSettings', () => {
 
         expect(screen.getByText('ACCOUNT SETTINGS')).toBeInTheDocument();
         expect(screen.getByText('Name:')).toBeInTheDocument();
-        expect(screen.getByText('Parent Email:')).toBeInTheDocument();
+        expect(screen.getByText('Contact Email:')).toBeInTheDocument();
         expect(screen.getByText('ada@example.com')).toBeInTheDocument();
         expect(screen.getByText('3-6')).toBeInTheDocument();
     });

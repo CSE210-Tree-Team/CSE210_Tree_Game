@@ -269,46 +269,147 @@ class TestUpdateUser(unittest.TestCase):
 
     def setUp(self):
         """Set up test fixtures."""
-        self.app = FastAPI()
         self.mock_student = {
             "username": "student@example.com",
             "email": "student@example.com",
             "displayName": "Test Student",
             "roles": [settings.ROLE_STUDENT]
         }
-
-    def test_update_user_not_implemented(self):
-        """Test that update_user returns not implemented message."""
-        with patch('api.routers.users.TreeService'):
-            
-            app = create_test_app(user_data=self.mock_student)
-            from api.routers.users import router
-            app.include_router(router)
-            
-            client = TestClient(app)
-            
-            response = client.post("/api/update-user", json={
-                "displayName": "Updated Name"
-            })
-            
-            # Since it's not implemented, should return the not implemented message
-            self.assertEqual(response.status_code, 200)
-            data = response.json()
-            self.assertEqual(data["message"], "Not implemented yet")
+        self.mock_tree = {
+            "treeID": "tree-uuid-123",
+            "health": settings.HEALTH_HEALTHY,
+            "growthStage": 2,
+            "resourceLevels": {
+                settings.RESOURCE_WATER: 75,
+                settings.RESOURCE_EARTH: 80,
+                settings.RESOURCE_SUN: 65
+            }
+        }
 
     def test_update_user_endpoint_exists(self):
-        """Test that update_user endpoint is accessible."""
-        with patch('api.routers.users.TreeService'):
-            
-            app = create_test_app(user_data=self.mock_student)
-            from api.routers.users import router
-            app.include_router(router)
-            
-            client = TestClient(app)
-            
-            # Should not return 404
-            response = client.post("/api/update-user", json={})
-            self.assertNotEqual(response.status_code, 404)
+        """Test that update_user endpoint is accessible via PUT."""
+        with patch('api.routers.users.TreeService') as mock_tree_service:
+            with patch('api.routers.users.get_person') as mock_get_person:
+                with patch('api.routers.users.get_student_details') as mock_get_student_details:
+                    
+                    mock_tree_service.get_tree_with_decay.return_value = self.mock_tree
+                    mock_get_person.return_value = {"username": "student@example.com"}
+                    mock_get_student_details.return_value = {}
+                    
+                    app = create_test_app(user_data=self.mock_student)
+                    from api.routers.users import router
+                    app.include_router(router)
+                    
+                    client = TestClient(app)
+                    
+                    # Should not return 404
+                    response = client.put("/api/update-user", json={})
+                    self.assertNotEqual(response.status_code, 404)
+
+    def test_update_user_requires_put_method(self):
+        """Test that update_user requires PUT method (not POST or GET)."""
+        app = create_test_app(user_data=self.mock_student)
+        from api.routers.users import router
+        app.include_router(router)
+        
+        client = TestClient(app)
+        
+        # POST should not work (should try to match PUT only)
+        response_post = client.post("/api/update-user", json={})
+        # GET should not work
+        response_get = client.get("/api/update-user")
+        
+        # Both should be method not allowed or not found
+        self.assertIn(response_post.status_code, [405, 404, 422])
+        self.assertIn(response_get.status_code, [405, 404])
+
+    def test_update_user_success(self):
+        """Test successfully updating user information."""
+        with patch('api.routers.users.TreeService') as mock_tree_service:
+            with patch('api.routers.users.get_person') as mock_get_person:
+                with patch('api.routers.users.get_student_details') as mock_get_student_details:
+                    with patch('api.routers.users.update_account') as mock_update_account:
+                        with patch('api.routers.users.upsert_student_details') as mock_upsert:
+                            
+                            mock_tree_service.get_tree_with_decay.return_value = self.mock_tree
+                            mock_get_person.return_value = {
+                                "username": "student@example.com",
+                                "email": "student@example.com",
+                                "displayName": "Updated Student",
+                                "roles": [settings.ROLE_STUDENT]
+                            }
+                            mock_get_student_details.return_value = {"studentLevel": "6-8"}
+                            
+                            app = create_test_app(user_data=self.mock_student)
+                            from api.routers.users import router
+                            app.include_router(router)
+                            
+                            client = TestClient(app)
+                            
+                            update_payload = {
+                                "username": "student@example.com",
+                                "displayName": "Updated Student",
+                                "email": "student@example.com",
+                                "roles": [settings.ROLE_STUDENT],
+                                "contactEmail": "contact@example.com",
+                                "educationLevel": "6-8"
+                            }
+                            
+                            response = client.put("/api/update-user", json=update_payload)
+                            
+                            self.assertEqual(response.status_code, 200)
+                            data = response.json()
+                            self.assertTrue(data["success"])
+                            self.assertIn("user", data)
+                            self.assertEqual(data["user"]["username"], "student@example.com")
+
+    def test_update_user_calls_update_functions(self):
+        """Test that update_user calls the appropriate update functions."""
+        with patch('api.routers.users.TreeService') as mock_tree_service:
+            with patch('api.routers.users.get_person') as mock_get_person:
+                with patch('api.routers.users.get_student_details') as mock_get_student_details:
+                    with patch('api.routers.users.update_account') as mock_update_account:
+                        with patch('api.routers.users.upsert_student_details') as mock_upsert:
+                            
+                            mock_tree_service.get_tree_with_decay.return_value = self.mock_tree
+                            mock_get_person.return_value = {
+                                "username": "student@example.com",
+                                "email": "student@example.com",
+                                "displayName": "Test Student",
+                                "roles": [settings.ROLE_STUDENT]
+                            }
+                            mock_get_student_details.return_value = {}
+                            
+                            app = create_test_app(user_data=self.mock_student)
+                            from api.routers.users import router
+                            app.include_router(router)
+                            
+                            client = TestClient(app)
+                            
+                            response = client.put("/api/update-user", json={
+                                "displayName": "New Name",
+                                "email": "new@example.com",
+                                "contactEmail": "contact@example.com",
+                                "educationLevel": "6-8"
+                            })
+                            
+                            # Verify update functions were called
+                            mock_update_account.assert_called_once()
+                            mock_upsert.assert_called_once()
+
+    def test_update_user_requires_authentication(self):
+        """Test that update_user requires authentication."""
+        app = FastAPI()
+        app.add_middleware(SessionMiddleware, secret_key="test-secret")
+        
+        from api.routers.users import router
+        app.include_router(router)
+        
+        client = TestClient(app)
+        
+        # Request without auth should fail
+        response = client.put("/api/update-user", json={})
+        self.assertNotEqual(response.status_code, 200)
 
 
 if __name__ == "__main__":

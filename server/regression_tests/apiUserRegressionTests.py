@@ -172,43 +172,46 @@ class TestUserAPIRoutes(APIQuestionsTestCase):
         self.assertEqual(data["message"], "No user data provided")
 
     def test_get_account_profile_defaults(self):
-        """Test that /api/account/profile returns defaults when no custom profile is stored."""
+        """Test that /api/get-user-info returns defaults when no custom profile is stored."""
         client = self.get_authenticated_client()
 
-        response = client.get("/api/account/profile")
+        response = client.get("/api/get-user-info")
         self.assertEqual(response.status_code, 200)
 
         data = response.json()
         self.assertTrue(data["success"])
-        profile = data["profile"]
+        user = data["user"]
 
-        self.assertEqual(profile["name"], "Test Student")
-        self.assertEqual(profile["email"], "test_student@example.com")
-        self.assertEqual(profile["parentEmail"], "")
-        self.assertEqual(profile["educationLevel"], "3-6")
+        self.assertEqual(user["username"], "test_student@example.com")
+        self.assertEqual(user["email"], "test_student@example.com")
+        self.assertEqual(user["displayName"], "Test Student")
+        self.assertEqual(user.get("contactEmail"), "")
+        self.assertEqual(user.get("educationLevel"), "3-6")
 
     def test_update_account_profile_persists(self):
-        """Test that /api/account/profile can be updated and is persisted in the database."""
+        """Test that /api/update-user can be used to update profile and is persisted in the database."""
         client = self.get_authenticated_client()
 
         update_payload = {
-            "name": "Updated Student",
+            "username": "test_student@example.com",
+            "displayName": "Updated Student",
             "email": "updated@example.com",
-            "parentEmail": "parent@example.com",
+            "roles": ["Student"],
+            "contactEmail": "contact@example.com",
             "educationLevel": "6-8",
         }
-        response = client.put("/api/account/profile", json=update_payload)
+        response = client.put("/api/update-user", json=update_payload)
         self.assertEqual(response.status_code, 200)
         self.assertTrue(response.json()["success"])
 
-        response = client.get("/api/account/profile")
+        response = client.get("/api/get-user-info")
         self.assertEqual(response.status_code, 200)
 
-        profile = response.json()["profile"]
-        self.assertEqual(profile["name"], "Updated Student")
-        self.assertEqual(profile["email"], "updated@example.com")
-        self.assertEqual(profile["parentEmail"], "parent@example.com")
-        self.assertEqual(profile["educationLevel"], "6-8")
+        user = response.json()["user"]
+        self.assertEqual(user["displayName"], "Updated Student")
+        self.assertEqual(user["email"], "updated@example.com")
+        self.assertEqual(user["contactEmail"], "contact@example.com")
+        self.assertEqual(user["educationLevel"], "6-8")
 
 
 if __name__ == '__main__':

@@ -8,30 +8,18 @@ if TYPE_CHECKING:
 
 
 class UserInfo(BaseModel):
-    """User information."""
+    """User information - unified user and profile data."""
     username: str
     email: EmailStr
     displayName: str
     roles: List[str]
+    contactEmail: Optional[str] = None
+    educationLevel: Optional[str] = None
 
 
 class UserWithTree(BaseModel):
     """Combined user and tree information for /api/get-user-info."""
     success: bool
+    message: Optional[str] = None
     user: UserInfo
     tree: Optional[TreeInfo] = None
-
-
-class AccountProfile(BaseModel):
-    """Account profile information that can be edited by users."""
-    name: str
-    email: EmailStr
-    parentEmail: Optional[str] = None
-    educationLevel: Optional[str] = None
-
-
-class AccountProfileResponse(BaseModel):
-    """Response for account profile endpoints."""
-    success: bool
-    profile: Optional[AccountProfile] = None
-    message: Optional[str] = None

@@ -12,9 +12,9 @@ import { useNavigate } from 'react-router-dom';
 import { Button } from '../../components/Button';
 import styles from '../../components/account-settings.module.css';
 import {
-    type AccountProfile,
+    type UserInfoResponse,
     establishAuthSession,
-    fetchAccountProfile,
+    fetchUserInfo,
     updateAccountProfile,
 } from '../ServerCalls/ServerCalls';
 
@@ -44,7 +44,7 @@ const useProfileDefaults = (user: ReturnType<typeof useAuth0>['user']) => {
 export const AccountSettings = () => {
     const { user, logout, getAccessTokenSilently } = useAuth0();
     const navigate = useNavigate();
-    const [profile, setProfile] = useState<Partial<AccountProfile>>({});
+    const [profile, setProfile] = useState<UserInfoResponse['user'] | null>(null);
 
     const { defaultName, defaultEmail } = useProfileDefaults(user);
 
@@ -60,8 +60,8 @@ export const AccountSettings = () => {
             }
 
             try {
-                const data = await fetchAccountProfile();
-                if (data?.profile) setProfile(data.profile);
+                const data = await fetchUserInfo();
+                if (data?.user) setProfile(data.user);
             } catch {
                 // Ignore profile load errors and fall back to defaults.
             }
@@ -70,10 +70,10 @@ export const AccountSettings = () => {
         load();
     }, [user]);
 
-    const displayName = profile.name || defaultName;
-    const parentEmail = profile.parentEmail || '';
-    const educationLevel = profile.educationLevel || DEFAULT_EDUCATION_LEVEL;
-    const email = profile.email || defaultEmail;
+    const displayName = profile?.displayName || defaultName;
+    const contactEmail = profile?.contactEmail || '';
+    const educationLevel = profile?.educationLevel || DEFAULT_EDUCATION_LEVEL;
+    const email = profile?.email || defaultEmail;
 
     return (
         <div className={styles.page}>
@@ -90,8 +90,8 @@ export const AccountSettings = () => {
                         <div className={styles.value}>{displayName}</div>
                     </div>
                     <div className={styles.row}>
-                        <p className={styles.label}>Parent Email:</p>
-                        <div className={styles.value}>{parentEmail || '(not set)'}</div>
+                        <p className={styles.label}>Contact Email:</p>
+                        <div className={styles.value}>{contactEmail || '(not set)'}</div>
                     </div>
                     <div className={styles.row}>
                         <p className={styles.label}>Email:</p>
@@ -129,13 +129,13 @@ export const AccountSettingsEdit = () => {
     const isDirtyRef = useRef(false);
     const [isSaving, setIsSaving] = useState(false);
     const [saveError, setSaveError] = useState<string | null>(null);
-    const [isParentEmailTouched, setIsParentEmailTouched] = useState(false);
+    const [isContactEmailTouched, setIsContactEmailTouched] = useState(false);
     const [isEmailTouched, setIsEmailTouched] = useState(false);
 
-    const [formData, setFormData] = useState<AccountProfile>({
-        name: defaultName,
+    const [formData, setFormData] = useState<Partial<UserInfoResponse['user']>>({
+        displayName: defaultName,
         email: defaultEmail,
-        parentEmail: '',
+        contactEmail: '',
         educationLevel: DEFAULT_EDUCATION_LEVEL,
     });
 
@@ -151,12 +151,16 @@ export const AccountSettingsEdit = () => {
             }
 
             try {
-                const data = await fetchAccountProfile();
-                if (!data?.profile) return;
+                const data = await fetchUserInfo();
+                if (!data?.user) return;
                 if (isDirtyRef.current) return;
                 setFormData((prev) => ({
                     ...prev,
-                    ...data.profile,
+                    username: data.user.username,
+                    displayName: data.user.displayName,
+                    email: data.user.email,
+                    contactEmail: data.user.contactEmail || '',
+                    educationLevel: data.user.educationLevel || DEFAULT_EDUCATION_LEVEL,
                 }));
             } catch {
                 // Ignore profile load errors and keep defaults.
@@ -166,13 +170,13 @@ export const AccountSettingsEdit = () => {
         load();
     }, [user]);
 
-    const parentEmailIsValid = isValidOptionalEmail(formData.parentEmail);
-    const parentEmailError =
-        isParentEmailTouched && !parentEmailIsValid
-            ? 'Please enter a valid parent email address (example: name@example.com).'
+    const contactEmailIsValid = isValidOptionalEmail(formData.contactEmail || '');
+    const contactEmailError =
+        isContactEmailTouched && !contactEmailIsValid
+            ? 'Please enter a valid contact email address (example: name@example.com).'
             : null;
 
-    const emailIsValid = isValidRequiredEmail(formData.email);
+    const emailIsValid = isValidRequiredEmail(formData.email || '');
     const emailError =
         isEmailTouched && !emailIsValid
             ? 'Please enter a valid email address (example: name@example.com).'
@@ -188,9 +192,9 @@ export const AccountSettingsEdit = () => {
             return;
         }
 
-        if (!parentEmailIsValid) {
-            setIsParentEmailTouched(true);
-            setSaveError('Please enter a valid parent email address.');
+        if (!contactEmailIsValid) {
+            setIsContactEmailTouched(true);
+            setSaveError('Please enter a valid contact email address.');
             return;
         }
 
@@ -231,40 +235,40 @@ export const AccountSettingsEdit = () => {
                         <input
                             id="name"
                             className={styles.input}
-                            value={formData.name}
+                            value={formData.displayName}
                             onChange={(event) => {
                                 isDirtyRef.current = true;
-                                setFormData({ ...formData, name: event.target.value });
+                                setFormData({ ...formData, displayName: event.target.value });
                             }}
                         />
                     </div>
 
                     <div className={styles.row}>
-                        <label htmlFor="parentEmail" className={styles.label}>Parent Email:</label>
+                        <label htmlFor="contactEmail" className={styles.label}>Contact Email:</label>
                         <input
-                            id="parentEmail"
+                            id="contactEmail"
                             className={styles.input}
                             type="email"
                             inputMode="email"
                             autoComplete="email"
-                            value={formData.parentEmail}
-                            aria-invalid={Boolean(formData.parentEmail.trim()) && !parentEmailIsValid}
-                            aria-describedby={parentEmailError ? 'parentEmailError' : undefined}
+                            value={formData.contactEmail}
+                            aria-invalid={Boolean((formData.contactEmail || '').trim()) && !contactEmailIsValid}
+                            aria-describedby={contactEmailError ? 'contactEmailError' : undefined}
                             onChange={(event) => {
                                 isDirtyRef.current = true;
-                                if (!isParentEmailTouched) setIsParentEmailTouched(true);
-                                setFormData({ ...formData, parentEmail: event.target.value });
+                                if (!isContactEmailTouched) setIsContactEmailTouched(true);
+                                setFormData({ ...formData, contactEmail: event.target.value });
                             }}
-                            onBlur={() => setIsParentEmailTouched(true)}
+                            onBlur={() => setIsContactEmailTouched(true)}
                         />
                     </div>
-                    {parentEmailError ? (
+                    {contactEmailError ? (
                         <p
-                            id="parentEmailError"
+                            id="contactEmailError"
                             role="alert"
                             className={styles.fieldError}
                         >
-                            {parentEmailError}
+                            {contactEmailError}
                         </p>
                     ) : null}
 
@@ -321,7 +325,7 @@ export const AccountSettingsEdit = () => {
                             label="SAVE"
                             className={styles.actionButton}
                             type="submit"
-                            disabled={isSaving || !parentEmailIsValid || !emailIsValid}
+                            disabled={isSaving || !contactEmailIsValid || !emailIsValid}
                         />
                         <Button
                             variant="grass"

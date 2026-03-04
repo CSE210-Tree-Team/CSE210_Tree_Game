@@ -242,7 +242,7 @@ class BackendIntegrationTests(unittest.TestCase):
     def test_update_user_requires_authentication(self):
         """Test that update-user requires authentication."""
         fresh_client = TestClient(app)
-        response = fresh_client.post(
+        response = fresh_client.put(
             "/api/update-user",
             json={"displayName": "Updated Name"},
             follow_redirects=False
@@ -256,18 +256,14 @@ class BackendIntegrationTests(unittest.TestCase):
         self.client.post("/api/auth/verify", json=self.test_user_data)
         
         # Update user
-        response = self.client.post(
+        response = self.client.put(
             "/api/update-user",
             json={"displayName": "Updated Test User"}
         )
         self.assertEqual(response.status_code, 200)
         data = response.json()
-        # The endpoint may return success or a message, handle both
-        if "success" in data:
-            self.assertIn("success", data)
-        else:
-            # May return "Not implemented yet" message or other response
-            self.assertIn("message", data)
+        # The endpoint should return success and updated user info
+        self.assertTrue(data.get("success", False) or "user" in data)
 
     # ========== Stats Routes Tests ==========
 
@@ -593,7 +589,7 @@ class BackendIntegrationTests(unittest.TestCase):
         self.assertEqual(info_response.status_code, 200)
         
         # 3. Update user
-        update_response = self.client.post(
+        update_response = self.client.put(
             "/api/update-user",
             json={"displayName": "Updated Name"}
         )
