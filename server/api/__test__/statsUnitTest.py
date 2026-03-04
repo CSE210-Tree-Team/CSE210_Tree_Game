@@ -12,6 +12,8 @@ from unittest.mock import Mock, patch, MagicMock
 from fastapi.testclient import TestClient
 from fastapi import FastAPI
 from config.settings import settings
+from api.__test__.test_helpers import create_test_app
+from starlette.middleware.sessions import SessionMiddleware
 
 
 class TestUpdateStat(unittest.TestCase):
@@ -19,7 +21,6 @@ class TestUpdateStat(unittest.TestCase):
 
     def setUp(self):
         """Set up test fixtures."""
-        self.app = FastAPI()
         self.mock_student = {
             "username": "student@example.com",
             "email": "student@example.com",
@@ -36,11 +37,11 @@ class TestUpdateStat(unittest.TestCase):
             mock_tree_service.update_tree_stat.return_value = None
             mock_student_required.return_value = self.mock_student
             
-            self.app = FastAPI()
+            app = create_test_app()
             from api.routers.stats import router
-            self.app.include_router(router)
+            app.include_router(router)
             
-            client = TestClient(self.app)
+            client = TestClient(app)
             
             response = client.put("/api/update-stat", json={
                 "stat_name": settings.RESOURCE_WATER,
@@ -61,11 +62,11 @@ class TestUpdateStat(unittest.TestCase):
             mock_tree_service.update_tree_stat.return_value = None
             mock_student_required.return_value = self.mock_student
             
-            self.app = FastAPI()
+            app = create_test_app()
             from api.routers.stats import router
-            self.app.include_router(router)
+            app.include_router(router)
             
-            client = TestClient(self.app)
+            client = TestClient(app)
             
             response = client.put("/api/update-stat", json={
                 "stat_name": settings.RESOURCE_EARTH,
@@ -85,11 +86,11 @@ class TestUpdateStat(unittest.TestCase):
             mock_tree_service.update_tree_stat.return_value = None
             mock_student_required.return_value = self.mock_student
             
-            self.app = FastAPI()
+            app = create_test_app()
             from api.routers.stats import router
-            self.app.include_router(router)
+            app.include_router(router)
             
-            client = TestClient(self.app)
+            client = TestClient(app)
             
             response = client.put("/api/update-stat", json={
                 "stat_name": settings.RESOURCE_SUN,
@@ -109,11 +110,11 @@ class TestUpdateStat(unittest.TestCase):
             mock_tree_service.update_tree_stat.return_value = None
             mock_student_required.return_value = self.mock_student
             
-            self.app = FastAPI()
+            app = create_test_app()
             from api.routers.stats import router
-            self.app.include_router(router)
+            app.include_router(router)
             
-            client = TestClient(self.app)
+            client = TestClient(app)
             
             # Test each valid resource
             for resource in [settings.RESOURCE_WATER, settings.RESOURCE_EARTH, settings.RESOURCE_SUN]:
@@ -132,11 +133,11 @@ class TestUpdateStat(unittest.TestCase):
             mock_tree_service.update_tree_stat.return_value = None
             mock_student_required.return_value = self.mock_student
             
-            self.app = FastAPI()
+            app = create_test_app()
             from api.routers.stats import router
-            self.app.include_router(router)
+            app.include_router(router)
             
-            client = TestClient(self.app)
+            client = TestClient(app)
             
             # Test with uppercase
             response = client.put("/api/update-stat", json={
@@ -160,11 +161,11 @@ class TestUpdateStat(unittest.TestCase):
             mock_tree_service.update_tree_stat.return_value = None
             mock_student_required.return_value = self.mock_student
             
-            self.app = FastAPI()
+            app = create_test_app()
             from api.routers.stats import router
-            self.app.include_router(router)
+            app.include_router(router)
             
-            client = TestClient(self.app)
+            client = TestClient(app)
             
             response = client.put("/api/update-stat", json={
                 "stat_name": settings.RESOURCE_WATER,
@@ -182,11 +183,11 @@ class TestUpdateStat(unittest.TestCase):
             mock_tree_service.update_tree_stat.return_value = None
             mock_student_required.return_value = self.mock_student
             
-            self.app = FastAPI()
+            app = create_test_app()
             from api.routers.stats import router
-            self.app.include_router(router)
+            app.include_router(router)
             
-            client = TestClient(self.app)
+            client = TestClient(app)
             
             response = client.put("/api/update-stat", json={
                 "stat_name": settings.RESOURCE_WATER,
@@ -204,11 +205,11 @@ class TestUpdateStat(unittest.TestCase):
             mock_tree_service.update_tree_stat.return_value = None
             mock_student_required.return_value = self.mock_student
             
-            self.app = FastAPI()
+            app = create_test_app()
             from api.routers.stats import router
-            self.app.include_router(router)
+            app.include_router(router)
             
-            client = TestClient(self.app)
+            client = TestClient(app)
             
             response = client.put("/api/update-stat", json={
                 "stat_name": settings.RESOURCE_WATER,
@@ -227,11 +228,11 @@ class TestUpdateStat(unittest.TestCase):
             mock_tree_service.get_tree_id.return_value = "tree-uuid-123"
             mock_student_required.return_value = self.mock_student
             
-            self.app = FastAPI()
+            app = create_test_app()
             from api.routers.stats import router
-            self.app.include_router(router)
+            app.include_router(router)
             
-            client = TestClient(self.app)
+            client = TestClient(app)
             
             response = client.put("/api/update-stat", json={
                 "value": 10
@@ -247,11 +248,11 @@ class TestUpdateStat(unittest.TestCase):
             mock_tree_service.get_tree_id.return_value = "tree-uuid-123"
             mock_student_required.return_value = self.mock_student
             
-            self.app = FastAPI()
+            app = create_test_app()
             from api.routers.stats import router
-            self.app.include_router(router)
+            app.include_router(router)
             
-            client = TestClient(self.app)
+            client = TestClient(app)
             
             response = client.put("/api/update-stat", json={
                 "stat_name": settings.RESOURCE_WATER
@@ -267,11 +268,11 @@ class TestUpdateStat(unittest.TestCase):
             mock_tree_service.get_tree_id.return_value = "tree-uuid-123"
             mock_student_required.return_value = self.mock_student
             
-            self.app = FastAPI()
+            app = create_test_app()
             from api.routers.stats import router
-            self.app.include_router(router)
+            app.include_router(router)
             
-            client = TestClient(self.app)
+            client = TestClient(app)
             
             # Test with boolean
             response = client.put("/api/update-stat", json={
@@ -289,11 +290,11 @@ class TestUpdateStat(unittest.TestCase):
             mock_tree_service.get_tree_id.return_value = None
             mock_student_required.return_value = self.mock_student
             
-            self.app = FastAPI()
+            app = create_test_app()
             from api.routers.stats import router
-            self.app.include_router(router)
+            app.include_router(router)
             
-            client = TestClient(self.app)
+            client = TestClient(app)
             
             response = client.put("/api/update-stat", json={
                 "stat_name": settings.RESOURCE_WATER,
@@ -311,11 +312,11 @@ class TestUpdateStat(unittest.TestCase):
             mock_tree_service.update_tree_stat.side_effect = Exception("Database error")
             mock_student_required.return_value = self.mock_student
             
-            self.app = FastAPI()
+            app = create_test_app()
             from api.routers.stats import router
-            self.app.include_router(router)
+            app.include_router(router)
             
-            client = TestClient(self.app)
+            client = TestClient(app)
             
             response = client.put("/api/update-stat", json={
                 "stat_name": settings.RESOURCE_WATER,
@@ -333,11 +334,11 @@ class TestUpdateStat(unittest.TestCase):
             mock_tree_service.update_tree_stat.side_effect = ValueError("Invalid stat name")
             mock_student_required.return_value = self.mock_student
             
-            self.app = FastAPI()
+            app = create_test_app()
             from api.routers.stats import router
-            self.app.include_router(router)
+            app.include_router(router)
             
-            client = TestClient(self.app)
+            client = TestClient(app)
             
             response = client.put("/api/update-stat", json={
                 "stat_name": "invalid",
@@ -355,11 +356,11 @@ class TestUpdateStat(unittest.TestCase):
             mock_tree_service.update_tree_stat.return_value = None
             mock_student_required.return_value = self.mock_student
             
-            self.app = FastAPI()
+            app = create_test_app()
             from api.routers.stats import router
-            self.app.include_router(router)
+            app.include_router(router)
             
-            client = TestClient(self.app)
+            client = TestClient(app)
             
             client.put("/api/update-stat", json={
                 "stat_name": settings.RESOURCE_WATER,

@@ -12,6 +12,8 @@ import unittest
 from unittest.mock import Mock, patch, MagicMock
 from fastapi.testclient import TestClient
 from fastapi import FastAPI
+from starlette.middleware.sessions import SessionMiddleware
+from api.__test__.test_helpers import create_test_app
 from config.settings import settings
 
 
@@ -20,7 +22,7 @@ class TestVerifyAuth(unittest.TestCase):
 
     def setUp(self):
         """Set up test fixtures."""
-        self.app = FastAPI()
+        self.app = create_test_app()
         
         # Patch the AuthService before importing the router
         with patch('api.routers.auth.AuthService') as mock_auth_service:
@@ -38,10 +40,10 @@ class TestVerifyAuth(unittest.TestCase):
             mock_auth_service.create_account.return_value = None
             mock_auth_service.update_login.return_value = None
             
-            self.app = FastAPI()
+            app = create_test_app()
             from api.routers.auth import router
-            self.app.include_router(router)
-            client = TestClient(self.app)
+            app.include_router(router)
+            client = TestClient(app)
             
             user_data = {
                 "email": "newuser@example.com",
@@ -71,10 +73,10 @@ class TestVerifyAuth(unittest.TestCase):
             mock_auth_service.get_user.return_value = existing_user
             mock_auth_service.update_login.return_value = None
             
-            self.app = FastAPI()
+            app = create_test_app()
             from api.routers.auth import router
-            self.app.include_router(router)
-            client = TestClient(self.app)
+            app.include_router(router)
+            client = TestClient(app)
             
             user_data = {
                 "email": "existing@example.com",
@@ -95,10 +97,10 @@ class TestVerifyAuth(unittest.TestCase):
     def test_verify_auth_no_user_data(self):
         """Test that verify_auth returns error when user data is missing."""
         with patch('api.routers.auth.AuthService') as mock_auth_service:
-            self.app = FastAPI()
+            app = create_test_app()
             from api.routers.auth import router
-            self.app.include_router(router)
-            client = TestClient(self.app)
+            app.include_router(router)
+            client = TestClient(app)
             
             response = client.post("/api/auth/verify", json={})
             
@@ -114,10 +116,10 @@ class TestVerifyAuth(unittest.TestCase):
             mock_auth_service.create_account.return_value = None
             mock_auth_service.update_login.return_value = None
             
-            self.app = FastAPI()
+            app = create_test_app()
             from api.routers.auth import router
-            self.app.include_router(router)
-            client = TestClient(self.app)
+            app.include_router(router)
+            client = TestClient(app)
             
             # Test with email
             user_data = {
@@ -139,10 +141,10 @@ class TestVerifyAuth(unittest.TestCase):
             mock_auth_service.create_account.return_value = None
             mock_auth_service.update_login.return_value = None
             
-            self.app = FastAPI()
+            app = create_test_app()
             from api.routers.auth import router
-            self.app.include_router(router)
-            client = TestClient(self.app)
+            app.include_router(router)
+            client = TestClient(app)
             
             user_data = {
                 "sub": "auth0|123",
@@ -161,10 +163,10 @@ class TestVerifyAuth(unittest.TestCase):
             mock_auth_service.get_user.return_value = {"username": "test@example.com"}
             mock_auth_service.update_login.return_value = None
             
-            self.app = FastAPI()
+            app = create_test_app()
             from api.routers.auth import router
-            self.app.include_router(router)
-            client = TestClient(self.app)
+            app.include_router(router)
+            client = TestClient(app)
             
             user_data = {
                 "email": "test@example.com",
@@ -183,10 +185,10 @@ class TestVerifyAuth(unittest.TestCase):
         with patch('api.routers.auth.AuthService') as mock_auth_service:
             mock_auth_service.get_user.side_effect = Exception("Database error")
             
-            self.app = FastAPI()
+            app = create_test_app()
             from api.routers.auth import router
-            self.app.include_router(router)
-            client = TestClient(self.app)
+            app.include_router(router)
+            client = TestClient(app)
             
             user_data = {
                 "email": "test@example.com",
@@ -206,10 +208,10 @@ class TestLogout(unittest.TestCase):
     def test_logout_clears_session(self):
         """Test that logout endpoint clears the session."""
         with patch('api.routers.auth.AuthService'):
-            self.app = FastAPI()
+            app = create_test_app()
             from api.routers.auth import router
-            self.app.include_router(router)
-            client = TestClient(self.app)
+            app.include_router(router)
+            client = TestClient(app)
             
             response = client.post("/api/auth/logout")
             
@@ -221,10 +223,10 @@ class TestLogout(unittest.TestCase):
     def test_logout_returns_success_message(self):
         """Test that logout endpoint returns correct success message."""
         with patch('api.routers.auth.AuthService'):
-            self.app = FastAPI()
+            app = create_test_app()
             from api.routers.auth import router
-            self.app.include_router(router)
-            client = TestClient(self.app)
+            app.include_router(router)
+            client = TestClient(app)
             
             response = client.post("/api/auth/logout")
             data = response.json()

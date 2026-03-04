@@ -14,7 +14,6 @@ from unittest.mock import Mock, patch, MagicMock
 from fastapi import HTTPException, Request
 from fastapi.testclient import TestClient
 from fastapi import FastAPI, Depends
-import pytest
 from config.settings import settings
 from utils.exceptions import NeedLoginException
 

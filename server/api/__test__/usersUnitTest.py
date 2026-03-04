@@ -13,6 +13,8 @@ from unittest.mock import Mock, patch, MagicMock
 from fastapi.testclient import TestClient
 from fastapi import FastAPI
 from config.settings import settings
+from api.__test__.test_helpers import create_test_app
+from starlette.middleware.sessions import SessionMiddleware
 
 
 class TestGetUserInfo(unittest.TestCase):
@@ -20,7 +22,6 @@ class TestGetUserInfo(unittest.TestCase):
 
     def setUp(self):
         """Set up test fixtures."""
-        self.app = FastAPI()
         self.mock_student = {
             "username": "student@example.com",
             "email": "student@example.com",

@@ -1,5 +1,6 @@
 """Application configuration and settings."""
 import os
+import secrets
 from typing import Dict, List, Optional
 from dotenv import load_dotenv
 
@@ -20,6 +21,19 @@ def _parse_optional_int(value: str) -> Optional[int]:
     return int(value)
 
 
+def _get_middleware_secret() -> str:
+    """Get middleware secret key from environment or generate a default for non-production.
+    
+    In production, the environment variable must be set explicitly.
+    For development and testing, a default is generated if not provided.
+    """
+    env_secret = os.getenv("MIDDLEWARE_SECRET_KEY", "")
+    if env_secret:
+        return env_secret
+    # Default for non-production environments (development/testing)
+    return "dev-default-middleware-secret-key"
+
+
 class Settings:
     """Application settings loaded from environment variables."""
     
@@ -28,7 +42,7 @@ class Settings:
     PORT: int = 8000
     
     # ========== SECURITY & AUTHENTICATION ==========
-    MIDDLEWARE_SECRET_KEY: str = os.getenv("MIDDLEWARE_SECRET_KEY", "")
+    MIDDLEWARE_SECRET_KEY: str = _get_middleware_secret()
     CLEAR_SESSIONS_ON_RESTART: bool = _parse_bool(
         os.getenv("CLEAR_SESSIONS_ON_RESTART", "true"),
         default=True

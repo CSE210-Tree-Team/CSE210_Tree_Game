@@ -13,6 +13,8 @@ import unittest
 from unittest.mock import Mock, patch, MagicMock
 from fastapi.testclient import TestClient
 from fastapi import FastAPI
+from starlette.middleware.sessions import SessionMiddleware
+from api.__test__.test_helpers import create_test_app
 from config.settings import settings
 
 
@@ -21,7 +23,6 @@ class TestAddQuestion(unittest.TestCase):
 
     def setUp(self):
         """Set up test fixtures."""
-        self.app = FastAPI()
         self.mock_user = {
             "username": "test@example.com",
             "email": "test@example.com",
@@ -37,11 +38,11 @@ class TestAddQuestion(unittest.TestCase):
             mock_qs.add_new_question.return_value = "question-uuid-123"
             mock_get_user.return_value = self.mock_user
             
-            self.app = FastAPI()
+            app = create_test_app()
             from api.routers.questions import router
-            self.app.include_router(router)
+            app.include_router(router)
             
-            client = TestClient(self.app)
+            client = TestClient(app)
             
             question_data = {
                 "text": "What is 2+2?",
@@ -68,11 +69,11 @@ class TestAddQuestion(unittest.TestCase):
             mock_qs.add_new_question.return_value = "question-uuid-456"
             mock_get_user.return_value = self.mock_user
             
-            self.app = FastAPI()
+            app = create_test_app()
             from api.routers.questions import router
-            self.app.include_router(router)
+            app.include_router(router)
             
-            client = TestClient(self.app)
+            client = TestClient(app)
             
             question_data = {
                 "text": "Select all correct answers",
@@ -95,11 +96,11 @@ class TestAddQuestion(unittest.TestCase):
             mock_qs.add_new_question.return_value = "question-uuid-789"
             mock_get_user.return_value = self.mock_user
             
-            self.app = FastAPI()
+            app = create_test_app()
             from api.routers.questions import router
-            self.app.include_router(router)
+            app.include_router(router)
             
-            client = TestClient(self.app)
+            client = TestClient(app)
             
             question_data = {
                 "text": "Explain your answer",
@@ -122,11 +123,11 @@ class TestAddQuestion(unittest.TestCase):
             mock_qs.add_new_question.return_value = "question-uuid-123"
             mock_get_user.return_value = self.mock_user
             
-            self.app = FastAPI()
+            app = create_test_app()
             from api.routers.questions import router
-            self.app.include_router(router)
+            app.include_router(router)
             
-            client = TestClient(self.app)
+            client = TestClient(app)
             
             question_data = {
                 "text": "General question",
@@ -149,11 +150,11 @@ class TestAddQuestion(unittest.TestCase):
             mock_qs.add_new_question.return_value = "question-uuid-123"
             mock_get_user.return_value = self.mock_user
             
-            self.app = FastAPI()
+            app = create_test_app()
             from api.routers.questions import router
-            self.app.include_router(router)
+            app.include_router(router)
             
-            client = TestClient(self.app)
+            client = TestClient(app)
             
             question_data = {
                 "text": "No resource question",
@@ -176,11 +177,11 @@ class TestAddQuestion(unittest.TestCase):
             mock_qs.add_new_question.side_effect = ValueError("Invalid question type")
             mock_get_user.return_value = self.mock_user
             
-            self.app = FastAPI()
+            app = create_test_app()
             from api.routers.questions import router
-            self.app.include_router(router)
+            app.include_router(router)
             
-            client = TestClient(self.app)
+            client = TestClient(app)
             
             question_data = {
                 "text": "What is 2+2?",
@@ -203,11 +204,11 @@ class TestAddQuestion(unittest.TestCase):
             mock_qs.add_new_question.side_effect = Exception("Database error")
             mock_get_user.return_value = self.mock_user
             
-            self.app = FastAPI()
+            app = create_test_app()
             from api.routers.questions import router
-            self.app.include_router(router)
+            app.include_router(router)
             
-            client = TestClient(self.app)
+            client = TestClient(app)
             
             question_data = {
                 "text": "What is 2+2?",
@@ -230,11 +231,11 @@ class TestAddQuestion(unittest.TestCase):
             mock_qs.add_new_question.return_value = "question-uuid-123"
             mock_get_user.return_value = self.mock_user
             
-            self.app = FastAPI()
+            app = create_test_app()
             from api.routers.questions import router
-            self.app.include_router(router)
+            app.include_router(router)
             
-            client = TestClient(self.app)
+            client = TestClient(app)
             
             question_data = {
                 "text": "What is 2+2?",
@@ -260,7 +261,7 @@ class TestGetQuestion(unittest.TestCase):
 
     def setUp(self):
         """Set up test fixtures."""
-        self.app = FastAPI()
+        app = create_test_app()
         self.mock_user = {
             "username": "test@example.com",
             "email": "test@example.com",
@@ -282,11 +283,11 @@ class TestGetQuestion(unittest.TestCase):
             mock_qs.get_question_by_id.return_value = question_data
             mock_get_user.return_value = self.mock_user
             
-            self.app = FastAPI()
+            app = create_test_app()
             from api.routers.questions import router
-            self.app.include_router(router)
+            app.include_router(router)
             
-            client = TestClient(self.app)
+            client = TestClient(app)
             
             response = client.post("/api/get-question", json={"questionID": "q-123"})
             
@@ -302,11 +303,11 @@ class TestGetQuestion(unittest.TestCase):
             
             mock_get_user.return_value = self.mock_user
             
-            self.app = FastAPI()
+            app = create_test_app()
             from api.routers.questions import router
-            self.app.include_router(router)
+            app.include_router(router)
             
-            client = TestClient(self.app)
+            client = TestClient(app)
             
             response = client.post("/api/get-question", json={})
             
@@ -320,11 +321,11 @@ class TestGetQuestion(unittest.TestCase):
             mock_qs.get_question_by_id.return_value = None
             mock_get_user.return_value = self.mock_user
             
-            self.app = FastAPI()
+            app = create_test_app()
             from api.routers.questions import router
-            self.app.include_router(router)
+            app.include_router(router)
             
-            client = TestClient(self.app)
+            client = TestClient(app)
             
             response = client.post("/api/get-question", json={"questionID": "nonexistent"})
             
@@ -338,11 +339,11 @@ class TestGetQuestion(unittest.TestCase):
             mock_qs.get_question_by_id.side_effect = Exception("Database error")
             mock_get_user.return_value = self.mock_user
             
-            self.app = FastAPI()
+            app = create_test_app()
             from api.routers.questions import router
-            self.app.include_router(router)
+            app.include_router(router)
             
-            client = TestClient(self.app)
+            client = TestClient(app)
             
             response = client.post("/api/get-question", json={"questionID": "q-123"})
             
@@ -354,7 +355,7 @@ class TestGetQuestions(unittest.TestCase):
 
     def setUp(self):
         """Set up test fixtures."""
-        self.app = FastAPI()
+        app = create_test_app()
         self.mock_user = {
             "username": "test@example.com",
             "email": "test@example.com",
@@ -383,11 +384,11 @@ class TestGetQuestions(unittest.TestCase):
             mock_qs.get_filtered_questions.return_value = questions
             mock_get_user.return_value = self.mock_user
             
-            self.app = FastAPI()
+            app = create_test_app()
             from api.routers.questions import router
-            self.app.include_router(router)
+            app.include_router(router)
             
-            client = TestClient(self.app)
+            client = TestClient(app)
             
             response = client.post("/api/get-questions", json={
                 "numQuestions": 5,
@@ -409,11 +410,11 @@ class TestGetQuestions(unittest.TestCase):
             mock_qs.get_filtered_questions.return_value = []
             mock_get_user.return_value = self.mock_user
             
-            self.app = FastAPI()
+            app = create_test_app()
             from api.routers.questions import router
-            self.app.include_router(router)
+            app.include_router(router)
             
-            client = TestClient(self.app)
+            client = TestClient(app)
             
             # Test with each resource type
             for resource_type in [settings.QUESTION_RESOURCE_WATER, settings.QUESTION_RESOURCE_EARTH, 
@@ -432,11 +433,11 @@ class TestGetQuestions(unittest.TestCase):
             mock_qs.get_filtered_questions.return_value = []
             mock_get_user.return_value = self.mock_user
             
-            self.app = FastAPI()
+            app = create_test_app()
             from api.routers.questions import router
-            self.app.include_router(router)
+            app.include_router(router)
             
-            client = TestClient(self.app)
+            client = TestClient(app)
             
             # Test with each question type
             for question_type in [settings.QUESTION_MCQ, settings.QUESTION_FREE_RESPONSE, 
@@ -454,11 +455,11 @@ class TestGetQuestions(unittest.TestCase):
             mock_qs.get_filtered_questions.return_value = []
             mock_get_user.return_value = self.mock_user
             
-            self.app = FastAPI()
+            app = create_test_app()
             from api.routers.questions import router
-            self.app.include_router(router)
+            app.include_router(router)
             
-            client = TestClient(self.app)
+            client = TestClient(app)
             
             response = client.post("/api/get-questions", json={})
             
@@ -475,11 +476,11 @@ class TestGetQuestions(unittest.TestCase):
             mock_qs.get_filtered_questions.side_effect = Exception("Database error")
             mock_get_user.return_value = self.mock_user
             
-            self.app = FastAPI()
+            app = create_test_app()
             from api.routers.questions import router
-            self.app.include_router(router)
+            app.include_router(router)
             
-            client = TestClient(self.app)
+            client = TestClient(app)
             
             response = client.post("/api/get-questions", json={})
             
@@ -493,11 +494,11 @@ class TestGetQuestions(unittest.TestCase):
             mock_qs.get_filtered_questions.return_value = []
             mock_get_user.return_value = self.mock_user
             
-            self.app = FastAPI()
+            app = create_test_app()
             from api.routers.questions import router
-            self.app.include_router(router)
+            app.include_router(router)
             
-            client = TestClient(self.app)
+            client = TestClient(app)
             
             client.post("/api/get-questions", json={
                 "numQuestions": 10,
