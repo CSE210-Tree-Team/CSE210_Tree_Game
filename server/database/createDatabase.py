@@ -198,7 +198,7 @@ def create_schema(db_path=DB_PATH):
         studentUsername TEXT PRIMARY KEY,
         studentLevel INTEGER,
         studentStats TEXT, -- JSON
-        parentEmail TEXT,
+        contactEmail TEXT,
         FOREIGN KEY (studentUsername) REFERENCES Account(username) ON DELETE CASCADE
     )
     ''')

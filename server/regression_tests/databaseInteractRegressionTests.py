@@ -46,9 +46,9 @@ from database.createDatabase import create_schema
 from database.addItemsToDatabase import (
     add_account, add_role, add_question_alone, add_question_choice,
     update_stat, update_health, update_account, update_last_login,
-    generate_tree, do_event, join_class, add_student_details
+    generate_tree, do_event, join_class, upsert_student_details
 )
-from database.getItemsFromDatabase import get_person, get_tree
+from database.getItemsFromDatabase import get_person, get_tree, get_student_details
 
 from config.settings import settings
 from schemas import Event
@@ -574,31 +574,37 @@ class TestStudentDetails(DatabaseInteractTestCase):
             role=settings.ROLE_STUDENT
         )
     
-    def test_add_student_details(self):
-        """Test adding student-specific details."""
-        student_stats = '{"questions_answered": 10, "accuracy": 0.85}'
-        
-        add_student_details(
+    def test_upsert_student_details_creates_record(self):
+        """Test upsert creates student details when missing."""
+        upsert_student_details(
             student_username="student_detail_user",
-            student_level="3-6",
-            student_stats=student_stats,
-            parent_email="parent@example.com"
+            contact_email="parent@example.com",
+            education_level="3-6"
         )
-        
-        # Verify by querying database directly
-        import sqlite3
-        with sqlite3.connect(self.db_path) as conn:
-            conn.row_factory = sqlite3.Row
-            cursor = conn.cursor()
-            cursor.execute(
-                "SELECT * FROM StudentDetails WHERE studentUsername = ?",
-                ("student_detail_user",)
-            )
-            result = dict(cursor.fetchone())
-            
-            self.assertEqual(result['studentLevel'], 1)
-            self.assertEqual(result['studentStats'], student_stats)
-            self.assertEqual(result['parentEmail'], "parent@example.com")
+
+        result = get_student_details("student_detail_user")
+        self.assertIsNotNone(result)
+        self.assertEqual(result['studentLevel'], 1)
+        self.assertEqual(result['studentStats'], '{"xp": 0}')
+        self.assertEqual(result['contactEmail'], "parent@example.com")
+
+    def test_upsert_student_details_updates_existing_record(self):
+        """Test upsert updates contact email and education level for existing row."""
+        upsert_student_details(
+            student_username="student_detail_user",
+            contact_email="old@example.com",
+            education_level="3-6"
+        )
+
+        upsert_student_details(
+            student_username="student_detail_user",
+            contact_email="new@example.com",
+            education_level="6-8"
+        )
+
+        result = get_student_details("student_detail_user")
+        self.assertEqual(result['contactEmail'], "new@example.com")
+        self.assertEqual(result['studentLevel'], 2)
 
 
 class TestIntegration(DatabaseInteractTestCase):
@@ -618,7 +624,7 @@ class TestIntegration(DatabaseInteractTestCase):
         )
         
         # Add student details
-        add_student_details("john_student", student_level="3-6")
+        upsert_student_details("john_student", education_level="3-6")
         
         # Generate tree
         tree_id = generate_tree("john_student")

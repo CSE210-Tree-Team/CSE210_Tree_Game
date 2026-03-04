@@ -146,7 +146,10 @@ describe('Homepage', () => {
     render(<Homepage />)
     
     await waitFor(() => {
-      expect(global.fetch).toHaveBeenCalledWith('/api/get-user-info', expect.anything())
+      const hasUserInfoCall = (global.fetch as any).mock.calls.some(
+        (call: unknown[]) => call[0] === '/api/get-user-info'
+      )
+      expect(hasUserInfoCall).toBe(true)
     })
   })
 

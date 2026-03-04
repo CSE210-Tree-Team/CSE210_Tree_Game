@@ -18,7 +18,7 @@ from regression_tests.apiQuestionsRegressionTests import APIQuestionsTestCase
 from fastapi.testclient import TestClient
 
 # Import the modules to test
-from database.getItemsFromDatabase import get_person
+from database.getItemsFromDatabase import get_person, get_student_details
 from config.settings import settings
 
 
@@ -185,8 +185,8 @@ class TestUserAPIRoutes(APIQuestionsTestCase):
         self.assertEqual(user["username"], "test_student@example.com")
         self.assertEqual(user["email"], "test_student@example.com")
         self.assertEqual(user["displayName"], "Test Student")
-        self.assertEqual(user.get("contactEmail"), "")
-        self.assertEqual(user.get("educationLevel"), "3-6")
+        self.assertIsNone(user.get("contactEmail"))
+        self.assertIsNone(user.get("educationLevel"))
 
     def test_update_account_profile_persists(self):
         """Test that /api/update-user can be used to update profile and is persisted in the database."""
@@ -204,14 +204,21 @@ class TestUserAPIRoutes(APIQuestionsTestCase):
         self.assertEqual(response.status_code, 200)
         self.assertTrue(response.json()["success"])
 
-        response = client.get("/api/get-user-info")
-        self.assertEqual(response.status_code, 200)
+        # Verify returned payload reflects updated account/profile values
+        updated_user = response.json()["user"]
+        self.assertEqual(updated_user["displayName"], "Updated Student")
+        self.assertEqual(updated_user["email"], "updated@example.com")
+        self.assertEqual(updated_user["contactEmail"], "contact@example.com")
+        self.assertEqual(updated_user["educationLevel"], "2")
 
-        user = response.json()["user"]
-        self.assertEqual(user["displayName"], "Updated Student")
-        self.assertEqual(user["email"], "updated@example.com")
-        self.assertEqual(user["contactEmail"], "contact@example.com")
-        self.assertEqual(user["educationLevel"], "6-8")
+        # Verify persistence in database
+        person = get_person("test_student@example.com")
+        self.assertEqual(person["displayName"], "Updated Student")
+        self.assertEqual(person["email"], "updated@example.com")
+
+        details = get_student_details("test_student@example.com")
+        self.assertEqual(details["contactEmail"], "contact@example.com")
+        self.assertEqual(details["studentLevel"], 2)
 
 
 if __name__ == '__main__':

@@ -41,10 +41,10 @@ def get_student_details(username):
     Retrieve student details by username.
 
     Returns:
-        dict | None: Example: { 'studentUsername': '...', 'studentLevel': 1, 'studentStats': '{...}', 'parentEmail': '...' }
+        dict | None: Example: { 'studentUsername': '...', 'studentLevel': 1, 'studentStats': '{...}', 'contactEmail': '...' }
     """
     return _query(
-        "SELECT studentUsername, studentLevel, studentStats, parentEmail FROM StudentDetails WHERE studentUsername = ?",
+        "SELECT studentUsername, studentLevel, studentStats, contactEmail FROM StudentDetails WHERE studentUsername = ?",
         (username,),
         fetchone=True,
     )

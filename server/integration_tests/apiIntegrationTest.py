@@ -359,13 +359,23 @@ class APIIntegrationTests(unittest.TestCase):
         """Test updating user info with authentication."""
         # Authenticate
         self.client.post("/api/auth/verify", json=self.test_user_data)
+
+        current_user_response = self.client.get("/api/get-user-info")
+        current_user = current_user_response.json().get("user", {})
         
-        # Update user
-        update_data = {"displayName": "Updated Test User"}
+        # Update user with full required payload
+        update_data = {
+            "username": current_user.get("username", self.test_user_email),
+            "email": current_user.get("email", self.test_user_email),
+            "displayName": "Updated Test User",
+            "roles": current_user.get("roles", [settings.ROLE_STUDENT]),
+            "contactEmail": "contact@example.com",
+            "educationLevel": "6-8",
+        }
         response = self.client.put("/api/update-user", json=update_data)
         
-        # Should return 200 or handle gracefully
-        self.assertIn(response.status_code, [200, 501, 404])
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(response.json().get("success"))
 
     # ========== Stats Routes Tests ==========
 

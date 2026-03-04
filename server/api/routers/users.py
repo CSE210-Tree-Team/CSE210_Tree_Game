@@ -57,7 +57,7 @@ def get_user_info(request: Request, student=Depends(student_required)):
         email=student.get("email"),
         displayName=student.get("displayName"),
         roles=student.get("roles", []),
-        contactEmail=student_details.get("parentEmail") if student_details else None,
+        contactEmail=student_details.get("contactEmail") if student_details else None,
         educationLevel=str(student_details.get("studentLevel")) if student_details and student_details.get("studentLevel") else None,
     )
     
@@ -131,7 +131,7 @@ async def update_user(
         if user_update.contactEmail or user_update.educationLevel:
             upsert_student_details(
                 student_username=username,
-                parent_email=user_update.contactEmail,
+                contact_email=user_update.contactEmail,
                 education_level=user_update.educationLevel,
             )
         
@@ -146,7 +146,7 @@ async def update_user(
             email=updated_account.get("email"),
             displayName=updated_account.get("displayName", ""),
             roles=updated_account.get("roles", []),
-            contactEmail=updated_student_details.get("parentEmail") if updated_student_details else None,
+            contactEmail=updated_student_details.get("contactEmail") if updated_student_details else None,
             educationLevel=str(updated_student_details.get("studentLevel")) if updated_student_details and updated_student_details.get("studentLevel") else None,
         )
         

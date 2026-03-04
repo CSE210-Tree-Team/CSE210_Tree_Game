@@ -63,9 +63,10 @@ class TestAuthService(unittest.TestCase):
         self.assertEqual(user, mock_user)
         mock_get_person.assert_called_once_with("test@example.com")
 
+    @patch("services.auth_service.upsert_student_details")
     @patch("services.auth_service.generate_tree")
     @patch("services.auth_service.add_account")
-    def test_create_account_success(self, mock_add_account, mock_generate_tree):
+    def test_create_account_success(self, mock_add_account, mock_generate_tree, mock_upsert_student_details):
         """Test create_account creates account and tree with expected defaults."""
         mock_generate_tree.return_value = "tree-uuid-123"
         user_data = {
@@ -89,10 +90,16 @@ class TestAuthService(unittest.TestCase):
             role=settings.ROLE_STUDENT
         )
         mock_generate_tree.assert_called_once_with("new@example.com")
+        mock_upsert_student_details.assert_called_once_with(
+            student_username="new@example.com",
+            contact_email="new@example.com",
+            education_level=None,
+        )
 
+    @patch("services.auth_service.upsert_student_details")
     @patch("services.auth_service.generate_tree")
     @patch("services.auth_service.add_account")
-    def test_create_account_fallback_defaults(self, mock_add_account, mock_generate_tree):
+    def test_create_account_fallback_defaults(self, mock_add_account, mock_generate_tree, mock_upsert_student_details):
         """Test create_account uses fallback values when optional fields are absent."""
         mock_generate_tree.return_value = "tree-uuid-789"
         user_data = {"sub": "auth0|abc"}
@@ -109,10 +116,12 @@ class TestAuthService(unittest.TestCase):
             role=settings.ROLE_STUDENT
         )
         mock_generate_tree.assert_called_once_with("auth0|abc")
+        mock_upsert_student_details.assert_not_called()
 
+    @patch("services.auth_service.upsert_student_details")
     @patch("services.auth_service.generate_tree")
     @patch("services.auth_service.add_account")
-    def test_create_account_raises_when_add_account_fails(self, mock_add_account, mock_generate_tree):
+    def test_create_account_raises_when_add_account_fails(self, mock_add_account, mock_generate_tree, mock_upsert_student_details):
         """Test create_account re-raises errors from account creation."""
         mock_add_account.side_effect = Exception("db failure")
 
@@ -120,6 +129,7 @@ class TestAuthService(unittest.TestCase):
             AuthService.create_account("bad@example.com", {"email": "bad@example.com"})
 
         mock_generate_tree.assert_not_called()
+        mock_upsert_student_details.assert_not_called()
 
     @patch("services.auth_service.update_last_login")
     def test_update_login_calls_data_layer(self, mock_update_last_login):

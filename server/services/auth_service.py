@@ -91,12 +91,12 @@ class AuthService:
             # Generate tree for the user
             tree_id = generate_tree(username)
             
-            # Create student details with contactEmail if provided
+            # Create student details with initial email if available.
             contact_email = user_data.get("email")
             if contact_email:
                 upsert_student_details(
                     student_username=username,
-                    parent_email=contact_email,
+                    contact_email=contact_email,
                     education_level=None
                 )
             

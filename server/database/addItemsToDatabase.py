@@ -10,7 +10,7 @@ Functions - Account Management:
     add_role(username, role)
     update_account(username, display_name, email)
     update_last_login(username)
-    add_student_details(student_username, student_level, student_stats, parent_email)
+    upsert_student_details(student_username, contact_email, education_level)
 
 Functions - Question Management:
     add_question_alone(question_id, text, question_type, difficulty, resource_type)
@@ -36,7 +36,6 @@ import uuid
 # Import education level constants for student details
 DEFAULT_EDUCATION_LEVEL_CODE = settings.DEFAULT_EDUCATION_LEVEL_CODE
 EDUCATION_LEVEL_LABEL_TO_CODE = settings.EDUCATION_LEVEL_LABEL_TO_CODE
-
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 DB_PATH = os.path.join(BASE_DIR, settings.DB_NAME)
@@ -366,13 +365,11 @@ def update_stat(tree_ID: str, stat_name: str, value: int):
     from database.getItemsFromDatabase import _query
 
     stat_name_lower = stat_name.lower()
-    valid_stats = ['water', 'earth', 'sun']  # TODO: Consider converting this to be: VALID_RESOURCES
+    valid_stats = [settings.RESOURCE_WATER, settings.RESOURCE_EARTH, settings.RESOURCE_SUN]
     
     if stat_name_lower not in valid_stats:
         raise ValueError(f"Invalid stat name '{stat_name}'. Must be one of {valid_stats}")
     
-    print(f"Updating stat '{stat_name_lower}' for tree '{tree_ID}' by {value}")
-
     # Get current value to check if it will actually change
     get_current_sql = f'''
         SELECT {stat_name_lower}
@@ -514,24 +511,6 @@ def join_class(student_username: str, class_code: str):
     
     _execute(sql, (student_username, class_id))
 
-def add_student_details(student_username: str, student_level: str = "3-6", student_stats: str = None, parent_email: str = None):
-    """
-    Add student-specific details to an account.
-    
-    Args:
-        studentUsername: The student's username
-        studentLevel: The student's education level (default: '3-6')
-        studentStats: JSON string of student stats
-        parentEmail: Parent's email (optional)
-    """
-    sql = '''
-        INSERT INTO StudentDetails (studentUsername, studentLevel, studentStats, parentEmail)
-        VALUES (?, ?, ?, ?)
-    '''
-
-    level_code = _normalize_education_level_code(student_level)
-    _execute(sql, (student_username, level_code, student_stats, parent_email))
-
 def _normalize_education_level_code(value: int | str | None) -> int:
     if value is None:
         return DEFAULT_EDUCATION_LEVEL_CODE
@@ -547,14 +526,14 @@ def _normalize_education_level_code(value: int | str | None) -> int:
     raise ValueError(f"Invalid education level label: {value}")
 
 
-def upsert_student_details(student_username: str, parent_email: str | None = None, education_level: int | str | None = None):
+def upsert_student_details(student_username: str, contact_email: str | None = None, education_level: int | str | None = None):
     """
-    Create StudentDetails row if missing and update parentEmail and/or studentLevel (education level).
+    Create StudentDetails row if missing and update contactEmail and/or studentLevel.
     """
     if not os.path.exists(DB_PATH):
         raise FileNotFoundError(f"Database {DB_PATH} does not exist. Please create it first.")
 
-    if parent_email is None and education_level is None:
+    if contact_email is None and education_level is None:
         return
 
     education_level_code = (
@@ -573,22 +552,22 @@ def upsert_student_details(student_username: str, parent_email: str | None = Non
         exists = cursor.fetchone() is not None
         if not exists:
             cursor.execute(
-                "INSERT INTO StudentDetails (studentUsername, studentLevel, studentStats, parentEmail) VALUES (?, ?, ?, ?)",
+                "INSERT INTO StudentDetails (studentUsername, studentLevel, studentStats, contactEmail) VALUES (?, ?, ?, ?)",
                 (
                     student_username,
                     education_level_code
                     if education_level_code is not None
                     else DEFAULT_EDUCATION_LEVEL_CODE,
                     '{"xp": 0}',
-                    parent_email,
+                    contact_email,
                 ),
             )
             conn.commit()
             return
 
         cursor.execute(
-            "UPDATE StudentDetails SET parentEmail = COALESCE(?, parentEmail), studentLevel = COALESCE(?, studentLevel) WHERE studentUsername = ?",
-            (parent_email, education_level_code, student_username),
+            "UPDATE StudentDetails SET contactEmail = COALESCE(?, contactEmail), studentLevel = COALESCE(?, studentLevel) WHERE studentUsername = ?",
+            (contact_email, education_level_code, student_username),
         )
         conn.commit()
 
