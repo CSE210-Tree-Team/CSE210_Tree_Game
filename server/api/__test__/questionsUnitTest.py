@@ -32,13 +32,11 @@ class TestAddQuestion(unittest.TestCase):
 
     def test_add_question_mcq_success(self):
         """Test successfully adding an MCQ question."""
-        with patch('api.routers.questions.QuestionService') as mock_qs, \
-             patch('api.routers.questions.get_current_user') as mock_get_user:
+        with patch('api.routers.questions.QuestionService') as mock_qs:
             
             mock_qs.add_new_question.return_value = "question-uuid-123"
-            mock_get_user.return_value = self.mock_user
             
-            app = create_test_app()
+            app = create_test_app(user_data=self.mock_user)
             from api.routers.questions import router
             app.include_router(router)
             
@@ -63,13 +61,11 @@ class TestAddQuestion(unittest.TestCase):
 
     def test_add_question_multi_select_success(self):
         """Test successfully adding a MultiSelect question."""
-        with patch('api.routers.questions.QuestionService') as mock_qs, \
-             patch('api.routers.questions.get_current_user') as mock_get_user:
+        with patch('api.routers.questions.QuestionService') as mock_qs:
             
             mock_qs.add_new_question.return_value = "question-uuid-456"
-            mock_get_user.return_value = self.mock_user
             
-            app = create_test_app()
+            app = create_test_app(user_data=self.mock_user)
             from api.routers.questions import router
             app.include_router(router)
             
@@ -90,13 +86,11 @@ class TestAddQuestion(unittest.TestCase):
 
     def test_add_question_free_response_success(self):
         """Test successfully adding a FreeResponse question."""
-        with patch('api.routers.questions.QuestionService') as mock_qs, \
-             patch('api.routers.questions.get_current_user') as mock_get_user:
+        with patch('api.routers.questions.QuestionService') as mock_qs:
             
             mock_qs.add_new_question.return_value = "question-uuid-789"
-            mock_get_user.return_value = self.mock_user
             
-            app = create_test_app()
+            app = create_test_app(user_data=self.mock_user)
             from api.routers.questions import router
             app.include_router(router)
             
@@ -117,13 +111,11 @@ class TestAddQuestion(unittest.TestCase):
 
     def test_add_question_general_resource_type(self):
         """Test adding question with general resource type."""
-        with patch('api.routers.questions.QuestionService') as mock_qs, \
-             patch('api.routers.questions.get_current_user') as mock_get_user:
+        with patch('api.routers.questions.QuestionService') as mock_qs:
             
             mock_qs.add_new_question.return_value = "question-uuid-123"
-            mock_get_user.return_value = self.mock_user
             
-            app = create_test_app()
+            app = create_test_app(user_data=self.mock_user)
             from api.routers.questions import router
             app.include_router(router)
             
@@ -144,13 +136,11 @@ class TestAddQuestion(unittest.TestCase):
 
     def test_add_question_none_resource_type(self):
         """Test adding question with none resource type."""
-        with patch('api.routers.questions.QuestionService') as mock_qs, \
-             patch('api.routers.questions.get_current_user') as mock_get_user:
+        with patch('api.routers.questions.QuestionService') as mock_qs:
             
             mock_qs.add_new_question.return_value = "question-uuid-123"
-            mock_get_user.return_value = self.mock_user
             
-            app = create_test_app()
+            app = create_test_app(user_data=self.mock_user)
             from api.routers.questions import router
             app.include_router(router)
             
@@ -171,13 +161,11 @@ class TestAddQuestion(unittest.TestCase):
 
     def test_add_question_invalid_type(self):
         """Test adding a question with invalid type raises 400 error."""
-        with patch('api.routers.questions.QuestionService') as mock_qs, \
-             patch('api.routers.questions.get_current_user') as mock_get_user:
+        with patch('api.routers.questions.QuestionService') as mock_qs:
             
             mock_qs.add_new_question.side_effect = ValueError("Invalid question type")
-            mock_get_user.return_value = self.mock_user
             
-            app = create_test_app()
+            app = create_test_app(user_data=self.mock_user)
             from api.routers.questions import router
             app.include_router(router)
             
@@ -198,13 +186,11 @@ class TestAddQuestion(unittest.TestCase):
 
     def test_add_question_service_exception(self):
         """Test adding a question with service exception returns 500 error."""
-        with patch('api.routers.questions.QuestionService') as mock_qs, \
-             patch('api.routers.questions.get_current_user') as mock_get_user:
+        with patch('api.routers.questions.QuestionService') as mock_qs:
             
             mock_qs.add_new_question.side_effect = Exception("Database error")
-            mock_get_user.return_value = self.mock_user
             
-            app = create_test_app()
+            app = create_test_app(user_data=self.mock_user)
             from api.routers.questions import router
             app.include_router(router)
             
@@ -225,13 +211,11 @@ class TestAddQuestion(unittest.TestCase):
 
     def test_add_question_calls_service_with_correct_params(self):
         """Test that add_question calls QuestionService with correct parameters."""
-        with patch('api.routers.questions.QuestionService') as mock_qs, \
-             patch('api.routers.questions.get_current_user') as mock_get_user:
+        with patch('api.routers.questions.QuestionService') as mock_qs:
             
             mock_qs.add_new_question.return_value = "question-uuid-123"
-            mock_get_user.return_value = self.mock_user
             
-            app = create_test_app()
+            app = create_test_app(user_data=self.mock_user)
             from api.routers.questions import router
             app.include_router(router)
             
@@ -271,8 +255,7 @@ class TestGetQuestion(unittest.TestCase):
 
     def test_get_question_success(self):
         """Test successfully retrieving a question."""
-        with patch('api.routers.questions.QuestionService') as mock_qs, \
-             patch('api.routers.questions.get_current_user') as mock_get_user:
+        with patch('api.routers.questions.QuestionService') as mock_qs:
             
             question_data = {
                 "questionID": "q-123",
@@ -281,9 +264,8 @@ class TestGetQuestion(unittest.TestCase):
                 "correct_choices": [0]
             }
             mock_qs.get_question_by_id.return_value = question_data
-            mock_get_user.return_value = self.mock_user
             
-            app = create_test_app()
+            app = create_test_app(user_data=self.mock_user)
             from api.routers.questions import router
             app.include_router(router)
             
@@ -298,12 +280,9 @@ class TestGetQuestion(unittest.TestCase):
 
     def test_get_question_missing_id(self):
         """Test getting question with missing ID returns 400 error."""
-        with patch('api.routers.questions.QuestionService') as mock_qs, \
-             patch('api.routers.questions.get_current_user') as mock_get_user:
+        with patch('api.routers.questions.QuestionService') as mock_qs:
             
-            mock_get_user.return_value = self.mock_user
-            
-            app = create_test_app()
+            app = create_test_app(user_data=self.mock_user)
             from api.routers.questions import router
             app.include_router(router)
             
@@ -315,13 +294,11 @@ class TestGetQuestion(unittest.TestCase):
 
     def test_get_question_not_found(self):
         """Test getting non-existent question returns 404 error."""
-        with patch('api.routers.questions.QuestionService') as mock_qs, \
-             patch('api.routers.questions.get_current_user') as mock_get_user:
+        with patch('api.routers.questions.QuestionService') as mock_qs:
             
             mock_qs.get_question_by_id.return_value = None
-            mock_get_user.return_value = self.mock_user
             
-            app = create_test_app()
+            app = create_test_app(user_data=self.mock_user)
             from api.routers.questions import router
             app.include_router(router)
             
@@ -333,13 +310,11 @@ class TestGetQuestion(unittest.TestCase):
 
     def test_get_question_service_error(self):
         """Test getting question with service error returns 500."""
-        with patch('api.routers.questions.QuestionService') as mock_qs, \
-             patch('api.routers.questions.get_current_user') as mock_get_user:
+        with patch('api.routers.questions.QuestionService') as mock_qs:
             
             mock_qs.get_question_by_id.side_effect = Exception("Database error")
-            mock_get_user.return_value = self.mock_user
             
-            app = create_test_app()
+            app = create_test_app(user_data=self.mock_user)
             from api.routers.questions import router
             app.include_router(router)
             
@@ -365,8 +340,7 @@ class TestGetQuestions(unittest.TestCase):
 
     def test_get_questions_success(self):
         """Test successfully retrieving questions."""
-        with patch('api.routers.questions.QuestionService') as mock_qs, \
-             patch('api.routers.questions.get_current_user') as mock_get_user:
+        with patch('api.routers.questions.QuestionService') as mock_qs:
             
             questions = [
                 {
@@ -382,9 +356,8 @@ class TestGetQuestions(unittest.TestCase):
                 }
             ]
             mock_qs.get_filtered_questions.return_value = questions
-            mock_get_user.return_value = self.mock_user
             
-            app = create_test_app()
+            app = create_test_app(user_data=self.mock_user)
             from api.routers.questions import router
             app.include_router(router)
             
@@ -404,13 +377,11 @@ class TestGetQuestions(unittest.TestCase):
 
     def test_get_questions_all_resource_types(self):
         """Test getting questions with different resource types."""
-        with patch('api.routers.questions.QuestionService') as mock_qs, \
-             patch('api.routers.questions.get_current_user') as mock_get_user:
+        with patch('api.routers.questions.QuestionService') as mock_qs:
             
             mock_qs.get_filtered_questions.return_value = []
-            mock_get_user.return_value = self.mock_user
             
-            app = create_test_app()
+            app = create_test_app(user_data=self.mock_user)
             from api.routers.questions import router
             app.include_router(router)
             
@@ -427,13 +398,11 @@ class TestGetQuestions(unittest.TestCase):
 
     def test_get_questions_all_question_types(self):
         """Test getting questions with different question types."""
-        with patch('api.routers.questions.QuestionService') as mock_qs, \
-             patch('api.routers.questions.get_current_user') as mock_get_user:
+        with patch('api.routers.questions.QuestionService') as mock_qs:
             
             mock_qs.get_filtered_questions.return_value = []
-            mock_get_user.return_value = self.mock_user
             
-            app = create_test_app()
+            app = create_test_app(user_data=self.mock_user)
             from api.routers.questions import router
             app.include_router(router)
             
@@ -449,13 +418,11 @@ class TestGetQuestions(unittest.TestCase):
 
     def test_get_questions_no_filters(self):
         """Test getting questions without filters."""
-        with patch('api.routers.questions.QuestionService') as mock_qs, \
-             patch('api.routers.questions.get_current_user') as mock_get_user:
+        with patch('api.routers.questions.QuestionService') as mock_qs:
             
             mock_qs.get_filtered_questions.return_value = []
-            mock_get_user.return_value = self.mock_user
             
-            app = create_test_app()
+            app = create_test_app(user_data=self.mock_user)
             from api.routers.questions import router
             app.include_router(router)
             
@@ -470,13 +437,11 @@ class TestGetQuestions(unittest.TestCase):
 
     def test_get_questions_service_error(self):
         """Test getting questions with service error returns 500."""
-        with patch('api.routers.questions.QuestionService') as mock_qs, \
-             patch('api.routers.questions.get_current_user') as mock_get_user:
+        with patch('api.routers.questions.QuestionService') as mock_qs:
             
             mock_qs.get_filtered_questions.side_effect = Exception("Database error")
-            mock_get_user.return_value = self.mock_user
             
-            app = create_test_app()
+            app = create_test_app(user_data=self.mock_user)
             from api.routers.questions import router
             app.include_router(router)
             
@@ -488,13 +453,11 @@ class TestGetQuestions(unittest.TestCase):
 
     def test_get_questions_calls_service_with_filters(self):
         """Test that get_questions passes filters to service."""
-        with patch('api.routers.questions.QuestionService') as mock_qs, \
-             patch('api.routers.questions.get_current_user') as mock_get_user:
+        with patch('api.routers.questions.QuestionService') as mock_qs:
             
             mock_qs.get_filtered_questions.return_value = []
-            mock_get_user.return_value = self.mock_user
             
-            app = create_test_app()
+            app = create_test_app(user_data=self.mock_user)
             from api.routers.questions import router
             app.include_router(router)
             
