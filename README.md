@@ -59,7 +59,6 @@ python main.py
 From the server directory:
 
 To create the database, run `python -m database.createDatabase`  
-To fill with test data, run `python -m database.generateTestData`  
 To view current state of the database, run `python -m database.printDatabase`. You may want to redirect the output into a text file.
 
 For getting organized dictionaries from the database, please reference `server/database/getItemsFromDatabase.py`. When calling these functions, use the username. Similarly, please reference `server/database/addItemsToDatabase.py` for any function calls that will update the database.
