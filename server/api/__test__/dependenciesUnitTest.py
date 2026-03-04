@@ -73,10 +73,10 @@ class TestGetUsername(unittest.TestCase):
                 get_username(request)
 
 
-class TestGetCurrentUser(unittest.TestCase):
+class TestGetCurrentUser(unittest.IsolatedAsyncioTestCase):
     """Tests for get_current_user dependency."""
 
-    def test_get_current_user_success(self):
+    async def test_get_current_user_success(self):
         """Test successfully getting current user."""
         with patch('api.dependencies.AuthService') as mock_auth_service:
             mock_auth_service.get_user.return_value = {
@@ -91,12 +91,12 @@ class TestGetCurrentUser(unittest.TestCase):
             request = Mock(spec=Request)
             request.session = {"user": "test@example.com"}
             
-            user = get_current_user(request)
+            user = await get_current_user(request)
             
             self.assertEqual(user["username"], "test@example.com")
             self.assertEqual(user["email"], "test@example.com")
 
-    def test_get_current_user_no_username_raises_exception(self):
+    async def test_get_current_user_no_username_raises_exception(self):
         """Test that missing username raises NeedLoginException."""
         with patch('api.dependencies.AuthService'):
             from api.dependencies import get_current_user
@@ -105,9 +105,9 @@ class TestGetCurrentUser(unittest.TestCase):
             request.session = {}
             
             with self.assertRaises(NeedLoginException):
-                get_current_user(request)
+                await get_current_user(request)
 
-    def test_get_current_user_user_not_found(self):
+    async def test_get_current_user_user_not_found(self):
         """Test that missing user returns HTTPException 403."""
         with patch('api.dependencies.AuthService') as mock_auth_service:
             mock_auth_service.get_user.return_value = None
@@ -118,11 +118,11 @@ class TestGetCurrentUser(unittest.TestCase):
             request.session = {"user": "nonexistent@example.com"}
             
             with self.assertRaises(HTTPException) as exc_info:
-                get_current_user(request)
+                await get_current_user(request)
             
             self.assertEqual(exc_info.exception.status_code, 403)
 
-    def test_get_current_user_returns_user_dict(self):
+    async def test_get_current_user_returns_user_dict(self):
         """Test that get_current_user returns complete user dictionary."""
         with patch('api.dependencies.AuthService') as mock_auth_service:
             mock_user = {
@@ -140,14 +140,14 @@ class TestGetCurrentUser(unittest.TestCase):
             request = Mock(spec=Request)
             request.session = {"user": "test@example.com"}
             
-            user = get_current_user(request)
+            user = await get_current_user(request)
             
             self.assertIn("username", user)
             self.assertIn("email", user)
             self.assertIn("displayName", user)
             self.assertIn("roles", user)
 
-    def test_get_current_user_calls_auth_service_with_correct_username(self):
+    async def test_get_current_user_calls_auth_service_with_correct_username(self):
         """Test that get_current_user calls AuthService with correct username."""
         with patch('api.dependencies.AuthService') as mock_auth_service:
             mock_auth_service.get_user.return_value = {
@@ -159,11 +159,11 @@ class TestGetCurrentUser(unittest.TestCase):
             request = Mock(spec=Request)
             request.session = {"user": "test@example.com"}
             
-            get_current_user(request)
+            await get_current_user(request)
             
             mock_auth_service.get_user.assert_called_once_with("test@example.com")
 
-    def test_get_current_user_with_student_role(self):
+    async def test_get_current_user_with_student_role(self):
         """Test getting current user with student role."""
         with patch('api.dependencies.AuthService') as mock_auth_service:
             mock_auth_service.get_user.return_value = {
@@ -176,11 +176,11 @@ class TestGetCurrentUser(unittest.TestCase):
             request = Mock(spec=Request)
             request.session = {"user": "student@example.com"}
             
-            user = get_current_user(request)
+            user = await get_current_user(request)
             
             self.assertIn(settings.ROLE_STUDENT, user["roles"])
 
-    def test_get_current_user_with_teacher_role(self):
+    async def test_get_current_user_with_teacher_role(self):
         """Test getting current user with teacher role."""
         with patch('api.dependencies.AuthService') as mock_auth_service:
             mock_auth_service.get_user.return_value = {
@@ -193,11 +193,11 @@ class TestGetCurrentUser(unittest.TestCase):
             request = Mock(spec=Request)
             request.session = {"user": "teacher@example.com"}
             
-            user = get_current_user(request)
+            user = await get_current_user(request)
             
             self.assertIn(settings.ROLE_TEACHER, user["roles"])
 
-    def test_get_current_user_with_multiple_roles(self):
+    async def test_get_current_user_with_multiple_roles(self):
         """Test getting current user with multiple roles."""
         with patch('api.dependencies.AuthService') as mock_auth_service:
             mock_auth_service.get_user.return_value = {
@@ -210,15 +210,15 @@ class TestGetCurrentUser(unittest.TestCase):
             request = Mock(spec=Request)
             request.session = {"user": "admin@example.com"}
             
-            user = get_current_user(request)
+            user = await get_current_user(request)
             
             self.assertEqual(len(user["roles"]), 2)
 
 
-class TestStudentRequired(unittest.TestCase):
+class TestStudentRequired(unittest.IsolatedAsyncioTestCase):
     """Tests for student_required dependency."""
 
-    def test_student_required_with_student_role(self):
+    async def test_student_required_with_student_role(self):
         """Test that student_required allows students."""
         with patch('api.dependencies.AuthService') as mock_auth_service:
             mock_auth_service.is_student.return_value = True
@@ -231,11 +231,11 @@ class TestStudentRequired(unittest.TestCase):
                 "roles": [settings.ROLE_STUDENT]
             }
             
-            result = student_required(request, person)
+            result = await student_required(request, person)
             
             self.assertEqual(result, person)
 
-    def test_student_required_with_teacher_role(self):
+    async def test_student_required_with_teacher_role(self):
         """Test that student_required denies teachers."""
         with patch('api.dependencies.AuthService') as mock_auth_service:
             mock_auth_service.is_student.return_value = False
@@ -249,11 +249,11 @@ class TestStudentRequired(unittest.TestCase):
             }
             
             with self.assertRaises(HTTPException) as exc_info:
-                student_required(request, person)
+                await student_required(request, person)
             
             self.assertEqual(exc_info.exception.status_code, 403)
 
-    def test_student_required_with_no_person(self):
+    async def test_student_required_with_no_person(self):
         """Test that student_required denies when person is None."""
         with patch('api.dependencies.AuthService') as mock_auth_service:
             from api.dependencies import student_required
@@ -261,11 +261,11 @@ class TestStudentRequired(unittest.TestCase):
             request = Mock(spec=Request)
             
             with self.assertRaises(HTTPException) as exc_info:
-                student_required(request, None)
+                await student_required(request, None)
             
             self.assertEqual(exc_info.exception.status_code, 403)
 
-    def test_student_required_calls_auth_service(self):
+    async def test_student_required_calls_auth_service(self):
         """Test that student_required calls AuthService.is_student."""
         with patch('api.dependencies.AuthService') as mock_auth_service:
             mock_auth_service.is_student.return_value = True
@@ -278,11 +278,11 @@ class TestStudentRequired(unittest.TestCase):
                 "roles": [settings.ROLE_STUDENT]
             }
             
-            student_required(request, person)
+            await student_required(request, person)
             
             mock_auth_service.is_student.assert_called_once_with("student@example.com")
 
-    def test_student_required_checks_role_based_access(self):
+    async def test_student_required_checks_role_based_access(self):
         """Test that student_required properly enforces role-based access."""
         with patch('api.dependencies.AuthService') as mock_auth_service:
             # First call: student
@@ -296,16 +296,16 @@ class TestStudentRequired(unittest.TestCase):
                 "roles": [settings.ROLE_STUDENT]
             }
             
-            result = student_required(request, person)
+            result = await student_required(request, person)
             self.assertEqual(result, person)
             
             # Second call: non-student
             mock_auth_service.is_student.return_value = False
             
             with self.assertRaises(HTTPException):
-                student_required(request, person)
+                await student_required(request, person)
 
-    def test_student_required_error_message_contains_detail(self):
+    async def test_student_required_error_message_contains_detail(self):
         """Test that student_required error contains 'Student role required'."""
         with patch('api.dependencies.AuthService') as mock_auth_service:
             mock_auth_service.is_student.return_value = False
@@ -319,11 +319,11 @@ class TestStudentRequired(unittest.TestCase):
             }
             
             with self.assertRaises(HTTPException) as exc_info:
-                student_required(request, person)
+                await student_required(request, person)
             
             self.assertIn("Student", str(exc_info.exception.detail))
 
-    def test_student_required_with_valid_username_and_student_role(self):
+    async def test_student_required_with_valid_username_and_student_role(self):
         """Test student_required with valid username and student role."""
         with patch('api.dependencies.AuthService') as mock_auth_service:
             mock_auth_service.is_student.return_value = True
@@ -338,12 +338,12 @@ class TestStudentRequired(unittest.TestCase):
                 "roles": [settings.ROLE_STUDENT]
             }
             
-            result = student_required(request, person)
+            result = await student_required(request, person)
             
             self.assertEqual(result["username"], "valid_student@example.com")
             self.assertIn(settings.ROLE_STUDENT, result["roles"])
 
-    def test_student_required_returns_same_person_object(self):
+    async def test_student_required_returns_same_person_object(self):
         """Test that student_required returns the same person object passed in."""
         with patch('api.dependencies.AuthService') as mock_auth_service:
             mock_auth_service.is_student.return_value = True
@@ -357,17 +357,17 @@ class TestStudentRequired(unittest.TestCase):
                 "extra_field": "extra_value"
             }
             
-            result = student_required(request, person)
+            result = await student_required(request, person)
             
             # Should be the exact same object
             self.assertIs(result, person)
             self.assertEqual(result["extra_field"], "extra_value")
 
 
-class TestDependenciesIntegration(unittest.TestCase):
+class TestDependenciesIntegration(unittest.IsolatedAsyncioTestCase):
     """Integration tests for dependencies working together."""
 
-    def test_dependency_chain_get_current_user_then_student_required(self):
+    async def test_dependency_chain_get_current_user_then_student_required(self):
         """Test that get_current_user and student_required work together."""
         with patch('api.dependencies.AuthService') as mock_auth_service:
             mock_user = {
@@ -385,14 +385,14 @@ class TestDependenciesIntegration(unittest.TestCase):
             request.session = {"user": "student@example.com"}
             
             # Get current user
-            user = get_current_user(request)
+            user = await get_current_user(request)
             self.assertIsNotNone(user)
             
             # Then apply student_required
-            result = student_required(request, user)
+            result = await student_required(request, user)
             self.assertEqual(result["username"], "student@example.com")
 
-    def test_dependency_chain_teacher_access_denied(self):
+    async def test_dependency_chain_teacher_access_denied(self):
         """Test that teacher is denied access via student_required."""
         with patch('api.dependencies.AuthService') as mock_auth_service:
             mock_user = {
@@ -410,12 +410,12 @@ class TestDependenciesIntegration(unittest.TestCase):
             request.session = {"user": "teacher@example.com"}
             
             # Get current user
-            user = get_current_user(request)
+            user = await get_current_user(request)
             self.assertIsNotNone(user)
             
             # Try to apply student_required - should fail
             with self.assertRaises(HTTPException):
-                student_required(request, user)
+                await student_required(request, user)
 
 
 if __name__ == "__main__":
