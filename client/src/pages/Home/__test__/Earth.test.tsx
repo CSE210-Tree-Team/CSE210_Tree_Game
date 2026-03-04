@@ -1,7 +1,7 @@
 import { describe, it, expect, vi } from 'vitest'
 import { render, screen } from '../../../test/test-utils'
 import userEvent from '@testing-library/user-event'
-import { Earth } from '../components/Earth'
+import { Earth } from '../components/Earth/Earth'
 import { EARTH_HEALTH_THRESHOLD, EARTH_UNHEALTHY_THRESHOLD, EARTH_IMAGES } from '../constant'
 
 describe('Earth Component', () => {

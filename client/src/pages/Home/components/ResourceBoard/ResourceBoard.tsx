@@ -1,4 +1,9 @@
-﻿import { type Resources } from "./Resources";
+﻿/**
+ * ResourceBoard component 
+ * Display the current resources (water and earth) 
+ * Accept resources as props and render the corresponding items
+ */
+import { type Resources } from "./Resources";
 import styles from "./ResourceBoard.module.css"
 import { RESOURCE_BOARD_BG} from "../../constant";
 import { ResourceItem, type ResourceType } from "./Resources";

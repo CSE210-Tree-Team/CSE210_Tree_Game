@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest'
 import { render, screen } from '../../../test/test-utils'
-import { Tree } from '../components/Tree'
+import { Tree } from '../components/Tree/Tree'
 import { TREE_HEALTH_THRESHOLD, TREE_UNHEALTHY_THRESHOLD, TREE_IMAGES } from '../constant'
 
 describe('Tree Component', () => {

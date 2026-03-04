@@ -1,3 +1,12 @@
+/**
+ * ResourceItem component 
+ * Display individual resource with icon, label, value, and progress bar
+ * Props:
+ * - type: the type of resource(water, earth)
+ * - value: the current value of the resource (0-100)
+ * - label: the label to display for the resource ("Water", "Earth")
+ */
+
 import styles from "./ResourceBoard.module.css"
 import { RESOURCE_ICONS } from "../../constant";
 
@@ -21,7 +30,6 @@ const RESOURCE_CONFIG = {
 
 export const ResourceItem = ({ type, value, label }: ResourceItemProps) => {
     const config = RESOURCE_CONFIG[type];
-    console.log(type, value);
     
     return (
         <div className={styles.resourceItem}>

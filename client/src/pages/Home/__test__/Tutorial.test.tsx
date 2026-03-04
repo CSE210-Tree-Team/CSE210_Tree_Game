@@ -1,7 +1,7 @@
 import { describe, it, expect, vi } from 'vitest';
 import { render, screen, waitFor } from '../../../test/test-utils';
 import userEvent from '@testing-library/user-event';
-import Tutorial from '../Tutorial';
+import Tutorial from '../components/Tutorial/Tutorial';
 
 describe('Tutorial Component', () => {
     it('renders first page initially', () => {

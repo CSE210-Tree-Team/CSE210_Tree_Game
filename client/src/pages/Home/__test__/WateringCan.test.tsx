@@ -1,7 +1,7 @@
 import { describe, it, expect, vi } from 'vitest'
 import { render, screen } from '../../../test/test-utils'
 import userEvent from '@testing-library/user-event'
-import { WateringCan } from '../components/WateringCan'
+import { WateringCan } from '../components/WateringCan/WateringCan'
 import { WATER_CAN_IMAGE } from '../constant'
 
 describe('WateringCan Component', () => {

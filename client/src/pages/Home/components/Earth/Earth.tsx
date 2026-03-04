@@ -1,3 +1,8 @@
+/**
+ * Earth Compinent
+ * Displays the health status of the earth based on the provided value
+ * healthy, unhealthy, withered
+ */
 import styles from "./Earth.module.css"
 import {
     EARTH_HEALTH_THRESHOLD,

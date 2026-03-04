@@ -1,3 +1,8 @@
+/**
+ * Tree Compinent
+ * Displays the health status of the tree based on the provided value
+ * healthy, unhealthy, withered
+ */
 import styles from "./Tree.module.css";
 import {
     TREE_HEALTH_THRESHOLD,
