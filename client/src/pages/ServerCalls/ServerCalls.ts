@@ -76,14 +76,16 @@ export async function updateAccountProfile(
   profile: Partial<UserInfoResponse['user']>,
 ): Promise<boolean> {
   // Map user data to update schema
-  const userUpdate = {
-    username: "",  // Will be ignored by server
+  const userUpdate: Record<string, unknown> = {
     displayName: profile.displayName || "",
-    email: profile.email || "",
-    roles: [],  // Will be ignored by server
     contactEmail: profile.contactEmail,
     educationLevel: profile.educationLevel,
   };
+  
+  // Only include email if it's actually provided
+  if (profile.email) {
+    userUpdate.email = profile.email;
+  }
 
   const response = await fetch("/api/update-user", {
     method: "PUT",
