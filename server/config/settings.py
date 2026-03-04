@@ -139,6 +139,19 @@ class Settings:
         QUESTION_RESOURCE_NONE
     ]
 
+    # ========== EDUCATION LEVELS ==========
+    # Maps education level labels to integer codes for storage
+    EDUCATION_LEVEL_PRIMARY: str = "3-6"
+    EDUCATION_LEVEL_MIDDLE: str = "6-8"
+    EDUCATION_LEVEL_HIGH: str = "9-12"
+    
+    EDUCATION_LEVEL_LABEL_TO_CODE: Dict[str, int] = {
+        "3-6": 1,
+        "6-8": 2,
+        "9-12": 3,
+    }
+    DEFAULT_EDUCATION_LEVEL_CODE: int = 1  # '3-6'
+    
     # ========== TIMING & DECAY ==========
     # Passive decay rates for resources -- how many minutes to decay 1 level of the resource
     PASSIVE_DECAY_RATE: int = 30  # 30 minutes to decay 1 level - 50 hours for tree to die from full.

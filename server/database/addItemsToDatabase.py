@@ -33,6 +33,10 @@ from config.settings import settings
 from schemas import Event
 import uuid
 
+# Import education level constants for student details
+DEFAULT_EDUCATION_LEVEL_CODE = settings.DEFAULT_EDUCATION_LEVEL_CODE
+EDUCATION_LEVEL_LABEL_TO_CODE = settings.EDUCATION_LEVEL_LABEL_TO_CODE
+
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 DB_PATH = os.path.join(BASE_DIR, settings.DB_NAME)
