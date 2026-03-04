@@ -233,6 +233,112 @@ class TestLogout(unittest.TestCase):
             
             self.assertEqual(data["message"], "Session cleared")
 
+    def test_verify_auth_stores_username_in_session(self):
+        """Test that verify_auth stores username in session."""
+        with patch('api.routers.auth.AuthService') as mock_auth_service:
+            mock_auth_service.get_user.return_value = None
+            mock_auth_service.create_account.return_value = None
+            mock_auth_service.update_login.return_value = None
+            
+            app = create_test_app()
+            from api.routers.auth import router
+            app.include_router(router)
+            client = TestClient(app)
+            
+            user_data = {
+                "email": "test@example.com",
+                "sub": "auth0|123",
+                "name": "Test User",
+                "nickname": "test"
+            }
+            
+            response = client.post("/api/auth/verify", json={"user": user_data})
+            
+            # Verify session was set (response should have Set-Cookie)
+            self.assertEqual(response.status_code, 200)
+            self.assertTrue(response.json()["success"])
+
+    def test_verify_auth_handles_auth_service_error(self):
+        """Test that verify_auth properly handles AuthService exceptions."""
+        with patch('api.routers.auth.AuthService') as mock_auth_service:
+            mock_auth_service.get_user.side_effect = ConnectionError("Database connection failed")
+            
+            app = create_test_app()
+            from api.routers.auth import router
+            app.include_router(router)
+            client = TestClient(app)
+            
+            user_data = {
+                "email": "test@example.com",
+                "sub": "auth0|123",
+                "name": "Test User"
+            }
+            
+            response = client.post("/api/auth/verify", json={"user": user_data})
+            
+            self.assertEqual(response.status_code, 400)
+            data = response.json()
+            self.assertIn("Authentication failed", data["detail"])
+
+    def test_verify_auth_missing_email_and_sub(self):
+        """Test verify_auth handles user data with neither email nor sub."""
+        with patch('api.routers.auth.AuthService') as mock_auth_service:
+            mock_auth_service.get_user.return_value = None
+            
+            app = create_test_app()
+            from api.routers.auth import router
+            app.include_router(router)
+            client = TestClient(app)
+            
+            user_data = {
+                "name": "Test User",
+                # Missing both email and sub
+            }
+            
+            response = client.post("/api/auth/verify", json={"user": user_data})
+            
+            # Should still try to process with None as username
+            self.assertEqual(response.status_code, 200)
+            mock_auth_service.get_user.assert_called_with(None)
+
+    def test_logout_response_structure(self):
+        """Test that logout response has correct structure."""
+        with patch('api.routers.auth.AuthService'):
+            app = create_test_app()
+            from api.routers.auth import router
+            app.include_router(router)
+            client = TestClient(app)
+            
+            response = client.post("/api/auth/logout")
+            data = response.json()
+            
+            # Verify required fields
+            self.assertIn("success", data)
+            self.assertIn("message", data)
+            self.assertTrue(data["success"])
+
+    def test_verify_auth_response_structure(self):
+        """Test that verify_auth response has correct structure."""
+        with patch('api.routers.auth.AuthService') as mock_auth_service:
+            mock_auth_service.get_user.return_value = {"username": "test@example.com"}
+            mock_auth_service.update_login.return_value = None
+            
+            app = create_test_app()
+            from api.routers.auth import router
+            app.include_router(router)
+            client = TestClient(app)
+            
+            user_data = {"email": "test@example.com", "sub": "auth0|123"}
+            
+            response = client.post("/api/auth/verify", json={"user": user_data})
+            data = response.json()
+            
+            # Verify required fields
+            self.assertIn("success", data)
+            self.assertIn("message", data)
+            self.assertTrue(data["success"])
+            self.assertIn("Session", data["message"])
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -348,6 +348,116 @@ class TestUpdateStat(unittest.TestCase):
                 10
             )
 
+    def test_update_stat_empty_stat_name(self):
+        """Test that empty stat_name returns 400 error."""
+        with patch('api.routers.stats.TreeService') as mock_tree_service:
+            mock_tree_service.get_tree_id.return_value = "tree-uuid-123"
+            
+            app = create_test_app(user_data=self.mock_student)
+            from api.routers.stats import router
+            app.include_router(router)
+            
+            client = TestClient(app)
+            
+            response = client.put("/api/update-stat", json={
+                "stat_name": "",
+                "value": 10
+            })
+            
+            self.assertEqual(response.status_code, 400)
+            data = response.json()
+            self.assertIn("detail", data)
+
+    def test_update_stat_invalid_stat_name(self):
+        """Test that invalid stat_name is caught by service validation."""
+        with patch('api.routers.stats.TreeService') as mock_tree_service:
+            mock_tree_service.get_tree_id.return_value = "tree-uuid-123"
+            mock_tree_service.update_tree_stat.side_effect = ValueError("Invalid stat: not_a_real_stat")
+            
+            app = create_test_app(user_data=self.mock_student)
+            from api.routers.stats import router
+            app.include_router(router)
+            
+            client = TestClient(app)
+            
+            response = client.put("/api/update-stat", json={
+                "stat_name": "not_a_real_stat",
+                "value": 10
+            })
+            
+            self.assertEqual(response.status_code, 400)
+            data = response.json()
+            self.assertIn("Invalid stat", data["detail"])
+
+    def test_update_stat_error_message_format(self):
+        """Test that stat update success message is properly formatted."""
+        with patch('api.routers.stats.TreeService') as mock_tree_service:
+            mock_tree_service.get_tree_id.return_value = "tree-uuid-123"
+            mock_tree_service.update_tree_stat.return_value = None
+            
+            app = create_test_app(user_data=self.mock_student)
+            from api.routers.stats import router
+            app.include_router(router)
+            
+            client = TestClient(app)
+            
+            response = client.put("/api/update-stat", json={
+                "stat_name": settings.RESOURCE_WATER,
+                "value": 10
+            })
+            
+            self.assertEqual(response.status_code, 200)
+            data = response.json()
+            self.assertIn("updated by", data["message"])
+            self.assertIn("10", data["message"])
+
+    def test_update_stat_specific_error_messages(self):
+        """Test that specific exceptions return appropriate error messages."""
+        with patch('api.routers.stats.TreeService') as mock_tree_service:
+            mock_tree_service.get_tree_id.return_value = "tree-uuid-123"
+            
+            # Test ValueError with specific message
+            mock_tree_service.update_tree_stat.side_effect = ValueError("Water level cannot exceed 100")
+            
+            app = create_test_app(user_data=self.mock_student)
+            from api.routers.stats import router
+            app.include_router(router)
+            
+            client = TestClient(app)
+            
+            response = client.put("/api/update-stat", json={
+                "stat_name": settings.RESOURCE_WATER,
+                "value": 200
+            })
+            
+            self.assertEqual(response.status_code, 400)
+            data = response.json()
+            self.assertIn("Water level cannot exceed 100", data["detail"])
+
+    def test_update_stat_zero_value(self):
+        """Test updating stat with zero value."""
+        with patch('api.routers.stats.TreeService') as mock_tree_service:
+            mock_tree_service.get_tree_id.return_value = "tree-uuid-123"
+            mock_tree_service.update_tree_stat.return_value = None
+            
+            app = create_test_app(user_data=self.mock_student)
+            from api.routers.stats import router
+            app.include_router(router)
+            
+            client = TestClient(app)
+            
+            response = client.put("/api/update-stat", json={
+                "stat_name": settings.RESOURCE_WATER,
+                "value": 0
+            })
+            
+            self.assertEqual(response.status_code, 200)
+            mock_tree_service.update_tree_stat.assert_called_with(
+                "tree-uuid-123",
+                settings.RESOURCE_WATER,
+                0
+            )
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -426,6 +426,135 @@ class TestUpdateUser(unittest.TestCase):
         response = client.put("/api/update-user", json={})
         self.assertNotEqual(response.status_code, 200)
 
+    def test_update_user_partial_update(self):
+        """Test updating only displayName without updating email."""
+        with patch('api.routers.users.TreeService') as mock_tree_service:
+            with patch('api.routers.users.get_person') as mock_get_person:
+                with patch('api.routers.users.get_student_details') as mock_get_student_details:
+                    with patch('api.routers.users.update_account') as mock_update_account:
+                        with patch('api.routers.users.upsert_student_details') as mock_upsert:
+                            
+                            mock_tree_service.get_tree_with_decay.return_value = self.mock_tree
+                            mock_get_person.return_value = {
+                                "username": "student@example.com",
+                                "email": "student@example.com",
+                                "displayName": "New Name",
+                                "roles": [settings.ROLE_STUDENT]
+                            }
+                            mock_get_student_details.return_value = {}
+                            
+                            app = create_test_app(user_data=self.mock_student)
+                            from api.routers.users import router
+                            app.include_router(router)
+                            
+                            client = TestClient(app)
+                            
+                            response = client.put("/api/update-user", json={
+                                "displayName": "New Name"
+                            })
+                            
+                            self.assertEqual(response.status_code, 200)
+                            # Verify update_account was called for displayName
+                            mock_update_account.assert_called_once()
+
+    def test_update_user_response_contains_updated_data(self):
+        """Test that update_user response contains the updated user data."""
+        with patch('api.routers.users.TreeService') as mock_tree_service:
+            with patch('api.routers.users.get_person') as mock_get_person:
+                with patch('api.routers.users.get_student_details') as mock_get_student_details:
+                    with patch('api.routers.users.update_account'):
+                        with patch('api.routers.users.upsert_student_details'):
+                            
+                            mock_tree_service.get_tree_with_decay.return_value = self.mock_tree
+                            mock_get_person.return_value = {
+                                "username": "student@example.com",
+                                "email": "newemail@example.com",
+                                "displayName": "Updated",
+                                "roles": [settings.ROLE_STUDENT]
+                            }
+                            mock_get_student_details.return_value = {"studentLevel": "9-10"}
+                            
+                            app = create_test_app(user_data=self.mock_student)
+                            from api.routers.users import router
+                            app.include_router(router)
+                            
+                            client = TestClient(app)
+                            
+                            response = client.put("/api/update-user", json={
+                                "email": "newemail@example.com",
+                                "displayName": "Updated"
+                            })
+                            
+                            data = response.json()
+                            self.assertEqual(data["user"]["email"], "newemail@example.com")
+                            self.assertEqual(data["user"]["displayName"], "Updated")
+
+    def test_update_user_error_handling(self):
+        """Test that update_user handles database errors gracefully."""
+        with patch('api.routers.users.TreeService') as mock_tree_service:
+            with patch('api.routers.users.get_person') as mock_get_person:
+                with patch('api.routers.users.get_student_details') as mock_get_student_details:
+                    with patch('api.routers.users.update_account') as mock_update_account:
+                        
+                        mock_get_person.return_value = {"username": "student@example.com"}
+                        mock_update_account.side_effect = Exception("Database error")
+                        mock_tree_service.get_tree_with_decay.return_value = self.mock_tree
+                        mock_get_student_details.return_value = {}
+                        
+                        app = create_test_app(user_data=self.mock_student)
+                        from api.routers.users import router
+                        app.include_router(router)
+                        
+                        client = TestClient(app)
+                        
+                        response = client.put("/api/update-user", json={
+                            "email": "new@example.com"
+                        })
+                        
+                        self.assertEqual(response.status_code, 500)
+
+    def test_get_user_info_response_structure(self):
+        """Test that get_user_info response has required structure."""
+        with patch('api.routers.users.TreeService') as mock_tree_service:
+            with patch('api.routers.users.get_student_details') as mock_get_student_details:
+                mock_tree_service.get_tree_with_decay.return_value = self.mock_tree
+                mock_get_student_details.return_value = {}
+                
+                app = create_test_app(user_data=self.mock_student)
+                from api.routers.users import router
+                app.include_router(router)
+                
+                client = TestClient(app)
+                
+                response = client.get("/api/get-user-info")
+                data = response.json()
+                
+                # Verify response structure
+                self.assertIn("success", data)
+                self.assertIn("user", data)
+                self.assertIn("tree", data)
+                self.assertTrue(data["success"])
+
+    def test_get_user_info_user_fields_present(self):
+        """Test that user object contains all required fields."""
+        with patch('api.routers.users.TreeService') as mock_tree_service:
+            with patch('api.routers.users.get_student_details') as mock_get_student_details:
+                mock_tree_service.get_tree_with_decay.return_value = self.mock_tree
+                mock_get_student_details.return_value = {"contactEmail": "parent@example.com", "studentLevel": "6-8"}
+                
+                app = create_test_app(user_data=self.mock_student)
+                from api.routers.users import router
+                app.include_router(router)
+                
+                client = TestClient(app)
+                
+                response = client.get("/api/get-user-info")
+                user = response.json()["user"]
+                
+                required_fields = ["username", "email", "displayName", "roles"]
+                for field in required_fields:
+                    self.assertIn(field, user)
+
 
 if __name__ == "__main__":
     unittest.main()

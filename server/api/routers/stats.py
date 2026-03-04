@@ -57,7 +57,6 @@ async def update_stat(
     stat_name_lower = body.stat_name.lower()
     
     try:
-        print(f"Updating stat: {stat_name_lower} by {body.value} for user {username}, tree {tree_id}")
         TreeService.update_tree_stat(tree_id, stat_name_lower, body.value)
         
         return StatUpdateResponse(

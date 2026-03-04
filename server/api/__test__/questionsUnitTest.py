@@ -239,6 +239,76 @@ class TestAddQuestion(unittest.TestCase):
             self.assertEqual(call_args.kwargs["question_type"], settings.QUESTION_MCQ)
             self.assertEqual(call_args.kwargs["resource_type"], settings.QUESTION_RESOURCE_SUN)
 
+    def test_add_question_missing_text(self):
+        """Test adding question with missing text field."""
+        with patch('api.routers.questions.QuestionService') as mock_qs:
+            app = create_test_app(user_data=self.mock_user)
+            from api.routers.questions import router
+            app.include_router(router)
+            
+            client = TestClient(app)
+            
+            # Missing required "text" field
+            question_data = {
+                "question_type": settings.QUESTION_MCQ,
+                "resource_type": settings.QUESTION_RESOURCE_SUN,
+                "choices": ["A", "B"],
+                "correct_choices": [0]
+            }
+            
+            response = client.post("/api/add-question", json=question_data)
+            
+            # FastAPI returns 422 for missing required fields
+            self.assertEqual(response.status_code, 422)
+
+    def test_add_question_missing_choices(self):
+        """Test adding question with empty choices list."""
+        with patch('api.routers.questions.QuestionService') as mock_qs:
+            mock_qs.add_new_question.return_value = "question-uuid-freeresponse"
+            
+            app = create_test_app(user_data=self.mock_user)
+            from api.routers.questions import router
+            app.include_router(router)
+            
+            client = TestClient(app)
+            
+            # choices defaults to [] in the schema, so this is valid
+            question_data = {
+                "text": "Free response question",
+                "question_type": settings.QUESTION_FREE_RESPONSE,
+                "resource_type": settings.QUESTION_RESOURCE_SUN,
+                # choices intentionally omitted - defaults to []
+                "correct_choices": []
+            }
+            
+            response = client.post("/api/add-question", json=question_data)
+            
+            # Should succeed because choices defaults to []
+            self.assertEqual(response.status_code, 200)
+
+    def test_add_question_error_message_included(self):
+        """Test that add_question returns error messages in response."""
+        with patch('api.routers.questions.QuestionService') as mock_qs:
+            mock_qs.add_new_question.side_effect = ValueError("Question text is too long")
+            
+            app = create_test_app(user_data=self.mock_user)
+            from api.routers.questions import router
+            app.include_router(router)
+            
+            client = TestClient(app)
+            
+            response = client.post("/api/add-question", json={
+                "text": "x" * 10000,
+                "question_type": settings.QUESTION_MCQ,
+                "resource_type": settings.QUESTION_RESOURCE_SUN,
+                "choices": ["A"],
+                "correct_choices": [0]
+            })
+            
+            self.assertEqual(response.status_code, 400)
+            data = response.json()
+            self.assertIn("Question text is too long", data["detail"])
+
 
 class TestGetQuestion(unittest.TestCase):
     """Tests for get_question endpoint."""
@@ -475,6 +545,109 @@ class TestGetQuestions(unittest.TestCase):
             call_args = mock_qs.get_filtered_questions.call_args
             self.assertEqual(call_args.kwargs["num_questions"], 10)
             self.assertEqual(call_args.kwargs["resource_type"], settings.QUESTION_RESOURCE_SUN)
+
+    def test_get_questions_response_has_required_fields(self):
+        """Test that get_questions response contains required fields."""
+        with patch('api.routers.questions.QuestionService') as mock_qs:
+            question_data = {
+                "questionID": "q-1",
+                "text": "Sample question",
+                "type": settings.QUESTION_MCQ,
+                "difficulty": 1,
+                "resourceType": settings.QUESTION_RESOURCE_WATER,
+                "choices": [{"text": "A", "isCorrect": True}]
+            }
+            mock_qs.get_filtered_questions.return_value = [question_data]
+            
+            app = create_test_app(user_data=self.mock_user)
+            from api.routers.questions import router
+            app.include_router(router)
+            
+            client = TestClient(app)
+            
+            response = client.post("/api/get-questions", json={})
+            
+            data = response.json()
+            self.assertIn("success", data)
+            self.assertIn("count", data)
+            self.assertIn("questions", data)
+
+    def test_add_question_missing_text(self):
+        """Test adding question with missing text returns 422."""
+        with patch('api.routers.questions.QuestionService') as mock_qs:
+            app = create_test_app(user_data=self.mock_user)
+            from api.routers.questions import router
+            app.include_router(router)
+            
+            client = TestClient(app)
+            
+            question_data = {
+                # Missing "text"
+                "question_type": settings.QUESTION_MCQ,
+                "resource_type": settings.QUESTION_RESOURCE_SUN,
+                "choices": ["A", "B"],
+                "correct_choices": [0],
+                "check_duplicates": True
+            }
+            
+            response = client.post("/api/add-question", json=question_data)
+            
+            self.assertEqual(response.status_code, 422)
+
+    def test_get_question_calls_service_with_correct_id(self):
+        """Test that get_question calls service with correct question ID."""
+        with patch('api.routers.questions.QuestionService') as mock_qs:
+            mock_qs.get_question_by_id.return_value = {"questionID": "q-123"}
+            
+            app = create_test_app(user_data=self.mock_user)
+            from api.routers.questions import router
+            app.include_router(router)
+            
+            client = TestClient(app)
+            
+            client.post("/api/get-question", json={"questionID": "q-123"})
+            
+            mock_qs.get_question_by_id.assert_called_once_with("q-123")
+
+    def test_add_question_error_message_format(self):
+        """Test that add_question error messages are properly formatted."""
+        with patch('api.routers.questions.QuestionService') as mock_qs:
+            mock_qs.add_new_question.side_effect = ValueError("Question text cannot be empty")
+            
+            app = create_test_app(user_data=self.mock_user)
+            from api.routers.questions import router
+            app.include_router(router)
+            
+            client = TestClient(app)
+            
+            response = client.post("/api/add-question", json={
+                "text": "",
+                "question_type": settings.QUESTION_MCQ,
+                "resource_type": settings.QUESTION_RESOURCE_SUN,
+                "choices": ["A"],
+                "correct_choices": [0]
+            })
+            
+            self.assertEqual(response.status_code, 400)
+            data = response.json()
+            self.assertIn("Question text cannot be empty", data["detail"])
+
+    def test_get_questions_empty_result(self):
+        """Test that get_questions handles empty results correctly."""
+        with patch('api.routers.questions.QuestionService') as mock_qs:
+            mock_qs.get_filtered_questions.return_value = []
+            
+            app = create_test_app(user_data=self.mock_user)
+            from api.routers.questions import router
+            app.include_router(router)
+            
+            client = TestClient(app)
+            
+            response = client.post("/api/get-questions", json={"numQuestions": 100})
+            
+            data = response.json()
+            self.assertEqual(data["count"], 0)
+            self.assertEqual(len(data["questions"]), 0)
 
 
 if __name__ == "__main__":

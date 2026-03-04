@@ -37,18 +37,3 @@ def create_test_app(user_data: Optional[Dict] = None) -> FastAPI:
         app.dependency_overrides[student_required] = mock_student_required
     
     return app
-
-
-def override_student_required(student_data):
-    """
-    Create a function to override the student_required dependency.
-    
-    Args:
-        student_data: Dictionary containing mock student data
-        
-    Returns:
-        A function that can be used to override the dependency
-    """
-    def _override():
-        return student_data
-    return _override

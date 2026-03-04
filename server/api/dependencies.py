@@ -75,9 +75,9 @@ async def student_required(
     person: Dict = Depends(get_current_user)
 ) -> Dict:
     """
-    Dependency that ensures the user is a student. Just add `student=Depends(student_required)` 
-    to any route.
+    Dependency that ensures the user is a student.
     
+    Use this dependency by adding `student=Depends(student_required)` to any route.
     This is the standard dependency to use for all student-only endpoints.
     It builds on get_current_user to provide role-based authorization.
     

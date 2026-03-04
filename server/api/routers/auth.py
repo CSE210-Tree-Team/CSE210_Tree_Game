@@ -1,8 +1,10 @@
 """Authentication routes."""
+import logging
 from fastapi import APIRouter, Request, HTTPException
 from schemas import GenericResponse
 from services.auth_service import AuthService
 
+logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/api/auth", tags=["authentication"])
 
 
@@ -58,7 +60,8 @@ async def verify_auth(request: Request, body: dict):
         return GenericResponse(success=True, message="Session established")
         
     except Exception as e:
-        raise HTTPException(status_code=400, detail=str(e))
+        logger.error(f"Auth verification failed: {str(e)}")
+        raise HTTPException(status_code=400, detail=f"Authentication failed: {str(e)}")
 
 
 @router.post("/logout", response_model=GenericResponse)
