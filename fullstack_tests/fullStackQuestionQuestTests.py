@@ -20,13 +20,13 @@ SERVER_DIR = os.path.join(REPO_ROOT, "server")
 sys.path.insert(0, REPO_ROOT)
 sys.path.insert(0, SERVER_DIR)
 
-from Database.createDatabase import create_schema
-import Database.addItemsToDatabase as addItemsToDatabase
-import Database.getItemsFromDatabase as getItemsFromDatabase
-import Database.createDatabase as createDatabase
+from database.createDatabase import create_schema
+import database.addItemsToDatabase as addItemsToDatabase
+import database.getItemsFromDatabase as getItemsFromDatabase
+import database.createDatabase as createDatabase
 
 from utils.addDefaultQuestions import load_questions, add_questions_to_database
-from Database.getItemsFromDatabase import get_questions
+from database.getItemsFromDatabase import get_questions
 
 
 ELEMENT_PATTERN = re.compile(r"^(\d+)?([A-Z][a-z]*)$")

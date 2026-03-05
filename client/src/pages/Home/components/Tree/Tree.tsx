@@ -21,7 +21,6 @@ interface TreeProps {
 
 
 export const Tree = ({ water }: TreeProps) => {
-    console.log(water);
     const getTreeImage = () => {
         if (water >= TREE_HEALTH_THRESHOLD) {
             return TREE_IMAGES.HEALTHY;

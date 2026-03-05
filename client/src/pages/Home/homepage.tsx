@@ -1,5 +1,6 @@
 ﻿import { useAuth0 } from '@auth0/auth0-react';
-import { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
+import { handle401Error } from '../ServerCalls/ServerCalls';
 import { useNavigate } from 'react-router-dom';
 import { Tree } from "./components/Tree/Tree";
 import { Earth } from "./components/Earth/Earth";
@@ -55,7 +56,6 @@ export const Homepage = () => {
                     throw new Error("Failed to verify the authentication");
                 }
                 const data = await fetchUserInfo();
-
                 setUserInfo(data);
             } catch {
                 throw new Error("Failed to establish backend session");
@@ -95,11 +95,11 @@ export const Homepage = () => {
                     <h1 className={`${fontStyles.title} ${styles.helloTitle}`}>
                         Hello, {userInfo?.user.displayName ?? 'User'}
                     </h1>
-                <ResourceBoard resources={userInfo?.tree.resourceLevels || userInfoMock.tree.resourceLevels} />
+                <ResourceBoard resources={userInfo?.tree?.resourceLevels ?? userInfoMock?.tree?.resourceLevels} />
 
                 <div className={styles.treeEarthContainer}>
-                <Tree water={userInfo?.tree.resourceLevels.water ?? userInfoMock.tree.resourceLevels.water} />
-                    <Earth earth={userInfo?.tree.resourceLevels.earth ?? userInfoMock.tree.resourceLevels.earth} onClick={handleSoilGame} />
+                <Tree water={userInfo?.tree?.resourceLevels.water ?? userInfoMock.tree.resourceLevels.water} />
+                    <Earth earth={userInfo?.tree?.resourceLevels.earth ?? userInfoMock.tree.resourceLevels.earth} onClick={handleSoilGame} />
                     <WateringCan onClick={handleWaterGame} />
                 </div>
 

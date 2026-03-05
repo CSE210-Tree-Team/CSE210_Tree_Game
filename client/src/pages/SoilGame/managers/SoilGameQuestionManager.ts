@@ -21,7 +21,7 @@
  * }
  */
 
-import { fetchQuestions, type Question } from "../../ServerCalls/ServerCalls";
+import { fetchQuestions, AuthenticationError, handle401Error, type Question } from "../../ServerCalls/ServerCalls";
 
 export type SoilQuestion = Question;
 
@@ -79,6 +79,13 @@ export async function fetchSoilQuestions(
   try {
     return await fetchQuestions(SOIL_QUESTION_COUNT, "Earth", SOIL_QUESTION_TYPE, difficulty);
   } catch (error) {
+    // Handle authentication errors with user-facing alert
+    if (error instanceof AuthenticationError) {
+      handle401Error();
+      // Return mock questions so the page can continue showing something
+      // (though it will redirect soon)
+      return mockQuestions;
+    }
     console.log("Falling back to dummy soil questions:");
     return mockQuestions;
   }
