@@ -16,7 +16,7 @@ type RawQuestion = {
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-const questionsPath = path.join(__dirname, "..", "utils", "questions.json");
+const questionsPath = path.join(__dirname, "..", "server", "utils", "questions.json");
 
 const fail = (message: string): never => {
   console.error(message);

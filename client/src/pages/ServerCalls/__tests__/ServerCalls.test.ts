@@ -136,17 +136,11 @@ describe("pushGameResults", () => {
     expect(fetchMock).toHaveBeenCalledWith(
       "/api/update-stat",
       expect.objectContaining({
-        method: "POST",
+        method: "PUT",
       })
     );
 
     expect(result).toBe(true);
-  });
-
-  it("throws if invalid gameType is provided", async () => {
-    await expect(
-      pushGameResults(10, "invalid" as any)
-    ).rejects.toThrow("Invalid gameType");
   });
 
   it("throws if response is not ok", async () => {

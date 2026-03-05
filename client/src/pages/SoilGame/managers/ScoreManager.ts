@@ -8,7 +8,7 @@
  * - Error handling for score operations
  */
 
-import { pushGameResults } from '../../ServerCalls/ServerCalls';
+import { pushGameResults, AuthenticationError, handle401Error } from '../../ServerCalls/ServerCalls';
 import type {
   ScoreSubmissionResult,
 } from '../types/Abstract.types';
@@ -124,6 +124,17 @@ export class ScoreManager {
         scoreAdded: scoreToSubmit,
       };
     } catch (error) {
+      // Handle authentication errors with user-facing alert
+      if (error instanceof AuthenticationError) {
+        handle401Error();
+        // Return error result but the page will redirect
+        return {
+          success: false,
+          scoreAdded: 0,
+          error: 'Authentication required',
+        };
+      }
+
       let errorMessage = 'Unknown error';
       if (error instanceof Error) {
         errorMessage = error.message;

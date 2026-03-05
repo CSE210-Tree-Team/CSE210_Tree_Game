@@ -7,7 +7,7 @@ Returns the fetched questions, a loading flag, and an error message if the fetch
 */
 
 import { useState, useEffect } from "react";
-import { fetchQuestions } from "../../ServerCalls/ServerCalls";
+import { fetchQuestions, AuthenticationError, handle401Error } from "../../ServerCalls/ServerCalls";
 import type { Question } from "../../ServerCalls/ServerCalls";
 import { NUM_QUESTIONS } from "../constants";
 
@@ -27,8 +27,12 @@ export const useWaterGameQuestions = (): UseWaterGameQuestionsResult => {
       try {
         const fetched = await fetchQuestions(NUM_QUESTIONS, "Water", "MCQ");
         setQuestions(fetched);
-      } catch {
-        setError("Failed to load questions. Please try again.");
+      } catch (error) {
+        if (error instanceof AuthenticationError) {
+          handle401Error();
+        } else {
+          setError("Failed to load questions. Please try again.");
+        }
       } finally {
         setIsLoading(false);
       }

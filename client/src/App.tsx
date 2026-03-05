@@ -1,4 +1,5 @@
 import { useAuth0 } from '@auth0/auth0-react';
+import { useEffect } from 'react';
 import { Login } from './pages/Login/Login';
 import { Homepage } from './pages/Home/homepage';
 import { Welcome } from './pages/Home/Welcome';
@@ -10,6 +11,34 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 
 function App() {
     const { isLoading, isAuthenticated } = useAuth0();
+
+    useEffect(() => {
+        if (!isAuthenticated) {
+            return;
+        }
+
+        const handleBeforeUnload = () => {
+            const endpoint = '/api/auth/logout';
+
+            if (navigator.sendBeacon) {
+                const payload = new Blob([], { type: 'application/json' });
+                navigator.sendBeacon(endpoint, payload);
+                return;
+            }
+
+            fetch(endpoint, {
+                method: 'POST',
+                keepalive: true,
+            }).catch(() => {
+                // no-op: unload calls are best-effort
+            });
+        };
+
+        window.addEventListener('beforeunload', handleBeforeUnload);
+        return () => {
+            window.removeEventListener('beforeunload', handleBeforeUnload);
+        };
+    }, [isAuthenticated]);
 
     if (isLoading) {
         return <div style={{ textAlign: 'center', marginTop: '50px' }}>Loading...</div>;

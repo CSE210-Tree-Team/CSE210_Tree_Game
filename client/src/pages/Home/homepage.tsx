@@ -1,5 +1,6 @@
 import { useAuth0 } from '@auth0/auth0-react';
-import { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
+import { handle401Error } from '../ServerCalls/ServerCalls';
 import { useNavigate } from 'react-router-dom';
 import { Tree } from "../../components/Tree";
 import { Earth } from "../../components/Earth";
@@ -48,14 +49,26 @@ export const Homepage = () => {
             }
             try {
                 const token = await getAccessTokenSilently();
-                const authSuccess = await establishAuthSession(token, user);
-                if (!authSuccess) {
-                    throw new Error("Failed to verify the authentication");
+                await fetch('/api/auth/verify', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({ user })
+                });
+
+                // Fetch user info including resource levels
+                const response = await fetch('/api/get-user-info');
+                if (response.ok) {
+                    const data = await response.json();
+                    setUserInfo(data);
+                } else if (response.status === 401) {
+                    handle401Error();
+                    return;
                 }
-                const data = await fetchUserInfo();
-                setUserInfo(data);
-            } catch  {
-                throw new Error("Failed to establish backend session");
+            } catch (error) {
+                console.error('Failed to establish backend session:', error);
             }
         }
         establishSession();
