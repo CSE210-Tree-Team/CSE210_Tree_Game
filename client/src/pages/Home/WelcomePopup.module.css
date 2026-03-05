@@ -7,14 +7,14 @@
 }
 
 .welcomePopup {
-    composes: popup grass from "../../../../components/Popup.module.css";
+    composes: popup grass from "../../components/Popup.module.css";
     width: 70%;
     padding: 3rem 2rem;
   
 }
 
 .welcomeText {
-    composes: text from "../../../../components/Popup.module.css";
+    composes: text from "../../components/Popup.module.css";
     font-size: 2rem;
     white-space: pre-line;
     text-align: left;

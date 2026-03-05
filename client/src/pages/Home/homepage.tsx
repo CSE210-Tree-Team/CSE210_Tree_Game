@@ -1,6 +1,5 @@
 ﻿import { useAuth0 } from '@auth0/auth0-react';
 import { useEffect, useState } from 'react';
-import { handle401Error } from '../ServerCalls/ServerCalls';
 import { useNavigate } from 'react-router-dom';
 import { Tree } from "./components/Tree/Tree";
 import { Earth } from "./components/Earth/Earth";
@@ -9,13 +8,13 @@ import { ResourceBoard } from "./components/ResourceBoard/ResourceBoard"
 
 import styles from "./homepage.module.css"
 import fontStyles from "../../components/Popup.module.css"
-import buttonStyles from "../../components/Button.module.css"
 
 import Tutorial from "./components/Tutorial/Tutorial"
-import { type UserInfoResponse } from "../ServerCalls/ServerCalls"
+import { type UserInfoResponse } from "../ServerCalls/types"
 import { establishAuthSession, fetchUserInfo } from "../ServerCalls/ServerCalls"
+import { Button } from "../../components/Button";
 
-const userInfoMock: UserInfoResponse = {
+const userInfoMock = {
     success: true,
     user: {
         username: "AA",
@@ -95,7 +94,7 @@ export const Homepage = () => {
                     <h1 className={`${fontStyles.title} ${styles.helloTitle}`}>
                         Hello, {userInfo?.user.displayName ?? 'User'}
                     </h1>
-                <ResourceBoard resources={userInfo?.tree?.resourceLevels ?? userInfoMock?.tree?.resourceLevels} />
+                <ResourceBoard resources={userInfo?.tree?.resourceLevels ?? userInfoMock.tree.resourceLevels} />
 
                 <div className={styles.treeEarthContainer}>
                 <Tree water={userInfo?.tree?.resourceLevels.water ?? userInfoMock.tree.resourceLevels.water} />
@@ -104,20 +103,10 @@ export const Homepage = () => {
                 </div>
 
 
-                <div>
-                <button className={`${buttonStyles.button} ${buttonStyles.grass} ${styles.buttonSingle} ${styles.buttonLogout}`} onClick={handleLogout}>
-                    Logout
-                    </button>
-
-                    <button
-                        className={`${buttonStyles.button} ${buttonStyles.grass} ${styles.buttonSingle} ${styles.buttonSetting}`}
-                        onClick={handleSettings}
-                    >
-                    Settings
-                    </button>
+            <div>
+                <Button variant="grass" label="Logout" onClick={handleLogout} className={`${styles.buttonSingle} ${styles.buttonLogout}`} />
+                <Button variant="grass" label="Settings" onClick={handleSettings} className={`${styles.buttonSingle} ${styles.buttonSetting}`} />
                 </div>
-
-            <br></br>
 
         </div>
     );
