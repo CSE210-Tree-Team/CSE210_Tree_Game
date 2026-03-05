@@ -198,7 +198,7 @@ class TestUserAPIRoutes(APIQuestionsTestCase):
             "email": "updated@example.com",
             "roles": ["Student"],
             "contactEmail": "contact@example.com",
-            "educationLevel": "6-8",
+            "educationLevel": 2,
         }
         response = client.put("/api/update-user", json=update_payload)
         self.assertEqual(response.status_code, 200)

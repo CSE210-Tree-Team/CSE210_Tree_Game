@@ -27,7 +27,7 @@ def get_user_info(request: Request, student=Depends(student_required)):
             "email": "student@example.com",
             "roles": ["Student"],
             "contactEmail": "parent@example.com",
-            "educationLevel": "6-8"
+            "educationLevel": "2"
         },
         "tree": {
             "treeID": "uuid-string",
@@ -96,7 +96,7 @@ async def update_user(
         "displayName": "New Name",
         "roles": ["Student"],
         "contactEmail": "contact@example.com",
-        "educationLevel": "6-8"
+        "educationLevel": 2
     }
     
     Returns:
