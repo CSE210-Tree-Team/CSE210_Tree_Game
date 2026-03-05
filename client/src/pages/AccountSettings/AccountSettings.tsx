@@ -18,7 +18,7 @@ import {
     updateAccountProfile,
 } from '../ServerCalls/ServerCalls';
 
-const EDUCATION_LEVELS = ['3-6', '6-8', '9-12'] as const;
+const EDUCATION_LEVELS = Array.from({ length: 12 }, (_, i) => i + 1) as const;
 const DEFAULT_EDUCATION_LEVEL = EDUCATION_LEVELS[0];
 
 const isValidOptionalEmail = (value: string) => {

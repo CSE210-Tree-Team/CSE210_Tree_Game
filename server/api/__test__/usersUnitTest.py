@@ -348,7 +348,7 @@ class TestUpdateUser(unittest.TestCase):
                                 "displayName": "Updated Student",
                                 "roles": [settings.ROLE_STUDENT]
                             }
-                            mock_get_student_details.return_value = {"studentLevel": "6-8"}
+                            mock_get_student_details.return_value = {"studentLevel": 2}
                             
                             app = create_test_app(user_data=self.mock_student)
                             from api.routers.users import router
@@ -362,7 +362,7 @@ class TestUpdateUser(unittest.TestCase):
                                 "email": "student@example.com",
                                 "roles": [settings.ROLE_STUDENT],
                                 "contactEmail": "contact@example.com",
-                                "educationLevel": "6-8"
+                                "educationLevel": 2
                             }
                             
                             response = client.put("/api/update-user", json=update_payload)
@@ -402,7 +402,7 @@ class TestUpdateUser(unittest.TestCase):
                                 "email": "new@example.com",
                                 "roles": [settings.ROLE_STUDENT],
                                 "contactEmail": "contact@example.com",
-                                "educationLevel": "6-8"
+                                "educationLevel": 2
                             })
                             
                             # Verify update functions were called
@@ -472,7 +472,7 @@ class TestUpdateUser(unittest.TestCase):
                                 "displayName": "Updated",
                                 "roles": [settings.ROLE_STUDENT]
                             }
-                            mock_get_student_details.return_value = {"studentLevel": "9-10"}
+                            mock_get_student_details.return_value = {"studentLevel": 5}
                             
                             app = create_test_app(user_data=self.mock_student)
                             from api.routers.users import router
@@ -540,7 +540,7 @@ class TestUpdateUser(unittest.TestCase):
         with patch('api.routers.users.TreeService') as mock_tree_service:
             with patch('api.routers.users.get_student_details') as mock_get_student_details:
                 mock_tree_service.get_tree_with_decay.return_value = self.mock_tree
-                mock_get_student_details.return_value = {"contactEmail": "parent@example.com", "studentLevel": "6-8"}
+                mock_get_student_details.return_value = {"contactEmail": "parent@example.com", "studentLevel": 2}
                 
                 app = create_test_app(user_data=self.mock_student)
                 from api.routers.users import router

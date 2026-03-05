@@ -35,7 +35,7 @@ import uuid
 
 # Import education level constants for student details
 DEFAULT_EDUCATION_LEVEL_CODE = settings.DEFAULT_EDUCATION_LEVEL_CODE
-EDUCATION_LEVEL_LABEL_TO_CODE = settings.EDUCATION_LEVEL_LABEL_TO_CODE
+VALID_EDUCATION_LEVELS = settings.VALID_EDUCATION_LEVELS
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 DB_PATH = os.path.join(BASE_DIR, settings.DB_NAME)
@@ -512,18 +512,28 @@ def join_class(student_username: str, class_code: str):
     _execute(sql, (student_username, class_id))
 
 def _normalize_education_level_code(value: int | str | None) -> int:
+    """
+    Normalize education level to an integer code (1-12).
+    
+    Args:
+        value: Can be an integer (1-12), string representation of integer, or None
+        
+    Returns:
+        Integer between 1 and 12
+        
+    Raises:
+        ValueError: If value is not a valid education level
+    """
     if value is None:
         return DEFAULT_EDUCATION_LEVEL_CODE
     if isinstance(value, int):
-        if value in EDUCATION_LEVEL_LABEL_TO_CODE.values():
+        if value in VALID_EDUCATION_LEVELS:
             return value
-        raise ValueError(f"Invalid education level code: {value}")
+        raise ValueError(f"Invalid education level code: {value}. Must be between 1 and 12.")
     trimmed = value.strip()
     if trimmed.isdigit():
         return _normalize_education_level_code(int(trimmed))
-    if trimmed in EDUCATION_LEVEL_LABEL_TO_CODE:
-        return EDUCATION_LEVEL_LABEL_TO_CODE[trimmed]
-    raise ValueError(f"Invalid education level label: {value}")
+    raise ValueError(f"Invalid education level: {value}. Must be a number between 1 and 12.")
 
 
 def upsert_student_details(student_username: str, contact_email: str | None = None, education_level: int | str | None = None):

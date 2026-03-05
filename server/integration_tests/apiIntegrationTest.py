@@ -370,7 +370,7 @@ class APIIntegrationTests(unittest.TestCase):
             "displayName": "Updated Test User",
             "roles": current_user.get("roles", [settings.ROLE_STUDENT]),
             "contactEmail": "contact@example.com",
-            "educationLevel": "6-8",
+            "educationLevel": 2,
         }
         response = self.client.put("/api/update-user", json=update_data)
         

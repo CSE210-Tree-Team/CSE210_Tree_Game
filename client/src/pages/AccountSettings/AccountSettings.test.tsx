@@ -61,7 +61,7 @@ describe('AccountSettings', () => {
         expect(screen.getByText('ACCOUNT SETTINGS')).toBeInTheDocument();
         expect(screen.getByText('Name:')).toBeInTheDocument();
         expect(screen.getByText('Contact Email:')).toBeInTheDocument();
-        expect(screen.getByText('3-6')).toBeInTheDocument();
+        expect(screen.getByText('1')).toBeInTheDocument();
     });
 
     it('navigates home when the home button is clicked', async () => {

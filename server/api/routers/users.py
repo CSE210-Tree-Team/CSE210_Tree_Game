@@ -27,7 +27,7 @@ def get_user_info(request: Request, student=Depends(student_required)):
             "email": "student@example.com",
             "roles": ["Student"],
             "contactEmail": "parent@example.com",
-            "educationLevel": "6-8"
+            "educationLevel": "2"
         },
         "tree": {
             "treeID": "uuid-string",
@@ -58,7 +58,7 @@ def get_user_info(request: Request, student=Depends(student_required)):
         displayName=student.get("displayName"),
         roles=student.get("roles", []),
         contactEmail=student_details.get("contactEmail") if student_details else None,
-        educationLevel=str(student_details.get("studentLevel")) if student_details and student_details.get("studentLevel") else None,
+        educationLevel=student_details.get("studentLevel") if student_details and student_details.get("studentLevel") else None,
     )
     
     # Construct TreeInfo object if tree exists
@@ -96,7 +96,7 @@ async def update_user(
         "displayName": "New Name",
         "roles": ["Student"],
         "contactEmail": "contact@example.com",
-        "educationLevel": "6-8"
+        "educationLevel": 2
     }
     
     Returns:
@@ -151,7 +151,7 @@ async def update_user(
             displayName=user_update.displayName or account_data.get("displayName", ""),
             roles=account_data.get("roles", []),
             contactEmail=updated_student_details.get("contactEmail") if updated_student_details else None,
-            educationLevel=str(updated_student_details.get("studentLevel")) if updated_student_details and updated_student_details.get("studentLevel") else None,
+            educationLevel=updated_student_details.get("studentLevel") if updated_student_details and updated_student_details.get("studentLevel") else None,
         )
         
         # Construct TreeInfo if tree exists

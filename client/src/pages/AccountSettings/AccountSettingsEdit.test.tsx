@@ -59,7 +59,7 @@ describe('AccountSettingsEdit', () => {
         expect(screen.getByText('ACCOUNT SETTINGS')).toBeInTheDocument();
         expect(screen.getByLabelText('Name:')).toHaveValue('Ada Lovelace');
         expect(screen.getByLabelText('Contact Email:')).toHaveValue('');
-        expect(screen.getByLabelText('Education Level:')).toHaveValue('3-6');
+        expect(screen.getByLabelText('Education Level:')).toHaveValue('1');
     });
 
     it('saves values and navigates back to account', async () => {
