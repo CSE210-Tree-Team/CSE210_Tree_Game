@@ -12,7 +12,7 @@ import type { Question } from "../../ServerCalls/ServerCalls";
 import { NUM_QUESTIONS } from "../constants";
 
 import { audioSystem } from "../../../AudioSystem";
-import audioFile from "../audio/SoilMinigameOST.mp3"
+import audioFile from "../audio/WaterMinigameOST.mp3"
 
 interface UseWaterGameQuestionsResult {
   questions: Question[];
