@@ -13,6 +13,9 @@ import Tutorial from "./Tutorial"
 import { type UserInfoResponse } from "../ServerCalls/ServerCalls"
 import { establishAuthSession, fetchUserInfo } from "../ServerCalls/ServerCalls"
 
+import { audioSystem } from '../../AudioSystem';
+import audioFile from './audio/SoilMinigameOST.mp3'
+
 const userInfoMock: UserInfoResponse = {
     success: true,
     user: {
@@ -74,6 +77,14 @@ export const Homepage = () => {
         establishSession();
     },[user, getAccessTokenSilently]);
 
+    useEffect(() => {
+        audioSystem.playAmbient(audioFile);
+        
+        return () => {
+            audioSystem.fadeOut(1500); // smoother than hard stop
+        };
+    }, []);
+
 
     const handleLogout = () => {
         sessionStorage.removeItem('hasSeenTutorial');
@@ -89,6 +100,7 @@ export const Homepage = () => {
     };
 
     const handleCloseTutorial = () => {
+        // audioSystem.playAmbient(audioFile);
         setShowTutorial(false);
         sessionStorage.setItem('hasSeenTutorial', 'true');
     }

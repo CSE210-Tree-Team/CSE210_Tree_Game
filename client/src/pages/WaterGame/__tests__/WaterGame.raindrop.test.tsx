@@ -21,6 +21,14 @@ import type { Question } from "../../ServerCalls/ServerCalls";
 import * as ServerCalls from "../../ServerCalls/ServerCalls";
 import * as utils from "../utils";
 
+vi.mock('../../../AudioSystem', () => ({
+  audioSystem: {
+    playAmbient: vi.fn(),
+    stopAmbient: vi.fn(),
+    fadeOut: vi.fn(),
+  },
+}));
+
 const mockQuestions = [
   {
     questionID: "1",
