@@ -54,6 +54,30 @@ pip install -r requirements.txt
 python main.py
 ```
 
+## Testing:
+
+### Frontend:
+```bash
+cd client
+npm run test
+```
+
+### Backend (from server directory):
+
+Run all tests:
+```bash
+python -m unittest discover -s . -p "*Test.py" -v
+```
+
+Run by test type:
+```bash
+python -m unittest discover -s . -p "*UnitTest.py" -v        # Unit tests
+python -m unittest discover -s regression_tests -p "*.py" -v  # Regression tests
+python -m unittest discover -s integration_tests -p "*.py" -v # Integration tests
+```
+
+**Note:** All API calls besides `/api/auth/verify` require authentication.
+
 ## Database:
 
 From the server directory:
@@ -62,8 +86,6 @@ To create the database, run `python -m database.createDatabase`
 To view current state of the database, run `python -m database.printDatabase`. You may want to redirect the output into a text file.
 
 For getting organized dictionaries from the database, please reference `server/database/getItemsFromDatabase.py`. When calling these functions, use the username. Similarly, please reference `server/database/addItemsToDatabase.py` for any function calls that will update the database.
-
-To test the database, as per the GitHub Actions, run `python -m tests.databaseInteractUnitTests` and `python -m tests.databaseUnitTests`.
 
 ## Questions:
 
@@ -81,13 +103,9 @@ To add questions, populate `server/utils/questions.json`. Then, run `python -m u
 
 ## Tree:
 
-The tree will gradually decay with time; this rate can be configured in the server settings, but will typically be a 1 percent decay every 30 minutes.
-
-Decaying currently occurs passively and is done directly through update_stats, without the explicit addition of Events to the database, although this functionality may be updated to account for updating events. Tests for updating stats can be run by going into the server folder and running `python -m unittest regression_tests.databaseStatUpdateRegressionTests -v`.
+The tree will gradually decay with time; this rate can be configured in the server settings, but will typically be a 1 percent decay every 30 minutes. Decaying occurs passively through update_stats without explicit event insertion.
 
 ## API Calls:
-
-From the server directory, the old API tests can be run with `python -m unittest regression_tests.apiQuestionsRegressionTests -v`, `python -m unittest regression_tests.apiStatRegressionTests -v`, and `python -m unittest regression_tests.apiUserRegressionTests -v`. Router-level unit tests can be run with `python -m unittest api.__test__.questionsUnitTest -v`, `python -m unittest api.__test__.statsUnitTest -v`, and `python -m unittest api.__test__.usersUnitTest -v`. **Note that all API calls besides /api/auth/verify require the user to be authenticated.**
 
 **Note:** Some endpoints currently use POST for data retrieval (e.g., `/api/get-question`, `/api/get-questions`). As a TODO, these should be refactored to use GET requests with query parameters or path parameters instead of POST with JSON bodies.
 

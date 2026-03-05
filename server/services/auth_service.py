@@ -109,4 +109,7 @@ class AuthService:
     
     @staticmethod
     def update_login(username: str) -> None:
+        """
+        Update the last login timestamp for the user.
+        """
         update_last_login(username)
