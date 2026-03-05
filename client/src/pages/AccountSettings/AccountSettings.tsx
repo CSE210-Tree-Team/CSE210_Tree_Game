@@ -18,7 +18,7 @@ import {
     updateAccountProfile,
 } from '../ServerCalls/ServerCalls';
 
-const EDUCATION_LEVELS = Array.from({ length: 12 }, (_, i) => i + 1) as const;
+const EDUCATION_LEVELS = Array.from({ length: 12 }, (_, i) => String(i + 1));
 const DEFAULT_EDUCATION_LEVEL = EDUCATION_LEVELS[0];
 
 const isValidOptionalEmail = (value: string) => {
@@ -153,7 +153,7 @@ export const AccountSettingsEdit = () => {
         };
 
         load();
-    }, [user]);
+    }, [user, getAccessTokenSilently]);
 
     const contactEmailIsValid = isValidOptionalEmail(formData.contactEmail || '');
     const contactEmailError =
@@ -203,66 +203,48 @@ export const AccountSettingsEdit = () => {
                             {saveError}
                         </p>
                     ) : null}
-                    <div className={styles.row}>
-                        <label htmlFor="name" className={styles.label}>Name:</label>
-                        <input
-                            id="name"
-                            className={styles.input}
-                            value={formData.displayName}
-                            onChange={(event) => {
-                                isDirtyRef.current = true;
-                                setFormData({ ...formData, displayName: event.target.value });
-                            }}
-                        />
-                    </div>
-
-                    <div className={styles.row}>
-                        <label htmlFor="contactEmail" className={styles.label}>Contact Email:</label>
-                        <input
-                            id="contactEmail"
-                            className={styles.input}
-                            type="email"
-                            inputMode="email"
-                            autoComplete="email"
-                            value={formData.contactEmail}
-                            aria-invalid={Boolean((formData.contactEmail || '').trim()) && !contactEmailIsValid}
-                            aria-describedby={contactEmailError ? 'contactEmailError' : undefined}
-                            onChange={(event) => {
-                                isDirtyRef.current = true;
-                                if (!isContactEmailTouched) setIsContactEmailTouched(true);
-                                setFormData({ ...formData, contactEmail: event.target.value });
-                            }}
-                            onBlur={() => setIsContactEmailTouched(true)}
-                        />
-                    </div>
-                    {contactEmailError ? (
-                        <p
-                            id="contactEmailError"
-                            role="alert"
-                            className={styles.fieldError}
-                        >
-                            {contactEmailError}
-                        </p>
-                    ) : null}
-
-                    <div className={styles.row}>
-                        <label htmlFor="educationLevel" className={styles.label}>Education Level:</label>
-                        <div className={styles.selectWrap}>
-                            <select
-                                id="educationLevel"
-                                className={styles.select}
-                                value={formData.educationLevel}
+                    <div className={styles.fieldGroup}>
+                        <div className={styles.row}>
+                            <label htmlFor="name" className={styles.label}>
+                                Name:
+                            </label>
+                            <input
+                                id="name"
+                                className={styles.input}
+                                value={formData.displayName ?? ''}
                                 onChange={(event) => {
                                     isDirtyRef.current = true;
-                                    if (!isEmailTouched) setIsEmailTouched(true);
-                                    setFormData({ ...formData, email: event.target.value });
+                                    setFormData({ ...formData, displayName: event.target.value });
                                 }}
-                                onBlur={() => setIsEmailTouched(true)}
                             />
                         </div>
-                        {emailError ? (
-                            <p id="emailError" role="alert" className={styles.fieldError}>
-                                {emailError}
+                    </div>
+
+                    <div className={styles.fieldGroup}>
+                        <div className={styles.row}>
+                            <label htmlFor="contactEmail" className={styles.label}>
+                                Contact Email:
+                            </label>
+                            <input
+                                id="contactEmail"
+                                className={styles.input}
+                                type="email"
+                                inputMode="email"
+                                autoComplete="email"
+                                value={formData.contactEmail ?? ''}
+                                aria-invalid={Boolean((formData.contactEmail || '').trim()) && !contactEmailIsValid}
+                                aria-describedby={contactEmailError ? 'contactEmailError' : undefined}
+                                onChange={(event) => {
+                                    isDirtyRef.current = true;
+                                    if (!isContactEmailTouched) setIsContactEmailTouched(true);
+                                    setFormData({ ...formData, contactEmail: event.target.value });
+                                }}
+                                onBlur={() => setIsContactEmailTouched(true)}
+                            />
+                        </div>
+                        {contactEmailError ? (
+                            <p id="contactEmailError" role="alert" className={styles.fieldError}>
+                                {contactEmailError}
                             </p>
                         ) : null}
                     </div>
@@ -276,7 +258,7 @@ export const AccountSettingsEdit = () => {
                                 <select
                                     id="educationLevel"
                                     className={styles.select}
-                                    value={formData.educationLevel}
+                                    value={formData.educationLevel ?? DEFAULT_EDUCATION_LEVEL}
                                     onChange={(event) => {
                                         isDirtyRef.current = true;
                                         setFormData({
@@ -305,7 +287,7 @@ export const AccountSettingsEdit = () => {
                         className={styles.actionButton}
                         type="button"
                         onClick={() => formRef.current?.requestSubmit()}
-                        disabled={isSaving || !parentEmailIsValid || !emailIsValid}
+                        disabled={isSaving || !contactEmailIsValid}
                     />
                     <Button
                         variant="grass"
