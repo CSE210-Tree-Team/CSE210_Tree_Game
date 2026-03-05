@@ -7,7 +7,7 @@ and inline color/weight styles for zero vs non-zero counts.
 
 import { render, screen } from "@testing-library/react";
 import { InventorySection } from "../components/Sidebar/InventorySection";
-import type { Inventory } from "../types/SoilGame_REP.type";
+import type { Inventory } from "../types/Abstract.types";
 
 
 const emptyInventory: Inventory = {
@@ -18,32 +18,25 @@ const emptyInventory: Inventory = {
 };
 
 
-test("renders all 4 elements", () => {
+test("does not render elements with value 0", () => {
   render(<InventorySection inventory={emptyInventory} />);
-  expect(screen.getByText("Nitrogen")).toBeInTheDocument();
-  expect(screen.getByText("Hydrogen")).toBeInTheDocument();
-  expect(screen.getByText("Carbon")).toBeInTheDocument();
-  expect(screen.getByText("Oxygen")).toBeInTheDocument();
+
+  expect(screen.queryByText("Nitrogen")).not.toBeInTheDocument();
+  expect(screen.queryByText("Hydrogen")).not.toBeInTheDocument();
+  expect(screen.queryByText("Carbon")).not.toBeInTheDocument();
+  expect(screen.queryByText("Oxygen")).not.toBeInTheDocument();
 });
 
 test("displays correct count for each element", () => {
   const inventory: Inventory = { Nitrogen: 3, Hydrogen: 0, Carbon: 1, Oxygen: 0 };
-  render(<InventorySection inventory={inventory} />);
+  render(<InventorySection inventory={inventory} inventoryCapacity={10} />);
   expect(screen.getByText("3")).toBeInTheDocument();
   expect(screen.getByText("1")).toBeInTheDocument();
 });
 
 test("element with count > 0 renders with success color and bold weight", () => {
   const inventory: Inventory = { ...emptyInventory, Nitrogen: 2 };
-  render(<InventorySection inventory={inventory} />);
+  render(<InventorySection inventory={inventory} inventoryCapacity={10} />);
   const countSpan = screen.getByText("2");
   expect(countSpan).toHaveStyle({ color: "var(--color-success)", fontWeight: "bold" });
-});
-
-test("element with count 0 renders with grey color and normal weight", () => {
-  render(<InventorySection inventory={emptyInventory} />);
-  const zeroSpans = screen.getAllByText("0");
-  zeroSpans.forEach((span) => {
-    expect(span).toHaveStyle({ color: "var(--color-grey1)", fontWeight: "normal" });
-  });
 });

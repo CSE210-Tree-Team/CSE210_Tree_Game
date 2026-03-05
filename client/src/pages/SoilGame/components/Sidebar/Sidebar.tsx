@@ -1,5 +1,5 @@
 import styles from './Sidebar.module.css';
-import type { Inventory, Quest } from '../../types/SoilGame_REP.type';
+import type { Inventory, Quest } from '../../types/Abstract.types';
 import { CommandsSection } from './CommandsSection';
 import { InventorySection } from './InventorySection';
 import { QuestSection } from './QuestSection';
@@ -7,6 +7,7 @@ import { QuestSection } from './QuestSection';
 interface SidebarProps {
     quests: Quest[];
     inventory: Inventory;
+    inventoryCapacity: number;
 }
 
 /**
@@ -16,11 +17,11 @@ interface SidebarProps {
  *   - InventorySection: current element counts
  *   - CommandsSection: static list of available key commands
  */
-export function Sidebar({ quests, inventory }: SidebarProps) {
+export function Sidebar({ quests, inventory, inventoryCapacity }: SidebarProps) {
     return (
         <div className={styles.sidebarContainer}>
             <QuestSection quests={quests} />
-            <InventorySection inventory={inventory} />
+            <InventorySection inventory={inventory} inventoryCapacity={inventoryCapacity} />
             <CommandsSection />
         </div>
     );

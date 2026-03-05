@@ -18,7 +18,7 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 
 import { useWaterGameQuestions } from "./hooks/useWaterGameQuestions";
-import { pushGameResults } from "../ServerCalls/ServerCalls";
+import { pushGameResults, AuthenticationError, handle401Error } from "../ServerCalls/ServerCalls";
 import { checkCollision } from "./collision";
 import { questionToRaindropAnswers, shuffleArray } from "./utils";
 
@@ -369,11 +369,15 @@ export const WaterGame = () => {
             buttonText="Go Back to Home"
             onClick={async () => {
               try {
-                await pushGameResults(correctCount * 10, "water");
-              } catch {
-                console.error("Failed to update water resource.");
-              } finally {
+                await pushGameResults(correctCount * 10, "Water");
                 window.location.href = "/";
+              } catch (error) {
+                if (error instanceof AuthenticationError) {
+                  handle401Error();
+                } else {
+                  console.error("Failed to update water resource.");
+                  window.location.href = "/";
+                }
               }
             }}
             textList={[

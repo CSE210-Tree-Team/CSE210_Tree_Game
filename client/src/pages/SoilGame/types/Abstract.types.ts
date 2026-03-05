@@ -1,0 +1,135 @@
+export const DEFAULT_MAP_SIZE = 5;
+export type ElementType = string;
+
+
+// Ordered finite states the game can take
+export type GamePhase = 'loading' | 'title' | 'tutorial' | 'playing' | 'complete';
+
+// Inventory is a count of each element
+export type Inventory = Record<string, number>;
+
+// Literally just a tuple representing a position on the map lmao 
+export interface Position {
+  x: number;
+  y: number;
+}
+
+/**
+ * @interface 
+ * x
+ * y
+ * resources
+ * collected
+ */
+export interface Node {
+  x: number;
+  y: number;
+
+  // CHANGED
+  resources: Record<string, number> | null;
+  collected: boolean;
+}
+
+/**
+ * @interface 
+ * moleculeName: Full name of the molecule to construct
+ * moleculeFormula: The chemical formula of the molecule to construct
+ * required: Element-Value pairs representing the required amount of each element
+ * submitted: The number of each element the player has submitted so far
+ * incorrect: Element-Value pairs for incorrect/unnecessary elements (not part of the molecule)
+ */
+export interface Quest {
+  moleculeName: string;
+  moleculeFormula: string;
+  required: Record<string, number>; // e.g. { Nitrogen: 1, Hydrogen: 3 }
+  submitted: Record<string, number>; // elements submitted so far
+  completed: boolean;
+  incorrect: Record<string, number>; // incorrect elements that can appear on the map
+}
+
+/**
+ * @interface
+ * phase: Current state of the game
+ * map: (N x N) array housing the Map backend
+ * mapSize: Size of the map (N x N)
+ * quests: List of quests the player must complete
+ * playerPosition: Tuple position of player in Map
+ * inventory: <ElementType, number> dictionary
+ * terminalLog: List of strings representing the terminal log
+ * score: Current score (managed by ScoreManager, cached here for display)
+ * requiredElements: Set of all element names needed for any quest
+ */
+export interface GameState {
+  phase: GamePhase;
+  map: Node[][];
+  mapSize: number; // N
+  quests: Quest[];
+  playerPosition: Position;
+  inventory: Inventory;
+  inventoryCapacity: number;
+  terminalLog: string[];
+  score: number;
+  showCompletionPopup: boolean;
+  requiredElements: Set<string>;
+}
+
+export interface CompleteGameRequest {
+  quests_completed: number;
+}
+
+export interface CompleteGameResponse {
+  success: boolean;
+  progress_added: number;
+  new_soil_level: number;
+}
+
+/**
+ * Result of a score submission attempt to the server
+ * Used by ScoreManager to indicate submission success/failure
+ */
+export interface ScoreSubmissionResult {
+  success: boolean;
+  scoreAdded: number;
+  error?: string;
+}
+
+/** TODO: Delete the following types and direction layout. 
+ *        We want to have directions tied to arrow keys
+ */
+
+/** Direction commands */
+export type Direction = 'w' | 'a' | 's' | 'd';
+
+/** All valid player inputs */
+export type PlayerCommand = Direction | 'collect' | 'c' | '1' | '2' | '3' | '4';
+
+/** Movement deltas for each direction */
+export const DIRECTION_DELTAS: Record<Direction, { dx: number; dy: number }> = {
+  w: { dx: 0, dy: -1 },  // up
+  a: { dx: -1, dy: 0 },  // left
+  s: { dx: 0, dy: 1 },   // down
+  d: { dx: 1, dy: 0 },   // right
+};
+
+export const SYMBOL_TO_ELEMENT: Record<string, string> = {
+  H: 'Hydrogen',
+  O: 'Oxygen',
+  C: 'Carbon',
+  N: 'Nitrogen',
+  Fe: 'Iron',
+  Cl: 'Chlorine',
+  Na: 'Sodium',
+  P: 'Phosphorus',
+  K: 'Potassium',
+  S: 'Sulfur',
+  Ca: 'Calcium',
+  Mg: 'Magnesium',
+};
+
+/** Direction labels for display */
+export const DIRECTION_LABELS: Record<Direction, string> = {
+  w: 'Up',
+  a: 'Left',
+  s: 'Down',
+  d: 'Right',
+};

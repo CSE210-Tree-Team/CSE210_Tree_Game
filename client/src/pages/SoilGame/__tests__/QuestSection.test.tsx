@@ -7,11 +7,11 @@ progress string display, and multiple quests.
 
 import { render, screen } from "@testing-library/react";
 import { QuestSection } from "../components/Sidebar/QuestSection";
-import type { Quest } from "../types/SoilGame_REP.type";
+import type { Quest } from "../types/Abstract.types";
 
 
 const mockQuest: Quest = {
-  id: 1,
+
   moleculeName: "Water",
   moleculeFormula: "H2O",
   required: { H: 2, O: 1 },
@@ -20,11 +20,10 @@ const mockQuest: Quest = {
 };
 
 
-test("renders quest name and formula", () => {
+test("renders quest name", () => {
   render(<QuestSection quests={[mockQuest]} />);
-  // Name and formula are in the same div so match with regex
   expect(screen.getByText(/Water/)).toBeInTheDocument();
-  expect(screen.getByText(/H2O/)).toBeInTheDocument();
+  expect(screen.queryByText(/H2O/)).not.toBeInTheDocument();
 });
 
 test("shows incomplete icon for an incomplete quest", () => {
@@ -38,15 +37,9 @@ test("shows completed icon for a completed quest", () => {
   expect(screen.getByAltText("completed")).toBeInTheDocument();
 });
 
-test("shows progress string for an incomplete quest", () => {
+test("does not show progress string for an incomplete quest", () => {
   render(<QuestSection quests={[mockQuest]} />);
-  expect(screen.getByText("0 / 2 H • 0 / 1 O")).toBeInTheDocument();
-});
-
-test("reflects partial submission in progress string", () => {
-  const partial = { ...mockQuest, submitted: { H: 1, O: 0 } };
-  render(<QuestSection quests={[partial]} />);
-  expect(screen.getByText("1 / 2 H • 0 / 1 O")).toBeInTheDocument();
+  expect(screen.queryByText(/0 \/ 2 H/)).not.toBeInTheDocument();
 });
 
 test("hides progress string for a completed quest", () => {
@@ -57,7 +50,6 @@ test("hides progress string for a completed quest", () => {
 
 test("renders multiple quests", () => {
   const quest2: Quest = {
-    id: 2,
     moleculeName: "Ammonia",
     moleculeFormula: "NH3",
     required: { N: 1, H: 3 },

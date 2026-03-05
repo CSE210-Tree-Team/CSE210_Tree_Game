@@ -1,14 +1,12 @@
-//import { useNavigate } from 'react-router-dom';
-import { useSoilGame } from './hooks/UseSoilGame_REP'; 
+import { useSoilGame } from './hooks/useSoilGame';
 import { TitleScreen } from './components/TitleScreen/TitleScreen';
 import { TutorialScreen } from './components/TutorialScreen/TutorialScreen';
 import { GameScreen } from './components/GameScreen/GameScreen';
-import { CompleteScreen } from './components/CompleteScreen/CompleteScreen';
+import { CompletionPopup } from './components/CompletionPopup/CompletionPopup';
 import styles from './SoilGame.module.css';
 
 export default function SoilMinigame() {
   const { state, setPhase, startGame, handleCommand } = useSoilGame();
-  //const navigate = useNavigate(); might need later for navigating back to main menu or other pages
 
   // Transition from Tutorial to Playing
   const handleReadyToPlay = () => {
@@ -28,15 +26,16 @@ export default function SoilMinigame() {
       )}
 
       {/* 3. Main Gameplay Screen */}
-      {state.phase === 'playing' && (
+      {(state.phase === 'playing' || state.phase === 'complete') && (
         <GameScreen state={state} onCommand={handleCommand} />
       )}
 
-      {/* 4. Game Completion Screen */}
-      {state.phase === 'complete' && (
-        <CompleteScreen 
-          onRestart={() => setPhase('title')} 
-          
+      {/* 4. Completion Popup Overlay */}
+      {state.showCompletionPopup && (
+        <CompletionPopup 
+          questsCompleted={state.quests.filter(q => q.completed).length} 
+          totalQuests={state.quests.length} 
+          score={state.score} 
         />
       )}
 

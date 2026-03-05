@@ -1,5 +1,6 @@
 import { useAuth0 } from '@auth0/auth0-react';
 import { useEffect, useState } from 'react';
+import { handle401Error } from '../ServerCalls/ServerCalls';
 import { useNavigate } from 'react-router-dom';
 import { Tree } from "../../components/Tree";
 import { Earth } from "../../components/Earth";
@@ -9,28 +10,10 @@ import styles from "../../components/homepage.module.css"
 import fontStyles from "../../components/Popup.module.css"
 import buttonStyles from "../../components/Button.module.css"
 import Tutorial from "./Tutorial"
-import { establishAuthSession, fetchUserInfo } from "../ServerCalls/ServerCalls";
-interface UserInfo {
-    success: boolean;
-    user: {
-        username: string;
-        displayName: string;
-        email: string;
-        roles: string[];
-    };
-    tree: {
-        treeID: string;
-        health: string;
-        growthStage: number;
-        resourceLevels: {
-            water: number;
-            earth: number;
-            sun: number;
-        };
-    };
-}
+import { type UserInfoResponse } from "../ServerCalls/ServerCalls"
+import { establishAuthSession, fetchUserInfo } from "../ServerCalls/ServerCalls"
 
-const userInfoMock: UserInfo = {
+const userInfoMock: UserInfoResponse = {
     success: true,
     user: {
         username: "AA",
@@ -44,46 +27,53 @@ const userInfoMock: UserInfo = {
         growthStage: 1,
         resourceLevels: {
             water: 70,
-            earth: 50,
+            earth: 40,
             sun: 100,
         }
     }
 
 }
 
-
-
 export const Homepage = () => {
     const { user, logout, getAccessTokenSilently } = useAuth0();
-    const [userInfo, setUserInfo] = useState<UserInfo | null>(null);
     const navigate = useNavigate();
+    const [userInfo, setUserInfo] = useState<UserInfoResponse | null>(null);
     const [showTutorial, setShowTutorial] = useState<boolean>(() => {
         const hasSeenTutorial = sessionStorage.getItem('hasSeenTutorial');
         return !hasSeenTutorial; // Show tutorial if user hasn't seen it before
     });
-
-
     useEffect(() => {
-        // Replace with actual user info fetch
-        //setUserInfo(userInfoMock);
-        // Establish backend session after Auth0 login
         const establishSession = async () => {
+            if (!user) {
+                return;
+            }
             try {
                 const token = await getAccessTokenSilently();
-                await establishAuthSession(token, user);
+                await fetch('/api/auth/verify', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({ user })
+                });
 
                 // Fetch user info including resource levels
-                const data = await fetchUserInfo();
-                setUserInfo(data);
+                const response = await fetch('/api/get-user-info');
+                if (response.ok) {
+                    const data = await response.json();
+                    setUserInfo(data);
+                } else if (response.status === 401) {
+                    handle401Error();
+                    return;
+                }
             } catch (error) {
                 console.error('Failed to establish backend session:', error);
             }
-        };
-
-        if (user) {
-            establishSession();
         }
-    }, [user, getAccessTokenSilently]);
+        establishSession();
+    },[user, getAccessTokenSilently]);
+
 
     const handleLogout = () => {
         sessionStorage.removeItem('hasSeenTutorial');

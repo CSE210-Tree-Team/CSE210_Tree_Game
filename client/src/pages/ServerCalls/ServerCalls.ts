@@ -1,13 +1,15 @@
 /**
- * This file contains functions for making API calls to the server related to fetching questions and pushing game results.
- * It defines the expected request and response formats for these API calls.
+ * This file contains functions for making API calls to the server related to authentication, user info, and game operations.
  * 
- * fetchQuestions: Fetches a list of questions from the server based on specified filters (number of questions, resource type, question type, difficulty).
- * pushGameResults: Sends the player's game progress to the server to update the corresponding resource levels.
+ * Functions:
+ * - establishAuthSession: Verify and establish authentication with the server
+ * - fetchUserInfo: Retrieve current user information and tree data
+ * - updateAccountProfile: Update user account settings
+ * - fetchQuestions: Fetch questions from the server based on specified filters
+ * - pushGameResults: Send game progress to update resource levels
  * 
- * The question and response formats are defined as TypeScript interfaces.
- * 
- * Reference constants.py for valid resource types and question types.
+ * Type definitions are located in types.ts
+ * Reference settings.py for valid resource types and question types.
  * Reference main.py for API endpoint implementations and expected request/response handling.
  * 
  * Example usage:
@@ -15,34 +17,14 @@
  * const success = await pushGameResults(10, "earth");
  */
 
-interface QuestionChoice {
-    text: string;
-    isCorrect: boolean;
-}
+import type {
+  Question,
+  GetQuestionsResponse,
+  UpdateStatResponse,
+  UserInfoResponse,
+} from './types';
 
-export interface Question {
-    questionID: string;
-    text: string;
-    type: string;
-    difficulty: number;
-    resourceType: string;
-    choices: QuestionChoice[];
-}
-
-interface GetQuestionsResponse {
-    success: boolean;
-    count: number;
-    questions: Question[];
-}
-
-interface UpdateStatResponse {
-  success: boolean;
-  message: string;
-}
-
-export type AuthVerifyResponse = {
-  success?: boolean;
-};
+export type { Question, UserInfoResponse };
 
 export async function establishAuthSession(
   token: string,
@@ -58,28 +40,24 @@ export async function establishAuthSession(
     body: JSON.stringify({ user }),
   });
 
-  return response.ok;
-}
+  if (!response.ok) {
+    if (response.status === 401) {
+      console.error("Authentication failed: Invalid or expired token");
+      throw new AuthenticationError();
+    }
+    const error = `Failed to establish auth session: ${response.status} ${response.statusText}`;
+    console.error(error);
+    throw new Error(error);
+  }
 
-export type UserInfoResponse = {
-  success: boolean;
-  user: {
-    username: string;
-    displayName: string;
-    email: string;
-    roles: string[];
-  };
-  tree: {
-    treeID: string;
-    health: string;
-    growthStage: number;
-    resourceLevels: {
-      water: number;
-      earth: number;
-      sun: number;
-    };
-  };
-};
+  const data = await response.json();
+
+  if (!data.success) {
+    throw new Error(data.message || 'Server returned unsuccessful response');
+  }
+
+  return true;
+}
 
 export async function fetchUserInfo(): Promise<UserInfoResponse> {
   const response = await fetch("/api/get-user-info", {
@@ -87,59 +65,84 @@ export async function fetchUserInfo(): Promise<UserInfoResponse> {
   });
 
   if (!response.ok) {
-    throw new Error("Failed to fetch user info");
+    if (response.status === 401) {
+      console.error("Authentication failed: Session expired or unauthorized");
+      throw new AuthenticationError();
+    }
+    const error = `Failed to fetch user info: ${response.status} ${response.statusText}`;
+    console.error(error);
+    throw new Error(error);
   }
 
-  return (await response.json()) as UserInfoResponse;
-}
+  const data: UserInfoResponse = await response.json();
 
-export type AccountProfile = {
-  name: string;
-  email: string;
-  parentEmail: string;
-  educationLevel: string;
-};
-
-export type AccountProfileResponse = {
-  success: boolean;
-  profile?: Partial<AccountProfile>;
-};
-
-export async function fetchAccountProfile(): Promise<AccountProfileResponse> {
-  const response = await fetch("/api/account/profile", {
-    credentials: "include",
-  });
-
-  if (!response.ok) {
-    throw new Error("Failed to fetch account profile");
+  if (!data.success) {
+    throw new Error('Server returned unsuccessful response');
   }
 
-  return (await response.json()) as AccountProfileResponse;
+  return data;
 }
 
 export async function updateAccountProfile(
-  profile: Partial<AccountProfile>,
+  profile: Partial<UserInfoResponse['user']>,
 ): Promise<boolean> {
-  const response = await fetch("/api/account/profile", {
+  // Map user data to update schema
+  const userUpdate: Record<string, unknown> = {
+    displayName: profile.displayName || "",
+    contactEmail: profile.contactEmail,
+    educationLevel: profile.educationLevel,
+  };
+  
+  // Only include email if it's actually provided
+  if (profile.email) {
+    userUpdate.email = profile.email;
+  }
+
+  const response = await fetch("/api/update-user", {
     method: "PUT",
     headers: {
       "Content-Type": "application/json",
     },
     credentials: "include",
-    body: JSON.stringify(profile),
+    body: JSON.stringify(userUpdate),
   });
 
-  return response.ok;
+  if (!response.ok) {
+    if (response.status === 401) {
+      console.error("Authentication failed: Cannot update profile - unauthorized");
+      throw new AuthenticationError();
+    }
+    const error = `Failed to update account profile: ${response.status} ${response.statusText}`;
+    console.error(error);
+    throw new Error(error);
+  }
+
+  const data = await response.json();
+
+  if (!data.success) {
+    throw new Error(data.message || 'Server returned unsuccessful response');
+  }
+
+  return true;
 }
 
 /**
- * Fetches questions list from Server. Refer to main.py for more.
- * @param numQuestions - Max number of questions to return
- * @param resourceType - Filter by resource (Defines the minigame the pulled questions pertained to)
- * @param questionType - Filter by question type (MCQ, etc.)
-interface UpdateStatResponse {
-    success: boolean;
-    message: string;
+ * Custom error class for authentication failures
+ */
+export class AuthenticationError extends Error {
+    constructor(message: string = 'Authentication required. Please log in again.') {
+        super(message);
+        this.name = 'AuthenticationError';
+    }
+}
+
+/**
+ * Handles 401 authentication errors by showing alert and redirecting to login
+ */
+export function handle401Error(): void {
+    alert('Your session has expired. Please log in again.');
+    // Redirect to root which will trigger Auth0 login
+    window.location.href = '/';
 }
 
 /**
@@ -170,7 +173,13 @@ export async function fetchQuestions(
     });
 
     if (!response.ok) {
-        throw new Error('Failed to fetch questions');
+        if (response.status === 401) {
+            console.error("Authentication failed: Cannot fetch questions - unauthorized");
+            throw new AuthenticationError();
+        }
+        const error = `Failed to fetch questions: ${response.status} ${response.statusText}`;
+        console.error(error);
+        throw new Error(error);
     }
 
     const data: GetQuestionsResponse = await response.json();
@@ -185,18 +194,14 @@ export async function fetchQuestions(
 /**
  * Pushes the game results to server (increments Tree's resource levels).
  * @param progress - Game result value to add to the resource level
- * @param gameType - Resource type to update: "water", "earth", or "sun"
+ * @param gameType - Resource type to update: "Water", "Earth", or "Sun"
  * @returns Promise<boolean> - true if update was successful
  */
-export async function pushGameResults(progress: number, gameType: string): Promise<boolean> {
+export async function pushGameResults(progress: number, gameType: string): Promise<boolean> {    
     const statName = gameType.toLowerCase();
-    
-    if (!['water', 'earth', 'sun'].includes(statName)) {
-        throw new Error(`Invalid gameType: ${gameType}. Must be "water", "earth", or "sun"`);
-    }
 
     const response = await fetch('/api/update-stat', {
-        method: 'POST',
+        method: 'PUT',
         headers: {
             'Content-Type': 'application/json',
         },
@@ -207,7 +212,13 @@ export async function pushGameResults(progress: number, gameType: string): Promi
     });
 
     if (!response.ok) {
-        throw new Error(`Failed to update stat: ${response.statusText}`);
+        if (response.status === 401) {
+            console.error("Authentication failed: Cannot update stat - unauthorized");
+            throw new AuthenticationError();
+        }
+        const error = `Failed to update stat: ${response.status} ${response.statusText}`;
+        console.error(error);
+        throw new Error(error);
     }
 
     const data: UpdateStatResponse = await response.json();

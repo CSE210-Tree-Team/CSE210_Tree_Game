@@ -1,4 +1,4 @@
-import type { GameState } from '../../types/SoilGame_REP.type';
+import type { GameState } from '../../types/Abstract.types';
 import { Terminal } from '../Terminal/Terminal';
 import { Sidebar } from '../Sidebar/Sidebar';
 import styles from './GameScreen.module.css';
@@ -21,7 +21,7 @@ export function GameScreen({ state, onCommand }: GameScreenProps) {
                 <Terminal logs={state.terminalLog} onCommand={onCommand} />
             </div>
             <div className={styles.sidebarContainer}>
-                <Sidebar quests={state.quests} inventory={state.inventory} />
+                <Sidebar quests={state.quests} inventory={state.inventory} inventoryCapacity={state.inventoryCapacity} />
             </div>
         </div>
     );

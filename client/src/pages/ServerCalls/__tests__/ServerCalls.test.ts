@@ -33,19 +33,6 @@ describe("fetchQuestions", () => {
         { text: "Heavy Water", isCorrect: false },
       ],
     },
-    {
-      questionID: "q3",
-      difficulty: 1,
-      resourceType: "Earth",
-      text: "What are the main components of soil?",
-      type: "MultiSelect",
-      choices: [
-        { text: "Minerals", isCorrect: true },
-        { text: "Organic matter", isCorrect: true },
-        { text: "Water", isCorrect: true },
-        { text: "Air", isCorrect: true },
-      ],
-    },
   ];
 
   it("fetches questions successfully", async () => {
@@ -144,22 +131,16 @@ describe("pushGameResults", () => {
       }),
     } as any);
 
-    const result = await pushGameResults(10, "water");
+    const result = await pushGameResults(10, "Water");
 
     expect(fetchMock).toHaveBeenCalledWith(
       "/api/update-stat",
       expect.objectContaining({
-        method: "POST",
+        method: "PUT",
       })
     );
 
     expect(result).toBe(true);
-  });
-
-  it("throws if invalid gameType is provided", async () => {
-    await expect(
-      pushGameResults(10, "invalid" as any)
-    ).rejects.toThrow("Invalid gameType");
   });
 
   it("throws if response is not ok", async () => {
@@ -168,7 +149,7 @@ describe("pushGameResults", () => {
       statusText: "Server Error",
     } as any);
 
-    await expect(pushGameResults(10, "water")).rejects.toThrow(
+    await expect(pushGameResults(10, "Water")).rejects.toThrow(
       "Failed to update stat"
     );
   });
@@ -182,7 +163,7 @@ describe("pushGameResults", () => {
       }),
     } as any);
 
-    const result = await pushGameResults(5, "earth");
+    const result = await pushGameResults(5, "Earth");
     expect(result).toBe(false);
   });
 });
