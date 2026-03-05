@@ -472,7 +472,7 @@ class TestUpdateUser(unittest.TestCase):
                                 "displayName": "Updated",
                                 "roles": [settings.ROLE_STUDENT]
                             }
-                            mock_get_student_details.return_value = {"studentLevel": "9-10"}
+                            mock_get_student_details.return_value = {"studentLevel": 5}
                             
                             app = create_test_app(user_data=self.mock_student)
                             from api.routers.users import router

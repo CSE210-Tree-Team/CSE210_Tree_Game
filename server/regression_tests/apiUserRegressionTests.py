@@ -209,7 +209,7 @@ class TestUserAPIRoutes(APIQuestionsTestCase):
         self.assertEqual(updated_user["displayName"], "Updated Student")
         self.assertEqual(updated_user["email"], "updated@example.com")
         self.assertEqual(updated_user["contactEmail"], "contact@example.com")
-        self.assertEqual(updated_user["educationLevel"], "2")
+        self.assertEqual(updated_user["educationLevel"], 2)
 
         # Verify persistence in database
         person = get_person("test_student@example.com")
