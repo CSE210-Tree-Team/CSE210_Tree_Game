@@ -9,7 +9,7 @@ from schemas.question import (
     QuestionResponse,
     QuestionsGetRequest
 )
-from schemas.event import Event, EventType, Resource, DUMMY_EVENT
+from schemas.event import Event, EventType, Resource
 
 # Rebuild models to resolve forward references
 UserWithTree.model_rebuild()
@@ -49,7 +49,6 @@ __all__ = [
     "Event",
     "EventType",
     "Resource",
-    "DUMMY_EVENT",
     "GenericResponse",
     "DataResponse",
     "QuestionListResponse",
