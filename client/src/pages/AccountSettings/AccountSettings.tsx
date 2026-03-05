@@ -127,6 +127,7 @@ export const AccountSettingsEdit = () => {
     const navigate = useNavigate();
     const { defaultName, defaultEmail } = useProfileDefaults(user);
     const isDirtyRef = useRef(false);
+    const formRef = useRef<HTMLFormElement>(null);
     const [isSaving, setIsSaving] = useState(false);
     const [saveError, setSaveError] = useState<string | null>(null);
     const [isParentEmailTouched, setIsParentEmailTouched] = useState(false);
@@ -220,118 +221,135 @@ export const AccountSettingsEdit = () => {
             <div className={styles.content}>
                 <h1 className={styles.title}>ACCOUNT SETTINGS</h1>
 
-                <form className={styles.formArea} onSubmit={handleSave}>
+                <form ref={formRef} className={styles.formArea} onSubmit={handleSave}>
                     {saveError ? (
                         <p role="alert" className={styles.errorMessage}>
                             {saveError}
                         </p>
                     ) : null}
-                    <div className={styles.row}>
-                        <label htmlFor="name" className={styles.label}>Name:</label>
-                        <input
-                            id="name"
-                            className={styles.input}
-                            value={formData.name}
-                            onChange={(event) => {
-                                isDirtyRef.current = true;
-                                setFormData({ ...formData, name: event.target.value });
-                            }}
-                        />
-                    </div>
-
-                    <div className={styles.row}>
-                        <label htmlFor="parentEmail" className={styles.label}>Parent Email:</label>
-                        <input
-                            id="parentEmail"
-                            className={styles.input}
-                            type="email"
-                            inputMode="email"
-                            autoComplete="email"
-                            value={formData.parentEmail}
-                            aria-invalid={Boolean(formData.parentEmail.trim()) && !parentEmailIsValid}
-                            aria-describedby={parentEmailError ? 'parentEmailError' : undefined}
-                            onChange={(event) => {
-                                isDirtyRef.current = true;
-                                if (!isParentEmailTouched) setIsParentEmailTouched(true);
-                                setFormData({ ...formData, parentEmail: event.target.value });
-                            }}
-                            onBlur={() => setIsParentEmailTouched(true)}
-                        />
-                    </div>
-                    {parentEmailError ? (
-                        <p
-                            id="parentEmailError"
-                            role="alert"
-                            className={styles.fieldError}
-                        >
-                            {parentEmailError}
-                        </p>
-                    ) : null}
-
-                    <div className={styles.row}>
-                        <label htmlFor="email" className={styles.label}>Email:</label>
-                        <input
-                            id="email"
-                            className={styles.input}
-                            type="email"
-                            inputMode="email"
-                            autoComplete="email"
-                            value={formData.email}
-                            aria-invalid={!emailIsValid}
-                            aria-describedby={emailError ? 'emailError' : undefined}
-                            onChange={(event) => {
-                                isDirtyRef.current = true;
-                                if (!isEmailTouched) setIsEmailTouched(true);
-                                setFormData({ ...formData, email: event.target.value });
-                            }}
-                            onBlur={() => setIsEmailTouched(true)}
-                        />
-                    </div>
-                    {emailError ? (
-                        <p id="emailError" role="alert" className={styles.fieldError}>
-                            {emailError}
-                        </p>
-                    ) : null}
-
-                    <div className={styles.row}>
-                        <label htmlFor="educationLevel" className={styles.label}>Education Level:</label>
-                        <div className={styles.selectWrap}>
-                            <select
-                                id="educationLevel"
-                                className={styles.select}
-                                value={formData.educationLevel}
+                    <div className={styles.fieldGroup}>
+                        <div className={styles.row}>
+                            <label htmlFor="name" className={styles.label}>
+                                Name:
+                            </label>
+                            <input
+                                id="name"
+                                className={styles.input}
+                                value={formData.name}
                                 onChange={(event) => {
                                     isDirtyRef.current = true;
-                                    setFormData({ ...formData, educationLevel: event.target.value });
+                                    setFormData({ ...formData, name: event.target.value });
                                 }}
-                            >
-                                {EDUCATION_LEVELS.map((level) => (
-                                    <option key={level} value={level}>
-                                        {level}
-                                    </option>
-                                ))}
-                            </select>
-                            <span className={styles.arrow}>▼</span>
+                            />
                         </div>
                     </div>
 
-                    <div className={styles.actions}>
-                        <Button
-                            variant="grass"
-                            label="SAVE"
-                            className={styles.actionButton}
-                            type="submit"
-                            disabled={isSaving || !parentEmailIsValid || !emailIsValid}
-                        />
-                        <Button
-                            variant="grass"
-                            label="CANCEL"
-                            className={styles.actionButton}
-                            type="button"
-                            onClick={() => navigate('/account')}
-                        />
+                    <div className={styles.fieldGroup}>
+                        <div className={styles.row}>
+                            <label htmlFor="parentEmail" className={styles.label}>
+                                Parent Email:
+                            </label>
+                            <input
+                                id="parentEmail"
+                                className={styles.input}
+                                type="email"
+                                inputMode="email"
+                                autoComplete="email"
+                                value={formData.parentEmail}
+                                aria-invalid={Boolean(formData.parentEmail.trim()) && !parentEmailIsValid}
+                                aria-describedby={parentEmailError ? 'parentEmailError' : undefined}
+                                onChange={(event) => {
+                                    isDirtyRef.current = true;
+                                    if (!isParentEmailTouched) setIsParentEmailTouched(true);
+                                    setFormData({ ...formData, parentEmail: event.target.value });
+                                }}
+                                onBlur={() => setIsParentEmailTouched(true)}
+                            />
+                        </div>
+                        {parentEmailError ? (
+                            <p id="parentEmailError" role="alert" className={styles.fieldError}>
+                                {parentEmailError}
+                            </p>
+                        ) : null}
                     </div>
+
+                    <div className={styles.fieldGroup}>
+                        <div className={styles.row}>
+                            <label htmlFor="email" className={styles.label}>
+                                Email:
+                            </label>
+                            <input
+                                id="email"
+                                className={styles.input}
+                                type="email"
+                                inputMode="email"
+                                autoComplete="email"
+                                value={formData.email}
+                                aria-invalid={!emailIsValid}
+                                aria-describedby={emailError ? 'emailError' : undefined}
+                                onChange={(event) => {
+                                    isDirtyRef.current = true;
+                                    if (!isEmailTouched) setIsEmailTouched(true);
+                                    setFormData({ ...formData, email: event.target.value });
+                                }}
+                                onBlur={() => setIsEmailTouched(true)}
+                            />
+                        </div>
+                        {emailError ? (
+                            <p id="emailError" role="alert" className={styles.fieldError}>
+                                {emailError}
+                            </p>
+                        ) : null}
+                    </div>
+
+                    <div className={styles.fieldGroup}>
+                        <div className={styles.row}>
+                            <label htmlFor="educationLevel" className={styles.label}>
+                                Education Level:
+                            </label>
+                            <div className={styles.selectWrap}>
+                                <select
+                                    id="educationLevel"
+                                    className={styles.select}
+                                    value={formData.educationLevel}
+                                    onChange={(event) => {
+                                        isDirtyRef.current = true;
+                                        setFormData({
+                                            ...formData,
+                                            educationLevel: event.target.value,
+                                        });
+                                    }}
+                                >
+                                    {EDUCATION_LEVELS.map((level) => (
+                                        <option key={level} value={level}>
+                                            {level}
+                                        </option>
+                                    ))}
+                                </select>
+                                <span className={styles.arrow}>▼</span>
+                            </div>
+                        </div>
+                    </div>
+
                 </form>
+
+                <div className={styles.actions}>
+                    <Button
+                        variant="grass"
+                        label="SAVE"
+                        className={styles.actionButton}
+                        type="button"
+                        onClick={() => formRef.current?.requestSubmit()}
+                        disabled={isSaving || !parentEmailIsValid || !emailIsValid}
+                    />
+                    <Button
+                        variant="grass"
+                        label="CANCEL"
+                        className={styles.actionButton}
+                        type="button"
+                        onClick={() => navigate('/account')}
+                    />
+                </div>
             </div>
         </div>
     );
