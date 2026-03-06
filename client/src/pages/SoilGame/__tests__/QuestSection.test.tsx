@@ -11,6 +11,7 @@ import type { Quest } from "../types/Abstract.types";
 
 
 const mockQuest: Quest = {
+  
 
   moleculeName: "Water",
   moleculeFormula: "H2O",
