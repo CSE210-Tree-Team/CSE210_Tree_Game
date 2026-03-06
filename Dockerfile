@@ -5,7 +5,7 @@ COPY client/package*.json ./
 RUN npm ci
 
 COPY client/ ./
-RUN npm run build
+RUN npm run build:prod
 
 FROM python:3.12-slim AS runtime
 ENV PYTHONDONTWRITEBYTECODE=1
