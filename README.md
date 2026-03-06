@@ -30,7 +30,7 @@ Important:
 Recommended Railway service settings:
 - Builder: `Dockerfile`
 - Start command override: empty (use Docker `CMD`)
-- Public networking target port: `8000` (or auto-detect)
+- Public networking target port: auto-detect (recommended) or `8080` if Railway asks for a fixed port
 - Frontend image build command (in Dockerfile): `npm run build:prod`
 
 Required Railway environment variables:

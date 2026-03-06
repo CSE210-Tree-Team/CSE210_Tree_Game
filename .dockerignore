@@ -13,3 +13,17 @@ server/.venv
 server/__pycache__
 server/**/__pycache__
 fullstack_tests
+README.md
+LICENSE
+start.sh
+server/tests
+server/integration_tests
+server/regression_tests
+server/api/__test__
+server/services/__test__
+server/db.txt
+client/log.txt
+client/src/**/*.test.ts
+client/src/**/*.test.tsx
+client/src/**/__test__
+client/src/**/__tests__

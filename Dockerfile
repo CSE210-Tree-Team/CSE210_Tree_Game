@@ -16,10 +16,16 @@ WORKDIR /app/server
 COPY server/requirements.txt ./
 RUN pip install --no-cache-dir -r requirements.txt
 
-COPY server/ ./
+COPY server/main.py ./
+COPY server/api ./api
+COPY server/config ./config
+COPY server/database ./database
+COPY server/schemas ./schemas
+COPY server/services ./services
+COPY server/utils ./utils
 COPY --from=frontend-builder /app/client/dist /app/client/dist
 
-EXPOSE 8000
+EXPOSE 8080
 
 # Ensure schema exists, then start the API which serves the built frontend.
 CMD ["sh", "-c", "python -m database.createDatabase && python main.py"]
