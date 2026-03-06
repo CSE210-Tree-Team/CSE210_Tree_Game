@@ -10,7 +10,11 @@ export const Auth0ProviderWithConfig = ({ children }: Auth0ProviderWithConfigPro
     const clientId = import.meta.env.VITE_AUTH0_CLIENT_ID;
 
     if (!domain || !clientId) {
-        throw new Error('Auth0 domain and clientId must be provided');
+        return (
+            <div style={{ padding: '1.5rem', fontFamily: 'sans-serif' }}>
+                App configuration error: missing Auth0 environment variables.
+            </div>
+        );
     }
 
     return (

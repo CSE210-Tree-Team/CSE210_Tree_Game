@@ -1,6 +1,12 @@
 FROM node:20-alpine AS frontend-builder
 WORKDIR /app/client
 
+# Vite only exposes env vars that exist at build time.
+ARG VITE_AUTH0_DOMAIN
+ARG VITE_AUTH0_CLIENT_ID
+ENV VITE_AUTH0_DOMAIN=${VITE_AUTH0_DOMAIN}
+ENV VITE_AUTH0_CLIENT_ID=${VITE_AUTH0_CLIENT_ID}
+
 COPY client/package*.json ./
 RUN npm ci
 

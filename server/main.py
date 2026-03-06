@@ -5,8 +5,7 @@ Main application entry point for the Tree Game API.
 import os
 import secrets
 import uvicorn
-from fastapi import FastAPI
-from fastapi.staticfiles import StaticFiles
+from fastapi import FastAPI, HTTPException
 from fastapi.responses import FileResponse
 from starlette.middleware.sessions import SessionMiddleware
 
@@ -50,15 +49,6 @@ app.add_exception_handler(NeedLoginException, redirect_to_login_handler)
 
 # Initialize services
 decay_service = DecayService(decay_rate_minutes=settings.PASSIVE_DECAY_RATE)
-
-# Static file serving
-if os.path.exists(settings.FRONTEND_PATH):
-    app.mount(
-        "/assets",
-        StaticFiles(directory=os.path.join(settings.FRONTEND_PATH, "assets")),
-        name="static"
-    )
-
 
 ############################################
 #             Lifecycle Events             #
@@ -135,6 +125,39 @@ def serve_frontend():
     index_path = os.path.join(settings.FRONTEND_PATH, "index.html")
     if os.path.exists(index_path):
         return FileResponse(index_path)
+    return {"message": "Frontend not built. Run 'npm run build' in the client directory."}
+
+
+@app.get("/{full_path:path}")
+def serve_frontend_assets_and_routes(full_path: str):
+    """
+    Serve built frontend static files and SPA routes.
+
+    - Requests for existing files in client/dist (e.g., fonts, images, JS, CSS) return that file.
+    - Non-file frontend routes fall back to index.html for React Router.
+    - /api/* is excluded so unknown API paths still return API-style 404s.
+    """
+    if full_path.startswith("api/"):
+        raise HTTPException(status_code=404, detail="Not Found")
+
+    frontend_root = os.path.abspath(settings.FRONTEND_PATH)
+    if not os.path.isdir(frontend_root):
+        return {"message": "Frontend not built. Run 'npm run build' in the client directory."}
+
+    safe_path = os.path.normpath(full_path).lstrip(os.sep)
+    requested_path = os.path.abspath(os.path.join(frontend_root, safe_path))
+
+    # Block path traversal outside the frontend dist directory.
+    if os.path.commonpath([frontend_root, requested_path]) != frontend_root:
+        raise HTTPException(status_code=404, detail="Not Found")
+
+    if os.path.isfile(requested_path):
+        return FileResponse(requested_path)
+
+    index_path = os.path.join(frontend_root, "index.html")
+    if os.path.exists(index_path):
+        return FileResponse(index_path)
+
     return {"message": "Frontend not built. Run 'npm run build' in the client directory."}
 
 ############################################
