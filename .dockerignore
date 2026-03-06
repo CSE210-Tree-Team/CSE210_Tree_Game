@@ -1,0 +1,15 @@
+.git
+.gitignore
+.vscode
+__pycache__
+*.pyc
+*.pyo
+*.pyd
+.env
+**/.env
+client/node_modules
+client/dist
+server/.venv
+server/__pycache__
+server/**/__pycache__
+fullstack_tests

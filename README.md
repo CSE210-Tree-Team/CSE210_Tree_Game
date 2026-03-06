@@ -18,6 +18,32 @@ Access the application at: http://localhost:5173/
 
 Press Ctrl+C **twice** to stop both servers.
 
+## Deploying To Railway (Production)
+
+Use the repository `Dockerfile` for Railway deployment.
+
+Important:
+- Do not run `./start.sh` on Railway. It is for local development only.
+- Do not set public networking to port `5173` (that is the local Vite dev server).
+- Let Railway inject `PORT` and route traffic to the backend process.
+
+Recommended Railway service settings:
+- Builder: `Dockerfile`
+- Start command override: empty (use Docker `CMD`)
+- Public networking target port: `8000` (or auto-detect)
+
+Required Railway environment variables:
+- `MIDDLEWARE_SECRET_KEY` = strong random string
+- `CLEAR_SESSIONS_ON_RESTART` = `false`
+- `VITE_AUTH0_DOMAIN` = your Auth0 tenant domain
+- `VITE_AUTH0_CLIENT_ID` = your Auth0 client id
+- `EMAIL_PASSWORD` = sender mailbox app password (if email features are used)
+
+Auth0 app settings must include your Railway URL in:
+- Allowed Callback URLs
+- Allowed Logout URLs
+- Allowed Web Origins
+
 ## Initial Setup:
 
 1. Clone the Repository

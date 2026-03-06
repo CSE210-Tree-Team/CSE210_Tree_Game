@@ -38,8 +38,10 @@ class Settings:
     """Application settings loaded from environment variables."""
     
     # ========== SERVER CONFIGURATION ==========
-    HOST: str = "localhost"
-    PORT: int = 8000
+    # HOST: str = "localhost"
+    # PORT: int = 8000
+    HOST: str = os.getenv("HOST", "0.0.0.0")
+    PORT: int = int(os.getenv("PORT", "8000"))
     
     # ========== SECURITY & AUTHENTICATION ==========
     MIDDLEWARE_SECRET_KEY: str = _get_middleware_secret()
@@ -70,7 +72,10 @@ class Settings:
     }
     
     # ========== FRONTEND CONFIGURATION ==========
-    FRONTEND_PATH: str = os.path.join("..", "client", "dist")
+    # FRONTEND_PATH: str = os.path.join("..", "client", "dist")
+    FRONTEND_PATH: str = os.path.abspath(
+        os.path.join(os.path.dirname(__file__), "..", "..", "client", "dist")
+    )
     
     # ========== DATABASE CONFIGURATION ==========
     DB_NAME: str = "game_database.db"
