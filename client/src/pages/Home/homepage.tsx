@@ -14,7 +14,7 @@ import { type UserInfoResponse } from "../ServerCalls/ServerCalls"
 import { establishAuthSession, fetchUserInfo } from "../ServerCalls/ServerCalls"
 
 import { audioSystem } from '../../AudioSystem';
-import audioFile from './audio/SoilMinigameOST.mp3'
+import audioFile from './audio/HomeScreenOST.mp3'
 
 const userInfoMock: UserInfoResponse = {
     success: true,
@@ -100,7 +100,7 @@ export const Homepage = () => {
     };
 
     const handleCloseTutorial = () => {
-        // audioSystem.playAmbient(audioFile);
+        audioSystem.playAmbient(audioFile);
         setShowTutorial(false);
         sessionStorage.setItem('hasSeenTutorial', 'true');
     }
