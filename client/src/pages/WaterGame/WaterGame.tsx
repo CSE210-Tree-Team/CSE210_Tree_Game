@@ -18,7 +18,11 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 
 import { useWaterGameQuestions } from "./hooks/useWaterGameQuestions";
-import { pushGameResults, AuthenticationError, handle401Error } from "../ServerCalls/ServerCalls";
+import {
+  pushGameResults,
+  AuthenticationError,
+  handle401Error,
+} from "../ServerCalls/ServerCalls";
 import { checkCollision } from "./collision";
 import { questionToRaindropAnswers, shuffleArray } from "./utils";
 
@@ -275,7 +279,7 @@ export const WaterGame = () => {
           <img
             src="/leftArrow.svg"
             alt="Back Arrow"
-            className={styles.arrow}
+            className={styles.icon}
             onClick={() => navigate("/")}
           />
           <Popup
@@ -295,7 +299,7 @@ export const WaterGame = () => {
           <img
             src="/leftArrow.svg"
             alt="Back Arrow"
-            className={styles.arrow}
+            className={styles.icon}
             onClick={() => {
               setScreen("start");
             }}
@@ -322,6 +326,14 @@ export const WaterGame = () => {
           className={styles.gameScreen}
           ref={gameScreenRef}
         >
+          <img
+            src="/waterExit.svg"
+            alt="Water Game Exit"
+            className={styles.icon}
+            onClick={() => {
+              setScreen("end");
+            }}
+          />
           <span data-testid="question" className={styles.question}>
             <p className={styles.questionText}>
               {questions[currentQuestionIndex]?.text}

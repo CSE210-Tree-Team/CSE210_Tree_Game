@@ -173,3 +173,24 @@ test("renders results screen and game results", async () => {
   const items = screen.getAllByRole("listitem");
   expect(items).toHaveLength(3);
 }, 10000);
+
+// Renders the game screen and skips to the end screen using the exit icon
+test("x navigates exits game early and navigates to end screen", async () => {
+  const user = userEvent.setup();
+  render(
+    <MemoryRouter>
+      <WaterGame />
+    </MemoryRouter>,
+  );
+
+  await screen.findByTestId("water-start");
+  await user.click(screen.getByRole("button", { name: /play/i }));
+  await user.click(screen.getByRole("button", { name: /i'm ready/i }));
+
+  expect(screen.getByTestId("water-game")).toBeInTheDocument();
+  const exit = screen.getByAltText(/water game exit/i);
+  expect(exit).toBeInTheDocument();
+
+  await user.click(exit);
+  expect(screen.getByTestId("water-end")).toBeInTheDocument();
+});

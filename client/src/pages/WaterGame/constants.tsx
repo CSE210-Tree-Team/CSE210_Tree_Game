@@ -9,7 +9,7 @@ export const BUCKET_WIDTH = 140;
 export const BUCKET_HEIGHT = 140;
 
 // Game settings
-export const NUM_QUESTIONS = 3; // number of questions fetched per game session
+export const NUM_QUESTIONS = 5; // number of questions fetched per game session
 
 // Point indicator settings
 export const NUM_POINTS = 10; // points awarded per correct answer
