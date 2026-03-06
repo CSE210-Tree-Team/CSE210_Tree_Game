@@ -1,4 +1,9 @@
-import styles from "./homepage.module.css"
+/**
+ * Earth Compinent
+ * Displays the health status of the earth based on the provided value
+ * healthy, unhealthy, withered
+ */
+import styles from "./Earth.module.css"
 import {
     EARTH_HEALTH_THRESHOLD,
     EARTH_UNHEALTHY_THRESHOLD,
@@ -6,7 +11,7 @@ import {
     HEALTH_HEALTHY,
     HEALTH_UNHEALTHY,
     HEALTH_WITHERED
-} from "./constant";
+} from "../../constant";
 interface EarthProps {
     earth: number;
     onClick: () => void;
