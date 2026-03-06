@@ -11,8 +11,6 @@ import { fetchQuestions, AuthenticationError, handle401Error } from "../../Serve
 import type { Question } from "../../ServerCalls/ServerCalls";
 import { NUM_QUESTIONS } from "../constants";
 
-import { audioSystem } from "../../../AudioSystem";
-import audioFile from "../audio/WaterMinigameOST.mp3"
 
 interface UseWaterGameQuestionsResult {
   questions: Question[];
@@ -43,16 +41,6 @@ export const useWaterGameQuestions = (): UseWaterGameQuestionsResult => {
 
     loadQuestions();
   }, []);
-
-  useEffect(() => {
-    if (!isLoading && !error) {
-      audioSystem.playAmbient(audioFile);
-    }
-
-    return () => {
-      audioSystem.stopAmbient();
-    };
-  }, [isLoading, error]);
 
   return { questions, isLoading, error };
 };
