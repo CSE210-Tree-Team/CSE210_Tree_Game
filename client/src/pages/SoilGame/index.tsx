@@ -22,20 +22,28 @@ export default function SoilMinigame() {
 
       {/* 2. Tutorial Screen */}
       {state.phase === 'tutorial' && (
-        <TutorialScreen onReady={handleReadyToPlay} />
+        <TutorialScreen onReady={handleReadyToPlay} onBack={() => setPhase('title')} />
       )}
 
       {/* 3. Main Gameplay Screen */}
       {(state.phase === 'playing' || state.phase === 'complete') && (
-        <GameScreen state={state} onCommand={handleCommand} />
+        <>
+          <img
+            src="/closeSoil.svg"
+            alt="Exit Game"
+            className={styles.closeButton}
+            onClick={() => handleCommand('exit')}
+          />
+          <GameScreen state={state} onCommand={handleCommand} />
+        </>
       )}
 
       {/* 4. Completion Popup Overlay */}
       {state.showCompletionPopup && (
-        <CompletionPopup 
-          questsCompleted={state.quests.filter(q => q.completed).length} 
-          totalQuests={state.quests.length} 
-          score={state.score} 
+        <CompletionPopup
+          questsCompleted={state.quests.filter(q => q.completed).length}
+          totalQuests={state.quests.length}
+          score={state.score}
         />
       )}
 

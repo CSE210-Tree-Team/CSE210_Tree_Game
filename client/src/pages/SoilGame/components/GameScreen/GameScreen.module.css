@@ -1,17 +1,17 @@
-
 .gameBoard {
     width: 90%;
     max-width: 1100px;
     height: 85%;
-    background: var(--color-brown); 
-    border: 12px solid var(--color-tan); 
+    background: var(--color-brown);
+    border: 12px solid var(--color-tan);
     border-radius: 30px;
-    box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
     display: flex;
     overflow: hidden;
     padding: 10px;
     gap: 10px;
-  }
+}
+
 .terminalContainer {
     flex: 0 0 75%;
     height: 100%;
