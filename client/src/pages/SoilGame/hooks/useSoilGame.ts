@@ -1,3 +1,13 @@
+/*
+  useSoilGame
+
+  The top-level hook that wires together all Soil minigame state and logic.
+  Composes useGameLifecycle, usePlayerMovement, useInventoryActions, and
+  useQuestActions into a single interface consumed by the SoilGame page.
+  Also owns the command parser — mapping raw terminal input strings (e.g.
+  "w", "collect nitrogen 2", "1") to the appropriate sub-hook actions.
+*/
+
 import { useState, useCallback } from 'react';
 
 import {

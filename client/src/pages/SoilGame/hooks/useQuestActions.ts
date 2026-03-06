@@ -1,3 +1,12 @@
+/*
+  useQuestActions
+
+  Handles quest submission during gameplay.
+  Checks whether the player's current inventory satisfies a quest's required
+  elements. On success, marks the quest complete, updates the score, and
+  consumes the used inventory items. On failure, logs a hint to keep searching.
+*/
+
 import { useCallback } from 'react';
 import type { Dispatch, SetStateAction } from 'react';
 

@@ -1,3 +1,11 @@
+/*
+  usePlayerMovement
+
+  Handles moving the player through the dungeon map.
+  Validates that the target position is within bounds, updates the player's
+  position in game state, and appends location info to the terminal log.
+*/
+
 import { useCallback } from 'react';
 import type { Dispatch, SetStateAction } from 'react';
 

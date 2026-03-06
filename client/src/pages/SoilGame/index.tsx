@@ -1,3 +1,4 @@
+import { useNavigate } from 'react-router-dom';
 import { useSoilGame } from './hooks/useSoilGame';
 import { TitleScreen } from './components/TitleScreen/TitleScreen';
 import { TutorialScreen } from './components/TutorialScreen/TutorialScreen';
@@ -6,6 +7,7 @@ import { CompletionPopup } from './components/CompletionPopup/CompletionPopup';
 import styles from './SoilGame.module.css';
 
 export default function SoilMinigame() {
+  const navigate = useNavigate();
   const { state, setPhase, startGame, handleCommand } = useSoilGame();
 
   // Transition from Tutorial to Playing
@@ -17,7 +19,7 @@ export default function SoilMinigame() {
     <div className={styles.gameContainer}>
       {/* 1. Title Screen */}
       {state.phase === 'title' && (
-        <TitleScreen onPlay={() => setPhase('tutorial')} />
+        <TitleScreen onPlay={() => setPhase('tutorial')} onBack={() => navigate('/')} />
       )}
 
       {/* 2. Tutorial Screen */}

@@ -1,3 +1,12 @@
+/*
+  useInventoryActions
+
+  Handles collecting and dropping resources in the player's inventory.
+  Validates collection against available node resources, inventory capacity,
+  and quest requirements (penalizing collection of unneeded elements).
+  Dropping resources returns them to the current map node.
+*/
+
 import { useCallback } from 'react';
 import type { Dispatch, SetStateAction } from 'react';
 

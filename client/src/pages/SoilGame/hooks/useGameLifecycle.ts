@@ -1,3 +1,13 @@
+/*
+  useGameLifecycle
+
+  Manages the overall game lifecycle for the Soil minigame.
+  Handles phase transitions (title → tutorial → playing → complete),
+  fetching and initializing quests and the map when the game starts,
+  and submitting the player's final score when all quests are completed.
+  Auto-triggers game completion via a useEffect when all quests are done.
+*/
+
 import { useCallback, useEffect } from 'react';
 import type { Dispatch, SetStateAction } from 'react';
 
