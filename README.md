@@ -21,7 +21,7 @@ Press Ctrl+C **twice** to stop both servers.
 ## Initial Setup:
 
 1. Clone the Repository
-2. Set up the .env file and put it in the client folder. Note: it is on discord for members of our group.
+2. Set up the `.env` file in the repository root. Note: it is on discord for members of our group.
    - VITE_AUTH0_DOMAIN =
    - VITE_AUTH0_CLIENT_ID =
    - AUTH0_CLIENT_SECRET =
