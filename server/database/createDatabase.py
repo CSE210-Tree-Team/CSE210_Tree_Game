@@ -107,7 +107,7 @@ def create_schema(db_path=DB_PATH):
     cursor.execute(f'''
     CREATE TABLE IF NOT EXISTS Event (
         eventID TEXT PRIMARY KEY,
-        eventType TEXT NOT NULL CHECK(eventType IN ('{settings.EVENT_LEVEL}', '{settings.EVENT_BONUS}', '{settings.EVENT_PENALTY}', '{settings.EVENT_NEUTRAL}')),
+        eventType TEXT NOT NULL CHECK(eventType IN ('{settings.EVENT_LEVEL}', '{settings.EVENT_BONUS}', '{settings.EVENT_PENALTY}', '{settings.EVENT_NEUTRAL}', '{settings.EVENT_CHANGE}')),
         resourceAffected TEXT CHECK(resourceAffected IN ('{settings.RESOURCE_WATER}', '{settings.RESOURCE_EARTH}', '{settings.RESOURCE_SUN}', '{settings.RESOURCE_NONE}', '{settings.RESOURCE_ALL}')),
         description TEXT,
         percentChange INTEGER,

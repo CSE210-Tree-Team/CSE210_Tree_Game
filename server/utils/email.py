@@ -75,7 +75,7 @@ class EmailService:
         event_str = (
             f"Event Type: {event_data['eventType']}, "
             f"Resource Affected: {event_data['resourceAffected']}, "
-            f"Description: {event_data['description']}, "
+            f"Description: {event_data['description']} "
             f"Stat Changes: {event_data['percentChange']}%, "
             f"Conditions Met: {event_data['conditions']}"
         )

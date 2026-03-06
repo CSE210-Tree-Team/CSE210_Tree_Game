@@ -20,6 +20,7 @@ Functions - Tree & Resource Management:
     generate_tree(username)
     update_stat(tree_ID, stat_name, value)
     update_health(tree_ID, health_status)  # Updates the overall health status of the tree (healthy, unhealthy, etc.)
+    add_event(event)  # Records an event in the database
     do_event(tree_ID, event, value)
 
 Functions - Class Management:
@@ -243,6 +244,53 @@ def add_question_choice(choice_id: str, question_id: str, text: str, is_correct:
     '''
     
     _execute(sql, (choice_id, question_id, text, 1 if is_correct else 0))
+
+
+def add_event(event: Event) -> str:
+    """
+    Add an event to the Event table in the database.
+    
+    Args:
+        event: Event object to store in the database
+    
+    Returns:
+        str: The eventID of the added event
+    
+    Raises:
+        ValueError: If eventType or resourceAffected is invalid
+        sqlite3.IntegrityError: If eventID already exists (PRIMARY KEY violation)
+    
+    Note:
+        This function only records the event in the database.
+        To apply event effects to a tree, use do_event() instead.
+        The resourceAffected is automatically converted to lowercase to match database constraints.
+    """
+    if event.eventType not in settings.VALID_EVENT_TYPES:
+        raise ValueError(f"Invalid event type '{event.eventType}'. Must be one of {settings.VALID_EVENT_TYPES}")
+    
+    # Convert resourceAffected to lowercase for database constraint compatibility
+    resource_value = event.resourceAffected.lower() if event.resourceAffected else None
+    
+    # Validate resourceAffected (case-insensitive)
+    if resource_value and resource_value not in settings.VALID_RESOURCES:
+        raise ValueError(f"Invalid resource '{event.resourceAffected}'. Must be one of {settings.VALID_RESOURCES} (case-insensitive)")
+    
+    sql = '''
+        INSERT INTO Event (eventID, eventType, resourceAffected, description, percentChange, conditions)
+        VALUES (?, ?, ?, ?, ?, ?)
+    '''
+    
+    _execute(sql, (
+        event.eventID,
+        event.eventType,
+        resource_value,  # Store as lowercase
+        event.description,
+        event.percentChange,
+        event.conditions
+    ))
+    
+    return event.eventID
+
 
 def apply_passive_decay(tree_ID: str):
     """

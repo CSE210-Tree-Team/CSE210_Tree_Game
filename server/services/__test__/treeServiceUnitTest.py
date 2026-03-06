@@ -60,6 +60,50 @@ class TestTreeService(unittest.TestCase):
 
         mock_apply_decay.assert_called_once_with("tree-uuid-123")
 
+    @patch("services.tree_service.NotificationService.check_and_notify_threshold")
+    @patch("services.tree_service.apply_passive_decay")
+    @patch("services.tree_service._query")
+    def test_apply_decay_triggers_threshold_check_on_passive_change(
+        self,
+        mock_query,
+        mock_apply_decay,
+        mock_check_threshold,
+    ):
+        """Test passive decay triggers notification checks when resource levels change."""
+        mock_apply_decay.return_value = True
+        mock_query.side_effect = [
+            {
+                "ownerUsername": "student@example.com",
+                settings.RESOURCE_WATER: 80,
+                settings.RESOURCE_EARTH: 70,
+                settings.RESOURCE_SUN: 60,
+            },
+            {
+                "ownerUsername": "student@example.com",
+                settings.RESOURCE_WATER: 75,
+                settings.RESOURCE_EARTH: 70,
+                settings.RESOURCE_SUN: 55,
+            },
+        ]
+
+        TreeService.apply_decay("tree-uuid-123")
+
+        self.assertEqual(mock_check_threshold.call_count, 2)
+        mock_check_threshold.assert_any_call(
+            username="student@example.com",
+            tree_id="tree-uuid-123",
+            resource_name=settings.RESOURCE_WATER,
+            old_value=80,
+            new_value=75,
+        )
+        mock_check_threshold.assert_any_call(
+            username="student@example.com",
+            tree_id="tree-uuid-123",
+            resource_name=settings.RESOURCE_SUN,
+            old_value=60,
+            new_value=55,
+        )
+
     @patch("services.tree_service.apply_passive_decay")
     @patch("services.tree_service.get_all_trees")
     def test_apply_decay_to_all_counts_successes(self, mock_get_all_trees, mock_apply_decay):
