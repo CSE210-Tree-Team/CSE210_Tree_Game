@@ -277,8 +277,8 @@ export const WaterGame = () => {
       {screen === "start" && (
         <div data-testid="water-start" className={styles.gameScreen}>
           <img
-            src="/leftArrow.svg"
-            alt="Back Arrow"
+            src="/waterBack.svg"
+            alt="Water Game Back Arrow"
             className={styles.icon}
             onClick={() => navigate("/")}
           />
@@ -297,8 +297,8 @@ export const WaterGame = () => {
       {screen === "tutorial" && (
         <div data-testid="water-tutorial" className={styles.gameScreen}>
           <img
-            src="/leftArrow.svg"
-            alt="Back Arrow"
+            src="/waterBack.svg"
+            alt="Water Game Back Arrow"
             className={styles.icon}
             onClick={() => {
               setScreen("start");
