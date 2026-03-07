@@ -81,7 +81,7 @@ test("back arrow navigates back to start screen from tutorial", async () => {
 
   // Tutorial screen
   expect(screen.getByTestId("water-tutorial")).toBeInTheDocument();
-  const backArrow = screen.getByAltText(/back arrow/i);
+  const backArrow = screen.getByAltText(/water game back arrow/i);
   expect(backArrow).toBeInTheDocument();
 
   // Click back arrow to return to start screen
@@ -100,7 +100,7 @@ test("back arrow navigates back to home from start screen", async () => {
 
   // Start screen
   await screen.findByTestId("water-start");
-  const backArrow = screen.getByAltText(/back arrow/i);
+  const backArrow = screen.getByAltText(/water game back arrow/i);
   expect(backArrow).toBeInTheDocument();
 
   // Click back arrow to return to home
