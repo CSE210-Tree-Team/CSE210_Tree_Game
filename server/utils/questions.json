@@ -35,6 +35,34 @@
         "correct_choices": [0, 1]
     },
     {
+        "text": "At what temperature does pure water freeze at sea level (C)?",
+        "question_type": "MCQ",
+        "resource_type": "Water",
+        "choices": ["0", "32", "100", "-10"],
+        "correct_choices": [0]
+    },
+    {
+        "text": "Which part of Earth contains most of the planet's fresh water?",
+        "question_type": "MCQ",
+        "resource_type": "Water",
+        "choices": ["Rivers", "Lakes", "Glaciers and ice caps", "Atmosphere"],
+        "correct_choices": [2]
+    },
+    {
+        "text": "Which process turns liquid water into water vapor?",
+        "question_type": "MCQ",
+        "resource_type": "Water",
+        "choices": ["Condensation", "Evaporation", "Precipitation", "Infiltration"],
+        "correct_choices": [1]
+    },
+    {
+        "text": "What is the chemical formula for hydrogen peroxide?",
+        "question_type": "MCQ",
+        "resource_type": "Water",
+        "choices": ["H2O", "HO", "H2O2", "O2H"],
+        "correct_choices": [2]
+    },
+    {
         "text": "Water/H2O",
         "question_type": "MultiSelect",
         "resource_type": "Earth",
