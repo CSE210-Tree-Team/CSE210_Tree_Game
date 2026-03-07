@@ -14,7 +14,10 @@ import { type UserInfoResponse } from "../ServerCalls/types"
 import { establishAuthSession, fetchUserInfo } from "../ServerCalls/ServerCalls"
 import { Button } from "../../components/Button";
 
-const userInfoMock = {
+import { audioSystem } from '../../AudioSystem';
+import audioFile from './audio/HomeScreenOST.mp3'
+
+const userInfoMock: UserInfoResponse = {
     success: true,
     user: {
         username: "AA",
@@ -63,6 +66,14 @@ export const Homepage = () => {
         establishSession();
     },[user, getAccessTokenSilently]);
 
+    useEffect(() => {
+        audioSystem.playAmbient(audioFile);
+        
+        return () => {
+            audioSystem.fadeOut(1500); // smoother than hard stop
+        };
+    }, []);
+
 
     const handleLogout = () => {
         sessionStorage.removeItem('hasSeenTutorial');
@@ -78,6 +89,7 @@ export const Homepage = () => {
     };
 
     const handleCloseTutorial = () => {
+        audioSystem.playAmbient(audioFile);
         setShowTutorial(false);
         sessionStorage.setItem('hasSeenTutorial', 'true');
     }

@@ -9,6 +9,8 @@ import { WaterGame } from './pages/WaterGame/WaterGame';
 import './App.css';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 
+import { audioSystem } from './AudioSystem';
+
 function App() {
     const { isLoading, isAuthenticated } = useAuth0();
 
@@ -39,6 +41,19 @@ function App() {
             window.removeEventListener('beforeunload', handleBeforeUnload);
         };
     }, [isAuthenticated]);
+
+    useEffect(() => {
+        const unlockAudio = () => {
+            audioSystem.unlock();
+            window.removeEventListener("pointerdown", unlockAudio);
+        };
+
+        window.addEventListener("pointerdown", unlockAudio);
+
+        return () => {
+            window.removeEventListener("pointerdown", unlockAudio);
+        };
+    }, []);
 
     if (isLoading) {
         return <div style={{ textAlign: 'center', marginTop: '50px' }}>Loading...</div>;

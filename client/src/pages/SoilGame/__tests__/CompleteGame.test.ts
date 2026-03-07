@@ -9,13 +9,13 @@ vi.mock('../../ServerCalls/ServerCalls', () => ({
   pushGameResults: (...args: any[]) => pushGameResultsMock(...args),
 }));
 
-// vi.mock('../AudioSystem', () => ({
-//   audioSystem: {
-//     playAmbient: vi.fn(),
-//     fadeOut: vi.fn(),
-//     stopAmbient: vi.fn(),
-//   }
-// }));
+vi.mock('../../../AudioSystem', () => ({
+  audioSystem: {
+    playAmbient: vi.fn(),
+    stopAmbient: vi.fn(),
+    fadeOut: vi.fn(),
+  },
+}));
 
 describe('completeGame', () => {
   beforeEach(() => {

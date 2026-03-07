@@ -45,6 +45,9 @@ import {
 
 import styles from "./WaterGame.module.css";
 
+import { audioSystem } from "../../AudioSystem";
+import audioFile from "./audio/WaterMinigameOST.mp3";
+
 export const WaterGame = () => {
   const [screen, setScreen] = useState<"start" | "tutorial" | "game" | "end">(
     "start",
@@ -129,7 +132,14 @@ export const WaterGame = () => {
     nextPointId.current = 0;
     caughtRaindropIds.current = new Set();
     setScreen("game");
+
+    audioSystem.playAmbient(audioFile);
   };
+  useEffect(() => {
+    return () => {
+      audioSystem.stopAmbient();
+    };
+  }, []);
 
   // Pauses the game when the tab is hidden and resumes when the tab is visible
   useEffect(() => {

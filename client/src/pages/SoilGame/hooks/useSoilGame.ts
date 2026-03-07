@@ -48,6 +48,10 @@ import {
   ScoreManager,
 } from '../managers/ScoreManager';
 
+import { audioSystem } from '../../../AudioSystem';
+
+import audioFile from '../audio/SoilMinigameOST.mp3'
+
 // import { audioSystem } from '../AudioSystem';
 
 const isValidQuest = (quest: Quest | null): quest is Quest => quest != null;
@@ -510,6 +514,22 @@ export function useSoilGame() {
       console.table(debugGrid);
     }
   }, [state.map, state.playerPosition]);
+
+  useEffect(() => {
+    if (state.phase === "playing") {
+      audioSystem.playAmbient(audioFile);
+    }
+
+    if (state.phase === "complete") {
+      audioSystem.fadeOut(3000);
+    }
+  }, [state.phase]);
+
+  useEffect(() => {
+    return () => {
+      audioSystem.stopAmbient();
+    };
+  }, []);
 
   // Use for testing - updates ScoreManager and syncs score to state
   const setQuestsCompleted = (value: number) => {
