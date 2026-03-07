@@ -20,7 +20,7 @@ from config.settings import settings
 
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-DB_PATH = os.path.join(BASE_DIR, settings.DB_NAME)
+DB_PATH = settings.resolve_db_path(BASE_DIR)
 
 # Credit to Gemini for generating this script.
 # I would suggest running this with redirection to a file for easier viewing:

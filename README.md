@@ -40,10 +40,6 @@ Required Railway environment variables:
 - `VITE_AUTH0_CLIENT_ID` = your Auth0 client id
 - `EMAIL_PASSWORD` = sender mailbox app password (if email features are used)
 
-Important for Docker builds:
-- Vite variables (`VITE_*`) must exist during image build, not only at container runtime.
-- If Railway is not exposing service variables during Docker build, add `VITE_AUTH0_DOMAIN` and `VITE_AUTH0_CLIENT_ID` as Docker build args in Railway so they are available to `vite build`.
-
 Auth0 app settings must include your Railway URL in:
 - Allowed Callback URLs
 - Allowed Logout URLs

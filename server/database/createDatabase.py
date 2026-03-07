@@ -28,9 +28,13 @@ from config.settings import settings
 
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-DB_PATH = os.path.join(BASE_DIR, settings.DB_NAME)
+DB_PATH = settings.resolve_db_path(BASE_DIR)
 
 def create_schema(db_path=DB_PATH):
+
+    db_dir = os.path.dirname(db_path)
+    if db_dir:
+        os.makedirs(db_dir, exist_ok=True)
 
     conn = sqlite3.connect(db_path)
     cursor = conn.cursor()

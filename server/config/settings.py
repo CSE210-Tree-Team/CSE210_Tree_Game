@@ -78,7 +78,21 @@ class Settings:
     )
     
     # ========== DATABASE CONFIGURATION ==========
+    # When true, use Railway mounted volume path for SQLite persistence.
+    USE_VOLUME_DATA: bool = _parse_bool(
+        os.getenv("USE_VOLUME_DATA", "false"),
+        default=False
+    )
+    # Railway volume mount path (typical mount target is /data).
+    RAILWAY_VOLUME_PATH: str = os.getenv("RAILWAY_VOLUME_PATH", "/data")
     DB_NAME: str = "game_database.db"
+
+    def resolve_db_path(self, local_base_dir: str) -> str:
+        """Resolve the SQLite DB path based on local vs Railway volume storage."""
+        if self.USE_VOLUME_DATA:
+            volume_dir = self.RAILWAY_VOLUME_PATH.strip() or "/data"
+            return os.path.join(volume_dir, self.DB_NAME)
+        return os.path.join(local_base_dir, self.DB_NAME)
     
     # ========== TREE HEALTH STATUSES ==========
     # Based on resource thresholds - automatically calculated from water/earth levels

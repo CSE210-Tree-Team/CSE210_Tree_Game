@@ -83,11 +83,9 @@ class APIIntegrationTests(unittest.TestCase):
         import database.addItemsToDatabase as db_add
         import database.getItemsFromDatabase as db_get
         
-        # Restore to original paths based on settings
-        original_path = os.path.join(
-            os.path.dirname(os.path.abspath(db_create.__file__)),
-            settings.DB_NAME
-        )
+        # Restore to original paths based on current settings (local or volume).
+        original_base_dir = os.path.dirname(os.path.abspath(db_create.__file__))
+        original_path = settings.resolve_db_path(original_base_dir)
         db_create.DB_PATH = original_path
         db_add.DB_PATH = original_path
         db_get.DB_PATH = original_path

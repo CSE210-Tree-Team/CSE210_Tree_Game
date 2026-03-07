@@ -18,7 +18,7 @@ from config.settings import settings
 
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-DB_PATH = os.path.join(BASE_DIR, settings.DB_NAME)
+DB_PATH = settings.resolve_db_path(BASE_DIR)
 
 def _query(sql, params=(), fetchone=False):
     """Internal helper to handle database connections and clean up. 

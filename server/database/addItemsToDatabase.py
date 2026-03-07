@@ -39,7 +39,7 @@ DEFAULT_EDUCATION_LEVEL_CODE = settings.DEFAULT_EDUCATION_LEVEL_CODE
 VALID_EDUCATION_LEVELS = settings.VALID_EDUCATION_LEVELS
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-DB_PATH = os.path.join(BASE_DIR, settings.DB_NAME)
+DB_PATH = settings.resolve_db_path(BASE_DIR)
 
 
 def _execute(sql, params=(), commit=True):
