@@ -8,6 +8,7 @@ import uvicorn
 from fastapi import FastAPI, HTTPException
 from fastapi.responses import FileResponse
 from starlette.middleware.sessions import SessionMiddleware
+from database.createDatabase import DB_PATH as RESOLVED_DB_PATH
 
 # Configuration
 from config import settings
@@ -69,6 +70,7 @@ async def startup_event():
         Exception: If configuration validation fails or services can't start
     """
     try:
+        print(f"Resolved database path: {RESOLVED_DB_PATH}")
         settings.validate()
         decay_service.start()
         print("Application started successfully")
