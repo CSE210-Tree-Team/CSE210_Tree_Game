@@ -1,14 +1,26 @@
 import { useNavigate } from 'react-router-dom';
-import styles from "../../components/homepage.module.css"
-import buttonStyles from "../../components/Button.module.css"
+import styles from "./homepage.module.css"
 import fontStyles from "../../components/Popup.module.css"
-import { WelcomePagePopup } from "../../components/WelcomePagePopup"
-import test from "../../components/WelcomePopup.module.css"
+import welcomeStyles from "./WelcomePopup.module.css"
+import { Button } from "../../components/Button";
+
+interface WelcomePagePopupProps {
+    text: string;
+}
+
+const WelcomePagePopup = ({ text }: WelcomePagePopupProps) => {
+    return (
+        <div className={`${welcomeStyles.welcomePopup}`}>
+            <p className={welcomeStyles.welcomeText}>{text}</p>
+        </div>
+    );
+};
+
 export const Welcome = () => {
     const navigate = useNavigate();
 
     return (
-        <div className={`${styles.homepageWrapper} ${test.welcomeContainer}`}>
+        <div className={`${styles.homepageWrapper} ${welcomeStyles.welcomeContainer}`}>
                 <h1 className={`${fontStyles.title} ${styles.gameTitle}`}>
                     Welcome to Bristlecone
                 </h1>
@@ -18,8 +30,8 @@ export const Welcome = () => {
                 />
 
             <div className={styles.buttonContainer}>
-                <button className={`${buttonStyles.button} ${buttonStyles.grass} `} onClick={() => navigate("/signup")}>Sign Up</button>
-                <button className={`${buttonStyles.button} ${buttonStyles.grass} `} onClick={() => navigate("/login")}>Log In</button>
+                <Button variant="grass" label="Sign Up" onClick={() => navigate("/signup")} />
+                <Button variant="grass" label="Log In" onClick={() => navigate("/login")} />
             </div>
         </div>
     );

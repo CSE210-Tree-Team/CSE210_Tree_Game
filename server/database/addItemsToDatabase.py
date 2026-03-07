@@ -20,6 +20,7 @@ Functions - Tree & Resource Management:
     generate_tree(username)
     update_stat(tree_ID, stat_name, value)
     update_health(tree_ID, health_status)  # Updates the overall health status of the tree (healthy, unhealthy, etc.)
+    add_event(event)  # Records an event in the database
     do_event(tree_ID, event, value)
 
 Functions - Class Management:
@@ -35,7 +36,7 @@ import uuid
 
 # Import education level constants for student details
 DEFAULT_EDUCATION_LEVEL_CODE = settings.DEFAULT_EDUCATION_LEVEL_CODE
-EDUCATION_LEVEL_LABEL_TO_CODE = settings.EDUCATION_LEVEL_LABEL_TO_CODE
+VALID_EDUCATION_LEVELS = settings.VALID_EDUCATION_LEVELS
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 DB_PATH = os.path.join(BASE_DIR, settings.DB_NAME)
@@ -243,6 +244,53 @@ def add_question_choice(choice_id: str, question_id: str, text: str, is_correct:
     '''
     
     _execute(sql, (choice_id, question_id, text, 1 if is_correct else 0))
+
+
+def add_event(event: Event) -> str:
+    """
+    Add an event to the Event table in the database.
+    
+    Args:
+        event: Event object to store in the database
+    
+    Returns:
+        str: The eventID of the added event
+    
+    Raises:
+        ValueError: If eventType or resourceAffected is invalid
+        sqlite3.IntegrityError: If eventID already exists (PRIMARY KEY violation)
+    
+    Note:
+        This function only records the event in the database.
+        To apply event effects to a tree, use do_event() instead.
+        The resourceAffected is automatically converted to lowercase to match database constraints.
+    """
+    if event.eventType not in settings.VALID_EVENT_TYPES:
+        raise ValueError(f"Invalid event type '{event.eventType}'. Must be one of {settings.VALID_EVENT_TYPES}")
+    
+    # Convert resourceAffected to lowercase for database constraint compatibility
+    resource_value = event.resourceAffected.lower() if event.resourceAffected else None
+    
+    # Validate resourceAffected (case-insensitive)
+    if resource_value and resource_value not in settings.VALID_RESOURCES:
+        raise ValueError(f"Invalid resource '{event.resourceAffected}'. Must be one of {settings.VALID_RESOURCES} (case-insensitive)")
+    
+    sql = '''
+        INSERT INTO Event (eventID, eventType, resourceAffected, description, percentChange, conditions)
+        VALUES (?, ?, ?, ?, ?, ?)
+    '''
+    
+    _execute(sql, (
+        event.eventID,
+        event.eventType,
+        resource_value,  # Store as lowercase
+        event.description,
+        event.percentChange,
+        event.conditions
+    ))
+    
+    return event.eventID
+
 
 def apply_passive_decay(tree_ID: str):
     """
@@ -512,18 +560,28 @@ def join_class(student_username: str, class_code: str):
     _execute(sql, (student_username, class_id))
 
 def _normalize_education_level_code(value: int | str | None) -> int:
+    """
+    Normalize education level to an integer code (1-12).
+    
+    Args:
+        value: Can be an integer (1-12), string representation of integer, or None
+        
+    Returns:
+        Integer between 1 and 12
+        
+    Raises:
+        ValueError: If value is not a valid education level
+    """
     if value is None:
         return DEFAULT_EDUCATION_LEVEL_CODE
     if isinstance(value, int):
-        if value in EDUCATION_LEVEL_LABEL_TO_CODE.values():
+        if value in VALID_EDUCATION_LEVELS:
             return value
-        raise ValueError(f"Invalid education level code: {value}")
+        raise ValueError(f"Invalid education level code: {value}. Must be between 1 and 12.")
     trimmed = value.strip()
     if trimmed.isdigit():
         return _normalize_education_level_code(int(trimmed))
-    if trimmed in EDUCATION_LEVEL_LABEL_TO_CODE:
-        return EDUCATION_LEVEL_LABEL_TO_CODE[trimmed]
-    raise ValueError(f"Invalid education level label: {value}")
+    raise ValueError(f"Invalid education level: {value}. Must be a number between 1 and 12.")
 
 
 def upsert_student_details(student_username: str, contact_email: str | None = None, education_level: int | str | None = None):

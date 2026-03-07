@@ -198,7 +198,7 @@ class TestUserAPIRoutes(APIQuestionsTestCase):
             "email": "updated@example.com",
             "roles": ["Student"],
             "contactEmail": "contact@example.com",
-            "educationLevel": "6-8",
+            "educationLevel": 2,
         }
         response = client.put("/api/update-user", json=update_payload)
         self.assertEqual(response.status_code, 200)
@@ -209,7 +209,7 @@ class TestUserAPIRoutes(APIQuestionsTestCase):
         self.assertEqual(updated_user["displayName"], "Updated Student")
         self.assertEqual(updated_user["email"], "updated@example.com")
         self.assertEqual(updated_user["contactEmail"], "contact@example.com")
-        self.assertEqual(updated_user["educationLevel"], "2")
+        self.assertEqual(updated_user["educationLevel"], 2)
 
         # Verify persistence in database
         person = get_person("test_student@example.com")

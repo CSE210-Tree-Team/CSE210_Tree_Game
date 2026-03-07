@@ -1,79 +1,144 @@
 [
-    {
-        "text": "What is the powerhouse of the cell?",
-        "question_type": "MCQ",
-        "resource_type": "Sun",
-        "choices": ["The mitochondria", "The nucleus", "The ribosome", "The endoplasmic reticulum"],
-        "correct_choices": [0]
-    },
-    {
-        "text": "Which process do plants use to make food?",
-        "question_type": "MCQ",
-        "resource_type": "Sun",
-        "choices": ["Respiration", "Photosynthesis", "Digestion", "Fermentation"],
-        "correct_choices": [1]
-    },
-    {
-        "text": "What is H2O?",
-        "question_type": "MCQ",
-        "resource_type": "Water",
-        "choices": ["Hydrogen Peroxide", "Water", "Hydrochloric Acid", "Heavy Water"],
-        "correct_choices": [1]
-    },
-    {
-        "text": "Which of these are renewable energy sources?",
-        "question_type": "MultiSelect",
-        "resource_type": "Sun",
-        "choices": ["Solar", "Coal", "Wind", "Natural Gas"],
-        "correct_choices": [0, 2]
-    },
-    {
-        "text": "Which of the following elements appears in water?",
-        "question_type": "MultiSelect",
-        "resource_type": "Water",
-        "choices": ["Hydrogen", "Oxygen", "Carbon", "Nitrogen"],
-        "correct_choices": [0, 1]
-    },
-    {
-        "text": "Water/H2O",
-        "question_type": "MultiSelect",
-        "resource_type": "Earth",
-        "choices": ["2H", "O", "2Fe"],
-        "correct_choices": [0, 1]
-    },
-    {
-        "text": "Carbon Dioxide/CO2",
-        "question_type": "MultiSelect",
-        "resource_type": "Earth",
-        "choices": ["C", "2O", "H", "Fe"],
-        "correct_choices": [0, 1]
-    },
-    {
-        "text": "Ammonia/NH3",
-        "question_type": "MultiSelect",
-        "resource_type": "Earth",
-        "choices": ["N", "3H", "O", "Fe"],
-        "correct_choices": [0, 1]
-    },
-    {
-        "text": "Methane/CH4",
-        "question_type": "MultiSelect",
-        "resource_type": "Earth",
-        "choices": ["C", "4H", "O", "Fe"],
-        "correct_choices": [0, 1]
-    },
-    {
-        "text": "Sodium Chloride/NaCl",
-        "question_type": "MultiSelect",
-        "resource_type": "Earth",
-        "choices": ["Na", "Cl", "2O", "Fe"],
-        "correct_choices": [0, 1]
-    },
-    {
-        "text": "Glucose/C6H12O6",
-        "question_type": "MultiSelect",
-        "resource_type": "Earth",
-        "choices": ["6C", "12H", "6O", "2N", "3Fe"],
-        "correct_choices": [0, 1, 2]
-    }
+  {
+    "text": "What is the powerhouse of the cell?",
+    "question_type": "MCQ",
+    "resource_type": "Sun",
+    "choices": [
+      "The mitochondria",
+      "The nucleus",
+      "The ribosome",
+      "The endoplasmic reticulum"
+    ],
+    "correct_choices": [0]
+  },
+  {
+    "text": "Which process do plants use to make food?",
+    "question_type": "MCQ",
+    "resource_type": "Sun",
+    "choices": ["Respiration", "Photosynthesis", "Digestion", "Fermentation"],
+    "correct_choices": [1]
+  },
+  {
+    "text": "What is H2O?",
+    "question_type": "MCQ",
+    "resource_type": "Water",
+    "choices": [
+      "Hydrogen Peroxide",
+      "Water",
+      "Hydrochloric Acid",
+      "Heavy Water"
+    ],
+    "correct_choices": [1]
+  },
+  {
+    "text": "Which of these are renewable energy sources?",
+    "question_type": "MultiSelect",
+    "resource_type": "Sun",
+    "choices": ["Solar", "Coal", "Wind", "Natural Gas"],
+    "correct_choices": [0, 2]
+  },
+  {
+    "text": "Which of the following elements appears in water?",
+    "question_type": "MultiSelect",
+    "resource_type": "Water",
+    "choices": ["Hydrogen", "Oxygen", "Carbon", "Nitrogen"],
+    "correct_choices": [0, 1]
+  },
+  {
+    "text": "Water/H2O",
+    "question_type": "MultiSelect",
+    "resource_type": "Earth",
+    "choices": ["2H", "O", "2Fe"],
+    "correct_choices": [0, 1]
+  },
+  {
+    "text": "Carbon Dioxide/CO2",
+    "question_type": "MultiSelect",
+    "resource_type": "Earth",
+    "choices": ["C", "2O", "H", "Fe"],
+    "correct_choices": [0, 1]
+  },
+  {
+    "text": "Ammonia/NH3",
+    "question_type": "MultiSelect",
+    "resource_type": "Earth",
+    "choices": ["N", "3H", "O", "Fe"],
+    "correct_choices": [0, 1]
+  },
+  {
+    "text": "Methane/CH4",
+    "question_type": "MultiSelect",
+    "resource_type": "Earth",
+    "choices": ["C", "4H", "O", "Fe"],
+    "correct_choices": [0, 1]
+  },
+  {
+    "text": "Sodium Chloride/NaCl",
+    "question_type": "MultiSelect",
+    "resource_type": "Earth",
+    "choices": ["Na", "Cl", "2O", "Fe"],
+    "correct_choices": [0, 1]
+  },
+  {
+    "text": "Glucose/C6H12O6",
+    "question_type": "MultiSelect",
+    "resource_type": "Earth",
+    "choices": ["6C", "12H", "6O", "2N", "3Fe"],
+    "correct_choices": [0, 1, 2]
+  },
+  {
+    "text": "What is the chemical formula for water?",
+    "question_type": "MCQ",
+    "resource_type": "Water",
+    "choices": ["CO2", "H2O", "NaCl", "HO"],
+    "correct_choices": [1]
+  },
+  {
+    "text": "What percentage of the earth is covered by water?",
+    "question_type": "MCQ",
+    "resource_type": "Water",
+    "choices": ["30", "50", "70", "100"],
+    "correct_choices": [2]
+  },
+  {
+    "text": "Which one of these is NOT a state of water?",
+    "question_type": "MCQ",
+    "resource_type": "Water",
+    "choices": ["Ice", "Liquid", "Gas", "Rock"],
+    "correct_choices": [3]
+  },
+  {
+    "text": "Which one of these is NOT a phase of the water cycle?",
+    "question_type": "MCQ",
+    "resource_type": "Water",
+    "choices": [
+      "Evaporation",
+      "Condensation",
+      "Precipation",
+      "Collection",
+      "Perspiration"
+    ],
+    "correct_choices": [4]
+  },
+  {
+    "text": "What is the main source of energy that drives the water cycle?",
+    "question_type": "MCQ",
+    "resource_type": "Water",
+    "choices": ["Moon", "Sun", "Wind", "Volcanoes"],
+    "correct_choices": [1]
+  },
+  {
+    "text": "Which water source contains most of Earth's freshwater?",
+    "question_type": "MCQ",
+    "resource_type": "Water",
+    "choices": ["Rivers", "Lakes", "Glaciers", "Clouds"],
+    "correct_choices": [2]
+  },
+  {
+    "text": "What element do plants release during photosynthesis?",
+    "question_type": "MCQ",
+    "resource_type": "Water",
+    "choices": ["Carbon", "Oxygen", "Hydrogen", "Nitrogen"],
+    "correct_choices": [1]
+  }
 ]

@@ -1,17 +1,18 @@
-import { useAuth0 } from '@auth0/auth0-react';
+﻿import { useAuth0 } from '@auth0/auth0-react';
 import { useEffect, useState } from 'react';
-import { handle401Error } from '../ServerCalls/ServerCalls';
 import { useNavigate } from 'react-router-dom';
-import { Tree } from "../../components/Tree";
-import { Earth } from "../../components/Earth";
-import { WateringCan } from "../../components/WateringCan";
-import { ResourceBoard } from "../../components/ResourceBoard"
-import styles from "../../components/homepage.module.css"
+import { Tree } from "./components/Tree/Tree";
+import { Earth } from "./components/Earth/Earth";
+import { WateringCan } from "./components/WateringCan/WateringCan";
+import { ResourceBoard } from "./components/ResourceBoard/ResourceBoard"
+
+import styles from "./homepage.module.css"
 import fontStyles from "../../components/Popup.module.css"
-import buttonStyles from "../../components/Button.module.css"
-import Tutorial from "./Tutorial"
-import { type UserInfoResponse } from "../ServerCalls/ServerCalls"
+
+import Tutorial from "./components/Tutorial/Tutorial"
+import { type UserInfoResponse } from "../ServerCalls/types"
 import { establishAuthSession, fetchUserInfo } from "../ServerCalls/ServerCalls"
+import { Button } from "../../components/Button";
 
 import { audioSystem } from '../../AudioSystem';
 import audioFile from './audio/HomeScreenOST.mp3'
@@ -52,26 +53,14 @@ export const Homepage = () => {
             }
             try {
                 const token = await getAccessTokenSilently();
-                await fetch('/api/auth/verify', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${token}`
-                    },
-                    body: JSON.stringify({ user })
-                });
-
-                // Fetch user info including resource levels
-                const response = await fetch('/api/get-user-info');
-                if (response.ok) {
-                    const data = await response.json();
-                    setUserInfo(data);
-                } else if (response.status === 401) {
-                    handle401Error();
-                    return;
+                const authSuccess = await establishAuthSession(token, user);
+                if (!authSuccess) {
+                    throw new Error("Failed to verify the authentication");
                 }
-            } catch (error) {
-                console.error('Failed to establish backend session:', error);
+                const data = await fetchUserInfo();
+                setUserInfo(data);
+            } catch {
+                throw new Error("Failed to establish backend session");
             }
         }
         establishSession();
@@ -109,35 +98,27 @@ export const Homepage = () => {
         navigate('/account');
     };
 
+
+
     return (
         <div className={styles.homepageWrapper}>
             {showTutorial && (<Tutorial onClose={handleCloseTutorial} />)}
                     <h1 className={`${fontStyles.title} ${styles.helloTitle}`}>
-                        Hello, {userInfo?.user.displayName || 'User'}
+                        Hello, {userInfo?.user.displayName ?? 'User'}
                     </h1>
-                <ResourceBoard resources={userInfo?.tree.resourceLevels || userInfoMock.tree.resourceLevels} />
+                <ResourceBoard resources={userInfo?.tree?.resourceLevels ?? userInfoMock.tree.resourceLevels} />
 
                 <div className={styles.treeEarthContainer}>
-                    <Tree water={userInfo?.tree.resourceLevels.water || userInfoMock.tree.resourceLevels.water} />
-                    <Earth earth={userInfo?.tree.resourceLevels.earth || userInfoMock.tree.resourceLevels.earth} onClick={handleSoilGame} />
+                <Tree water={userInfo?.tree?.resourceLevels.water ?? userInfoMock.tree.resourceLevels.water} />
+                    <Earth earth={userInfo?.tree?.resourceLevels.earth ?? userInfoMock.tree.resourceLevels.earth} onClick={handleSoilGame} />
                     <WateringCan onClick={handleWaterGame} />
                 </div>
 
 
-                <div>
-                <button className={`${buttonStyles.button} ${buttonStyles.grass} ${styles.buttonSingle} ${styles.buttonLogout}`} onClick={handleLogout}>
-                    Logout
-                    </button>
-
-                    <button
-                        className={`${buttonStyles.button} ${buttonStyles.grass} ${styles.buttonSingle} ${styles.buttonSetting}`}
-                        onClick={handleSettings}
-                    >
-                    Settings
-                    </button>
+            <div>
+                <Button variant="grass" label="Logout" onClick={handleLogout} className={`${styles.buttonSingle} ${styles.buttonLogout}`} />
+                <Button variant="grass" label="Settings" onClick={handleSettings} className={`${styles.buttonSingle} ${styles.buttonSetting}`} />
                 </div>
-
-            <br></br>
 
         </div>
     );

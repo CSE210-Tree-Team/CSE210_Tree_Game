@@ -140,17 +140,9 @@ class Settings:
     ]
 
     # ========== EDUCATION LEVELS ==========
-    # Maps education level labels to integer codes for storage
-    EDUCATION_LEVEL_PRIMARY: str = "3-6"
-    EDUCATION_LEVEL_MIDDLE: str = "6-8"
-    EDUCATION_LEVEL_HIGH: str = "9-12"
-    
-    EDUCATION_LEVEL_LABEL_TO_CODE: Dict[str, int] = {
-        "3-6": 1,
-        "6-8": 2,
-        "9-12": 3,
-    }
-    DEFAULT_EDUCATION_LEVEL_CODE: int = 1  # '3-6'
+    # Supported education levels: grades 1-12
+    VALID_EDUCATION_LEVELS: List[int] = list(range(1, 13))  # 1-12
+    DEFAULT_EDUCATION_LEVEL_CODE: int = 1  # Grade 1
     
     # ========== TIMING & DECAY ==========
     # Passive decay rates for resources -- how many minutes to decay 1 level of the resource

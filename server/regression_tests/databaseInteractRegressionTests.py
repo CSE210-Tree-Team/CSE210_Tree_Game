@@ -579,7 +579,7 @@ class TestStudentDetails(DatabaseInteractTestCase):
         upsert_student_details(
             student_username="student_detail_user",
             contact_email="parent@example.com",
-            education_level="3-6"
+            education_level=1
         )
 
         result = get_student_details("student_detail_user")
@@ -593,13 +593,13 @@ class TestStudentDetails(DatabaseInteractTestCase):
         upsert_student_details(
             student_username="student_detail_user",
             contact_email="old@example.com",
-            education_level="3-6"
+            education_level=1
         )
 
         upsert_student_details(
             student_username="student_detail_user",
             contact_email="new@example.com",
-            education_level="6-8"
+            education_level=2
         )
 
         result = get_student_details("student_detail_user")
@@ -624,7 +624,7 @@ class TestIntegration(DatabaseInteractTestCase):
         )
         
         # Add student details
-        upsert_student_details("john_student", education_level="3-6")
+        upsert_student_details("john_student", education_level=1)
         
         # Generate tree
         tree_id = generate_tree("john_student")

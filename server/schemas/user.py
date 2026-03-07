@@ -14,7 +14,7 @@ class UserInfo(BaseModel):
     displayName: str
     roles: List[str]
     contactEmail: Optional[str] = None
-    educationLevel: Optional[str] = None
+    educationLevel: Optional[int] = None
 
 
 class UserUpdate(BaseModel):
@@ -22,7 +22,7 @@ class UserUpdate(BaseModel):
     email: Optional[EmailStr] = None
     displayName: Optional[str] = None
     contactEmail: Optional[str] = None
-    educationLevel: Optional[str] = None
+    educationLevel: Optional[int] = None
 
 
 class UserWithTree(BaseModel):

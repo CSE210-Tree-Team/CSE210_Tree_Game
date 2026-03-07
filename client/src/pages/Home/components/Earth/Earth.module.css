@@ -1,0 +1,27 @@
+.earthContainer {
+    position: absolute;
+    left: 50%;
+    bottom: 0;
+    transform: translateX(-50%);
+    width: 40vw;
+    height: 40vh;
+    z-index: 1;
+    cursor: pointer;
+    transition: transform 0.3s ease;
+    display: inline-block;
+}
+
+    .earthContainer:hover {
+        transform: translateX(-50%) scale(1.15);
+    }
+
+    .earthContainer:active {
+        transform: translateX(-50%) scale(0.95);
+    }
+
+.earthImage {
+    width: 100%;
+    height: auto;
+    object-fit: contain;
+    display: block;
+}
