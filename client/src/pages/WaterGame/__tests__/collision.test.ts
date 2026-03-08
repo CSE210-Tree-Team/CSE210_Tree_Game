@@ -8,7 +8,7 @@ conditions, and exact edge cases at the bucket's boundaries.
 */
 
 import { describe, it, expect } from "vitest";
-import { checkCollision } from "../collision";
+import { checkCollision } from "../utils/collision";
 import { BUCKET_WIDTH } from "../constants";
 
 describe("checkCollision", () => {

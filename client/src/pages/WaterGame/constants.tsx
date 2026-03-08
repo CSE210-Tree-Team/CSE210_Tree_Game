@@ -16,3 +16,4 @@ export const NUM_POINTS = 10; // points awarded per correct answer
 export const INCORRECT = "X"; // text displayed for an incorrect answer
 export const POINT_DURATION_MS = 2000; // time the point indicator remains on screen in milliseconds
 export const POINT_WIDTH = 72; // pixels, used to center the point indicator above the bucket
+export const POINT_GAP = 72; // pixels, vertical distance the point indicator spawns from the bucket

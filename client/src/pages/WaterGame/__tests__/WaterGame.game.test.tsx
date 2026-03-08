@@ -15,15 +15,15 @@ import userEvent from "@testing-library/user-event";
 import { MemoryRouter } from "react-router-dom";
 import { vi, beforeEach, afterEach } from "vitest";
 
-import { WaterGame } from "../WaterGame";
-import styles from "../WaterGame.module.css";
+import { WaterGame } from "../index";
+import styles from "../screens/Screens.module.css";
 import type { RaindropAnswer } from "../types";
 import type { Question } from "../../ServerCalls/ServerCalls";
 import * as ServerCalls from "../../ServerCalls/ServerCalls";
-import * as utils from "../utils";
+import * as utils from "../utils/raindropHelper";
 import { INCORRECT, NUM_POINTS } from "../constants";
 
-vi.mock('../../../AudioSystem', () => ({
+vi.mock("../../../AudioSystem", () => ({
   audioSystem: {
     playAmbient: vi.fn(),
     stopAmbient: vi.fn(),
