@@ -4,9 +4,10 @@ export const RAINDROP_HEIGHT = 128;
 export const RAINDROP_FALL_SPEED = 1.2; // pixels per tick (tick = 16ms)
 export const SPAWN_INTERVAL_MS = 1750; // time between raindrop spawns in milliseconds
 
-// Bucket dimensions
+// Bucket dimensions and movement
 export const BUCKET_WIDTH = 140;
 export const BUCKET_HEIGHT = 140;
+export const BUCKET_MOVE = 20;
 
 // Game settings
 export const NUM_QUESTIONS = 5; // number of questions fetched per game session

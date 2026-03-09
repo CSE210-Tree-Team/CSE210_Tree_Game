@@ -3,9 +3,8 @@ import { useWaterGameQuestions } from "./useWaterGameQuestions";
 import { useGameLoop } from "./useGameLoop";
 import { usePoints } from "./usePoints";
 import { audioSystem } from "../../../AudioSystem";
+import type { GameScreen } from "../types";
 import audioFile from "../audio/WaterMinigameOST.mp3";
-
-export type GameScreen = "start" | "tutorial" | "game" | "end";
 
 export const useWaterGame = () => {
   const [screen, setScreen] = useState<GameScreen>("start");

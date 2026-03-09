@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { BUCKET_WIDTH } from "../constants";
+import { BUCKET_WIDTH, BUCKET_MOVE } from "../constants";
 
 export const useBucket = (bucketXRef: React.RefObject<number | null>) => {
   const [bucketX, setBucketX] = useState(0);
@@ -27,9 +27,9 @@ export const useBucket = (bucketXRef: React.RefObject<number | null>) => {
       const maxRight = Math.max(containerWidth - BUCKET_WIDTH, 0);
 
       if (e.key === "ArrowLeft") {
-        setBucketX((prev) => Math.max(prev - 20, 0));
+        setBucketX((prev) => Math.max(prev - BUCKET_MOVE, 0));
       } else if (e.key === "ArrowRight") {
-        setBucketX((prev) => Math.min(prev + 20, maxRight));
+        setBucketX((prev) => Math.min(prev + BUCKET_MOVE, maxRight));
       }
     };
 
