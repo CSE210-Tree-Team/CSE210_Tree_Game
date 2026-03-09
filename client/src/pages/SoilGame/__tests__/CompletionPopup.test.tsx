@@ -9,6 +9,14 @@ vi.mock('react-router-dom', () => ({
     useNavigate: () => mockNavigate,
 }));
 
+vi.mock('../../../AudioSystem', () => ({
+  audioSystem: {
+    playAmbient: vi.fn(),
+    stopAmbient: vi.fn(),
+    fadeOut: vi.fn(),
+  },
+}));
+
 describe('CompletionPopup', () => {
     beforeEach(() => {
         vi.clearAllMocks();

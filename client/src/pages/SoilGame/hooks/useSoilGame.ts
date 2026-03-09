@@ -20,10 +20,49 @@ import { ScoreManager } from '../managers/ScoreManager';
 import { renderMapLines } from '../utils/MapHelper';
 import { isValidCommand, parseCommand } from '../utils/CommandParser';
 
-import { useGameLifecycle } from './useGameLifecycle';
-import { usePlayerMovement } from './usePlayerMovement';
-import { useInventoryActions } from './useInventoryActions';
-import { useQuestActions } from './useQuestActions';
+import {
+  getNodeAt,
+  generateMap
+} from '../utils/MapHelper'
+
+import {
+  createEmptyInventory,
+  addToInventory,
+  removeFromInventory
+} from '../utils/InventoryHelper';
+
+import {
+  checkAndCompleteQuest,
+  formatLocationInfo,
+  isValidCommand,
+  parseCommand
+} from '../utils/QuestListHelper';
+
+
+
+import {
+  getNextPosition,
+} from '../utils/PositionHelper';
+
+import {
+  fetchSoilQuestions,
+  SOIL_QUESTION_COUNT,
+} from '../managers/SoilGameQuestionManager';
+import { toSoilQuest } from '../utils/QuestionAdapter'
+
+import {
+  POINTS_PER_INCORRECT,
+  ScoreManager,
+} from '../managers/ScoreManager';
+
+import { audioSystem } from '../../../AudioSystem';
+
+import audioFile from '../audio/SoilMinigameOST.mp3'
+
+// import { audioSystem } from '../AudioSystem';
+
+const isValidQuest = (quest: Quest | null): quest is Quest => quest != null;
+
 
 // ========================
 // Initial State
@@ -108,7 +147,23 @@ export function useSoilGame() {
     }
   }, [movePlayer, collectResources, dropResources, submitQuest, completeGame]);
 
-  // @testing-only — used in test files to sync score manager state
+  useEffect(() => {
+    if (state.phase === "playing") {
+      audioSystem.playAmbient(audioFile);
+    }
+
+    if (state.phase === "complete") {
+      audioSystem.fadeOut(3000);
+    }
+  }, [state.phase]);
+
+  useEffect(() => {
+    return () => {
+      audioSystem.stopAmbient();
+    };
+  }, []);
+
+  // Use for testing - updates ScoreManager and syncs score to state
   const setQuestsCompleted = (value: number) => {
     scoreManager.setQuestsCompleted(value);
     const newScore = scoreManager.calculateRawScore();

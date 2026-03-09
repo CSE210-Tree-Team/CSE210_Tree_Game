@@ -4,6 +4,14 @@ import { render, screen, waitFor } from '../../../test/test-utils'
 import userEvent from '@testing-library/user-event'
 import { Homepage } from '../homepage'
 
+vi.mock('../../../AudioSystem', () => ({
+  audioSystem: {
+    playAmbient: vi.fn(),
+    stopAmbient: vi.fn(),
+    fadeOut: vi.fn(),
+  },
+}));
+
 // Mock Auth0
 vi.mock('@auth0/auth0-react', () => ({
   useAuth0: () => ({

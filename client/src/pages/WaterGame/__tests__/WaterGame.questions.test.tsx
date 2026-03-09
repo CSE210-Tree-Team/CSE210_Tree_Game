@@ -16,6 +16,14 @@ import { WaterGame } from "../WaterGame";
 import type { Question } from "../../ServerCalls/ServerCalls";
 import * as ServerCalls from "../../ServerCalls/ServerCalls";
 
+vi.mock('../../../AudioSystem', () => ({
+  audioSystem: {
+    playAmbient: vi.fn(),
+    stopAmbient: vi.fn(),
+    fadeOut: vi.fn(),
+  },
+}));
+
 const mockQuestions = [
   {
     questionID: "1",
