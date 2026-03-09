@@ -23,6 +23,14 @@ import * as ServerCalls from "../../ServerCalls/ServerCalls";
 import * as utils from "../utils";
 import { INCORRECT, NUM_POINTS } from "../constants";
 
+vi.mock('../../../AudioSystem', () => ({
+  audioSystem: {
+    playAmbient: vi.fn(),
+    stopAmbient: vi.fn(),
+    fadeOut: vi.fn(),
+  },
+}));
+
 const mockQuestions = [
   {
     questionID: "1",
