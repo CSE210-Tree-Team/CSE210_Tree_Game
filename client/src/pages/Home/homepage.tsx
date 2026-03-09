@@ -1,4 +1,12 @@
-﻿import { useAuth0 } from '@auth0/auth0-react';
+﻿/**
+ * Homepage
+ * It serves as the main dashboard for users after logging in, displaying their tree's health and resources
+ * It integrates various components such as the Tree, Earth, Watering Can, and Resource Board to provide an interactive experience
+ * It also includes a tutorial for new users, guiding them through the basics of caring for their virtual tree and how to play the associated minigames
+ * The homepage manages user authentication, session establishment with the backend, and navigation to different parts of the application such as games and account settings
+ */
+
+import { useAuth0 } from '@auth0/auth0-react';
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Tree } from "./components/Tree/Tree";

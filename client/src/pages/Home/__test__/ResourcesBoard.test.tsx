@@ -1,3 +1,9 @@
+/*
+Unit tests for the resource board component
+
+It checks if the ResourceBoard component renders correctly with given resource values, displays correct percentage values, and shows the appropriate icons and background image
+It also tests edge cases for zero and maximum resource values to ensure proper handling of these scenarios
+*/
 import { describe, it, expect } from 'vitest'
 import { render, screen } from '../../../test/test-utils'
 import { ResourceBoard } from '../components/ResourceBoard/ResourceBoard'

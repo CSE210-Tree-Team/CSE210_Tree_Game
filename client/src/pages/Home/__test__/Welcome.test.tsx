@@ -1,3 +1,10 @@
+/*
+Unit tests for the welcome page
+
+It checks if the welcome page renders the correct title, introduction text, and buttons for signing up and logging in
+It also tests the navigation functionality of the buttons to ensure they redirect to the correct pages when clicked
+*/
+
 import { describe, it, expect, vi } from 'vitest'
 import { render, screen } from '../../../test/test-utils'
 import userEvent from '@testing-library/user-event'

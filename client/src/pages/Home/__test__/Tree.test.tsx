@@ -1,3 +1,9 @@
+/*
+Unit tests for the tree component
+
+It checks if the Tree component renders the correct image based on the water level, using predefined thresholds for healthy, unhealthy, and withered states
+It also verifies that the component uses the correct threshold values from constants and applies the appropriate CSS classes for styling
+*/
 import { describe, it, expect } from 'vitest'
 import { render, screen } from '../../../test/test-utils'
 import { Tree } from '../components/Tree/Tree'

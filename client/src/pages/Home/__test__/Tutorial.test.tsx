@@ -1,3 +1,11 @@
+/*
+Unit tests for the tutorial component
+
+It checks if the Tutorial component renders the correct content for both pages, including text and buttons
+It tests navigation between the first and second pages using the next and back buttons, ensuring the correct content is displayed
+It verifies that the onClose callback is called when the "I'm Ready" button is clicked on the second page
+It also checks for the presence of the grass variant styling and background overlay on both pages to ensure consistent visual design
+*/
 import { describe, it, expect, vi } from 'vitest';
 import { render, screen, waitFor } from '../../../test/test-utils';
 import userEvent from '@testing-library/user-event';

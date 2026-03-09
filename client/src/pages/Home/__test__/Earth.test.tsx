@@ -1,3 +1,9 @@
+/*
+Unit tests for the earth component
+
+It verifies whether the earth component renders using predefined img and styles correctly based on the given value. 
+It checks 3 states(healthy, withered, unhealthy) accordingly and also the threshold value of the earth resource.
+*/
 import { describe, it, expect, vi } from 'vitest'
 import { render, screen } from '../../../test/test-utils'
 import userEvent from '@testing-library/user-event'
