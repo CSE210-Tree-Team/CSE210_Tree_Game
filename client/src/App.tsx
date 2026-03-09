@@ -1,92 +1,96 @@
-import { useAuth0 } from '@auth0/auth0-react';
-import { useEffect } from 'react';
-import { Login } from './pages/Login/Login';
-import { Homepage } from './pages/Home/homepage';
-import { Welcome } from './pages/Home/Welcome';
-import SoilGame from './pages/SoilGame/index';
-import { AccountSettings, AccountSettingsEdit } from './pages/AccountSettings/AccountSettings';
-import { WaterGame } from './pages/WaterGame/WaterGame';
-import './App.css';
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { useAuth0 } from "@auth0/auth0-react";
+import { useEffect } from "react";
+import { Login } from "./pages/Login/Login";
+import { Homepage } from "./pages/Home/homepage";
+import { Welcome } from "./pages/Home/Welcome";
+import SoilGame from "./pages/SoilGame/index";
+import {
+  AccountSettings,
+  AccountSettingsEdit,
+} from "./pages/AccountSettings/AccountSettings";
+import { WaterGame } from "./pages/WaterGame/index";
+import "./App.css";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 
-import { audioSystem } from './AudioSystem';
+import { audioSystem } from "./AudioSystem";
 
 function App() {
-    const { isLoading, isAuthenticated } = useAuth0();
+  const { isLoading, isAuthenticated } = useAuth0();
 
-    useEffect(() => {
-        if (!isAuthenticated) {
-            return;
-        }
-
-        const handleBeforeUnload = () => {
-            const endpoint = '/api/auth/logout';
-
-            if (navigator.sendBeacon) {
-                const payload = new Blob([], { type: 'application/json' });
-                navigator.sendBeacon(endpoint, payload);
-                return;
-            }
-
-            fetch(endpoint, {
-                method: 'POST',
-                keepalive: true,
-            }).catch(() => {
-                // no-op: unload calls are best-effort
-            });
-        };
-
-        window.addEventListener('beforeunload', handleBeforeUnload);
-        return () => {
-            window.removeEventListener('beforeunload', handleBeforeUnload);
-        };
-    }, [isAuthenticated]);
-
-    useEffect(() => {
-        const unlockAudio = () => {
-            audioSystem.unlock();
-            window.removeEventListener("pointerdown", unlockAudio);
-        };
-
-        window.addEventListener("pointerdown", unlockAudio);
-
-        return () => {
-            window.removeEventListener("pointerdown", unlockAudio);
-        };
-    }, []);
-
-    if (isLoading) {
-        return <div style={{ textAlign: 'center', marginTop: '50px' }}>Loading...</div>;
+  useEffect(() => {
+    if (!isAuthenticated) {
+      return;
     }
 
-    //return isAuthenticated ? <Homepage /> : <Login />;
-    return (
-        <BrowserRouter>
-            <Routes>
-                {/* If not logged in, always show login */}
-                {!isAuthenticated ? (
-                    <>
-                        { /* Add welcome page*/}
-                        <Route path="/" element={<Welcome />} />
-                        <Route path="/login" element={<Login isSignup={false} />} />
-                        <Route path="/signup" element={<Login isSignup={true} />} />
-                        <Route path="*" element={<Navigate to="/" replace />} />
-                    </>
-                ) : (
-                    <>
-                        {/* After login, redirect to homepage */}
-                        <Route path="/" element={<Homepage />} />
-                        <Route path="/soil" element={<SoilGame />} />
-                        <Route path="/account" element={<AccountSettings />} />
-                        <Route path="/account/edit" element={<AccountSettingsEdit />} />
-                        <Route path="/water" element={<WaterGame />} />
-                        <Route path="*" element={<Navigate to="/" replace />} />
-                    </>
-                )}
+    const handleBeforeUnload = () => {
+      const endpoint = "/api/auth/logout";
 
-            </Routes>
-        </BrowserRouter>
+      if (navigator.sendBeacon) {
+        const payload = new Blob([], { type: "application/json" });
+        navigator.sendBeacon(endpoint, payload);
+        return;
+      }
+
+      fetch(endpoint, {
+        method: "POST",
+        keepalive: true,
+      }).catch(() => {
+        // no-op: unload calls are best-effort
+      });
+    };
+
+    window.addEventListener("beforeunload", handleBeforeUnload);
+    return () => {
+      window.removeEventListener("beforeunload", handleBeforeUnload);
+    };
+  }, [isAuthenticated]);
+
+  useEffect(() => {
+    const unlockAudio = () => {
+      audioSystem.unlock();
+      window.removeEventListener("pointerdown", unlockAudio);
+    };
+
+    window.addEventListener("pointerdown", unlockAudio);
+
+    return () => {
+      window.removeEventListener("pointerdown", unlockAudio);
+    };
+  }, []);
+
+  if (isLoading) {
+    return (
+      <div style={{ textAlign: "center", marginTop: "50px" }}>Loading...</div>
     );
+  }
+
+  //return isAuthenticated ? <Homepage /> : <Login />;
+  return (
+    <BrowserRouter>
+      <Routes>
+        {/* If not logged in, always show login */}
+        {!isAuthenticated ? (
+          <>
+            {/* Add welcome page*/}
+            <Route path="/" element={<Welcome />} />
+            <Route path="/login" element={<Login isSignup={false} />} />
+            <Route path="/signup" element={<Login isSignup={true} />} />
+            <Route path="*" element={<Navigate to="/" replace />} />
+          </>
+        ) : (
+          <>
+            {/* After login, redirect to homepage */}
+            <Route path="/" element={<Homepage />} />
+            <Route path="/soil" element={<SoilGame />} />
+            <Route path="/account" element={<AccountSettings />} />
+            <Route path="/account/edit" element={<AccountSettingsEdit />} />
+            <Route path="/water" element={<WaterGame />} />
+            <Route path="*" element={<Navigate to="/" replace />} />
+          </>
+        )}
+      </Routes>
+    </BrowserRouter>
+  );
 }
 
 export default App;

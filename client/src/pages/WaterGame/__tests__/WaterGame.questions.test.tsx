@@ -12,11 +12,11 @@ import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { MemoryRouter } from "react-router-dom";
 import { vi, beforeEach, afterEach } from "vitest";
-import { WaterGame } from "../WaterGame";
+import { WaterGame } from "../index";
 import type { Question } from "../../ServerCalls/ServerCalls";
 import * as ServerCalls from "../../ServerCalls/ServerCalls";
 
-vi.mock('../../../AudioSystem', () => ({
+vi.mock("../../../AudioSystem", () => ({
   audioSystem: {
     playAmbient: vi.fn(),
     stopAmbient: vi.fn(),

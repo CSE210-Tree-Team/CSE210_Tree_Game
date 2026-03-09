@@ -1,0 +1,72 @@
+.gameScreen {
+  display: flex;
+  padding: 4rem;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: center;
+  height: 100%;
+  width: -webkit-fill-available;
+  position: relative;
+  z-index: 1;
+}
+
+.icon {
+  position: absolute;
+  top: 4rem;
+  left: 4rem;
+  width: 4rem;
+  height: 4rem;
+  cursor: pointer;
+}
+
+/*
+GameScreen styling
+*/
+
+.question {
+  display: flex;
+  position: relative;
+  z-index: 2;
+  padding: 2rem 4rem;
+  flex-direction: column;
+  align-items: center;
+  gap: 4rem;
+  border-radius: 100px;
+  border: 0.25rem solid var(--color-blue2);
+  background-color: color-mix(in srgb, var(--color-blue1) 80%, transparent);
+}
+
+.questionText {
+  color: var(--color-blue2, #015177);
+  text-align: center;
+  font-family: Handjet;
+  font-size: 3rem;
+  font-style: normal;
+  font-weight: 700;
+  line-height: normal;
+  margin: 0;
+}
+
+.pointCount {
+  display: flex;
+  padding: 20px;
+  align-items: center;
+  position: absolute;
+  right: 4rem;
+  top: 4rem;
+  border-radius: 30px;
+  background-color: color-mix(in srgb, var(--color-blue2) 80%, transparent);
+}
+
+.pointCountText {
+  color: #fff;
+  text-align: center;
+  font-size: 2rem;
+  margin: 0;
+}
+
+.bucketContainer {
+  position: relative;
+  width: 100%;
+  height: 8.75rem;
+}
