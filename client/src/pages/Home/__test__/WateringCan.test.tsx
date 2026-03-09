@@ -1,3 +1,10 @@
+/*
+Unit tests for the watering can component
+
+It checks if the WateringCan component renders the correct image using the predefined path from constants, applies the appropriate CSS class for styling
+It also verifies that the onClick callback is called when the watering can image is clicked
+*/
+
 import { describe, it, expect, vi } from 'vitest'
 import { render, screen } from '../../../test/test-utils'
 import userEvent from '@testing-library/user-event'

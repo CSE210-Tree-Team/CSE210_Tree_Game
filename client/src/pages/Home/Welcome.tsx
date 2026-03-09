@@ -1,3 +1,10 @@
+/**
+ * Welcome page
+ * This page serves as the entry point for users visiting the website
+ * It provides a welcome message and an introduction to the game, encouraging users to sign up or log in 
+ * The page guides users towards creating an account or accessing their existing account to begin playing
+ */
+
 import { useNavigate } from 'react-router-dom';
 import styles from "./homepage.module.css"
 import fontStyles from "../../components/Popup.module.css"

@@ -1,3 +1,10 @@
+/*
+Unit tests for the homepage
+
+It checks if the homepage renders correctly with mocked user information, resource levels, and components
+It also tests navigation to account settings and games when respective elements are clicked
+The tests mock API responses and Auth0 authentication to ensure consistent test conditions
+*/
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import type { Mock } from 'vitest'
 import { render, screen, waitFor } from '../../../test/test-utils'
