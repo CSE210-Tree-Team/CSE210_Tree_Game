@@ -1,8 +1,6 @@
 import { describe, it, expect } from 'vitest';
 
 import {
-  type ElementType,
-  type GamePhase,
   type Inventory,
   type Position,
   type Node,
@@ -17,34 +15,6 @@ import {
   DIRECTION_LABELS
 } from '../types/Abstract.types';
 
-import {
-  getNodeAt,
-  hasUncollectedResource,
-  generateMap
-} from '../utils/MapHelper'
-
-import {
-  createEmptyInventory,
-  addToInventory,
-  removeFromInventory
-} from '../utils/InventoryHelper';
-
-import {
-  isQuestComplete,
-  getNextNeededElement,
-  submitElementToQuest,
-  formatQuestProgress,
-  getElementSymbol,
-  formatLocationInfo,
-  isValidCommand,
-  parseCommand
-} from '../utils/QuestListHelper';
-
-import {
-  isValidPosition,
-  getNextPosition,
-  getPossibleMoves
-} from '../utils/PositionHelper';
 
 
 describe('SoilGame_REP.type exports', () => {

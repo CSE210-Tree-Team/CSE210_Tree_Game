@@ -7,21 +7,9 @@ import {
 	SYMBOL_TO_ELEMENT,
 } from '../types/Abstract.types';
 
-// TODO: Potentially disconnect this to remove dependencies
-
-
 // ========================
 // Quest Helpers
 // ========================
-
-/** Check if a quest is fully completed (all required elements submitted) */
-// export function isQuestComplete(quest: Quest): boolean {
-// 	for (const [element, required] of Object.entries(quest.required)) {
-// 		const submitted = quest.submitted[element] || 0;
-// 		if (submitted < required) return false;
-// 	}
-// 	return true;
-// }
 
 /** Get the next needed element for a quest, returns null if quest is complete */
 export function getNextNeededElement(quest: Quest): { element: ElementType; remaining: number } | null {
@@ -118,27 +106,3 @@ export function formatLocationInfo(pos: Position, map: Node[][]): string[] {
 	return info;
 }
 
-// ========================
-// Validation
-// ========================
-
-/** Check if a string is a valid player command */
-export function isValidCommand(input: string): boolean {
-	const normalized = input.toLowerCase().trim();
-	if (['w', 'a', 's', 'd', '1', '2', '3', '4', 'i', 'exit'].includes(normalized)) return true;
-
-	const parts = normalized.split(/\s+/);
-	if ((parts[0] === 'collect' || parts[0] === 'drop') && parts.length === 3) {
-		const amount = parseInt(parts[2], 10);
-		if (!isNaN(amount) && amount > 0) return true;
-	}
-
-	return false;
-}
-
-/** 
- * Normalizes the input command to Lowercase forma
- */
-export function parseCommand(input: string): string {
-	return input.toLowerCase().trim();
-}
