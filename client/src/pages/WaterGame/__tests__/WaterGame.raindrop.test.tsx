@@ -15,11 +15,19 @@ import userEvent from "@testing-library/user-event";
 import { MemoryRouter } from "react-router-dom";
 import { vi, beforeEach, afterEach } from "vitest";
 
-import { WaterGame } from "../WaterGame";
+import { WaterGame } from "../index";
 import { SPAWN_INTERVAL_MS, RAINDROP_WIDTH } from "../constants";
 import type { Question } from "../../ServerCalls/ServerCalls";
 import * as ServerCalls from "../../ServerCalls/ServerCalls";
-import * as utils from "../utils";
+import * as utils from "../utils/raindropHelper";
+
+vi.mock("../../../AudioSystem", () => ({
+  audioSystem: {
+    playAmbient: vi.fn(),
+    stopAmbient: vi.fn(),
+    fadeOut: vi.fn(),
+  },
+}));
 
 const mockQuestions = [
   {

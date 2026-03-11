@@ -1,4 +1,4 @@
-import { RAINDROP_HEIGHT, RAINDROP_WIDTH, BUCKET_WIDTH } from "./constants";
+import { RAINDROP_HEIGHT, RAINDROP_WIDTH, BUCKET_WIDTH } from "../constants";
 
 export const checkCollision = (
   dropX: number,

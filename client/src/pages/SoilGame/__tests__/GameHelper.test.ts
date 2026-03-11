@@ -1,20 +1,9 @@
 import { describe, it, expect } from 'vitest';
 
 import {
-  type ElementType,
-  type GamePhase,
   type Inventory,
-  type Position,
   type Node,
   type Quest,
-  type GameState,
-  type CompleteGameRequest,
-  type CompleteGameResponse,
-  type Direction,
-  type PlayerCommand,
-  DIRECTION_DELTAS,
-  SYMBOL_TO_ELEMENT,
-  DIRECTION_LABELS,
   DEFAULT_MAP_SIZE
 } from '../types/Abstract.types';
 
@@ -36,10 +25,9 @@ import {
   checkAndCompleteQuest,
   formatQuestProgress,
   getElementSymbol,
-  formatLocationInfo,
-  isValidCommand,
-  parseCommand
 } from '../utils/QuestListHelper';
+
+import { isValidCommand, parseCommand } from '../utils/CommandParser';
 
 import {
   isValidPosition,

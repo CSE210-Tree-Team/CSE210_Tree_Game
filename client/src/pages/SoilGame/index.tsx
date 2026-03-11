@@ -1,3 +1,4 @@
+import { useNavigate } from 'react-router-dom';
 import { useSoilGame } from './hooks/useSoilGame';
 import { TitleScreen } from './components/TitleScreen/TitleScreen';
 import { TutorialScreen } from './components/TutorialScreen/TutorialScreen';
@@ -6,6 +7,7 @@ import { CompletionPopup } from './components/CompletionPopup/CompletionPopup';
 import styles from './SoilGame.module.css';
 
 export default function SoilMinigame() {
+  const navigate = useNavigate();
   const { state, setPhase, startGame, handleCommand } = useSoilGame();
 
   // Transition from Tutorial to Playing
@@ -17,25 +19,33 @@ export default function SoilMinigame() {
     <div className={styles.gameContainer}>
       {/* 1. Title Screen */}
       {state.phase === 'title' && (
-        <TitleScreen onPlay={() => setPhase('tutorial')} />
+        <TitleScreen onPlay={() => setPhase('tutorial')} onBack={() => navigate('/')} />
       )}
 
       {/* 2. Tutorial Screen */}
       {state.phase === 'tutorial' && (
-        <TutorialScreen onReady={handleReadyToPlay} />
+        <TutorialScreen onReady={handleReadyToPlay} onBack={() => setPhase('title')} />
       )}
 
       {/* 3. Main Gameplay Screen */}
       {(state.phase === 'playing' || state.phase === 'complete') && (
-        <GameScreen state={state} onCommand={handleCommand} />
+        <>
+          <img
+            src="/closeSoil.svg"
+            alt="Exit Game"
+            className={styles.closeButton}
+            onClick={() => handleCommand('exit')}
+          />
+          <GameScreen state={state} onCommand={handleCommand} />
+        </>
       )}
 
       {/* 4. Completion Popup Overlay */}
       {state.showCompletionPopup && (
-        <CompletionPopup 
-          questsCompleted={state.quests.filter(q => q.completed).length} 
-          totalQuests={state.quests.length} 
-          score={state.score} 
+        <CompletionPopup
+          questsCompleted={state.quests.filter(q => q.completed).length}
+          totalQuests={state.quests.length}
+          score={state.score}
         />
       )}
 

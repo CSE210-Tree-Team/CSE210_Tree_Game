@@ -18,3 +18,5 @@ export type PointData = {
   y: number;
   variant: "correct" | "incorrect";
 };
+
+export type GameScreen = "start" | "tutorial" | "game" | "end";

@@ -12,6 +12,14 @@ vi.mock('../../ServerCalls/ServerCalls', () => ({
   fetchQuestions: vi.fn(),
 }));
 
+vi.mock('../../../AudioSystem', () => ({
+  audioSystem: {
+    playAmbient: vi.fn(),
+    stopAmbient: vi.fn(),
+    fadeOut: vi.fn(),
+  },
+}));
+
 describe('Incorrect Nutrients Feature', () => {
   describe('Question Parsing - Incorrect Options', () => {
     it('parses Water/H2O with incorrect Fe option', () => {
