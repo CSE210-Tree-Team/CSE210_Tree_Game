@@ -61,7 +61,6 @@ describe('SoilGame_REP.type exports', () => {
       inventory: inv,
       inventoryCapacity: 10,
       terminalLog: [],
-      questsCompleted: 0,
       score: 0,
       showCompletionPopup: false,
       requiredElements: new Set<string>(),

@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach, vi, afterEach } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
 import { renderHook, act } from '@testing-library/react';
 import { useSoilGame } from '../hooks/useSoilGame';
 import { type Node, DEFAULT_MAP_SIZE } from '../types/Abstract.types';

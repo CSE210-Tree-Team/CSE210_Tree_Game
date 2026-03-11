@@ -19,7 +19,7 @@ const emptyInventory: Inventory = {
 
 
 test("does not render elements with value 0", () => {
-  render(<InventorySection inventory={emptyInventory} />);
+  render(<InventorySection inventory={emptyInventory} inventoryCapacity={10} />);
 
   expect(screen.queryByText("Nitrogen")).not.toBeInTheDocument();
   expect(screen.queryByText("Hydrogen")).not.toBeInTheDocument();
