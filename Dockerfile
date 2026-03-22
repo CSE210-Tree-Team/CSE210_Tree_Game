@@ -33,5 +33,5 @@ COPY --from=frontend-builder /app/client/dist /app/client/dist
 
 EXPOSE 8080
 
-# Ensure schema exists, seed default questions idempotently, then start the API.
-CMD ["sh", "-c", "python -m database.createDatabase && python -m utils.addDefaultQuestions && python main.py"]
+# Bootstrap schema/questions only when DB is missing, then start the API.
+CMD ["sh", "-c", "python -m database.bootstrap && python main.py"]

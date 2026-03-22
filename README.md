@@ -36,9 +36,14 @@ Recommended Railway service settings:
 Required Railway environment variables:
 - `MIDDLEWARE_SECRET_KEY` = strong random string
 - `CLEAR_SESSIONS_ON_RESTART` = `false`
+- `ENABLE_BACKGROUND_DECAY` = `false` (recommended for low-traffic resume deployments)
 - `VITE_AUTH0_DOMAIN` = your Auth0 tenant domain
 - `VITE_AUTH0_CLIENT_ID` = your Auth0 client id
 - `EMAIL_PASSWORD` = sender mailbox app password (if email features are used)
+
+Resource-saving behavior in this repository:
+- On container startup, schema/question bootstrap now runs only when the DB file does not exist.
+- Passive decay background loop is disabled by default and decay is applied on user requests instead.
 
 Auth0 app settings must include your Railway URL in:
 - Allowed Callback URLs

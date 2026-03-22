@@ -164,6 +164,13 @@ class Settings:
     DEFAULT_EDUCATION_LEVEL_CODE: int = 1  # Grade 1
     
     # ========== TIMING & DECAY ==========
+    # Run passive decay in a background loop. Keep this off by default to reduce
+    # idle CPU usage in very low-traffic deployments.
+    ENABLE_BACKGROUND_DECAY: bool = _parse_bool(
+        os.getenv("ENABLE_BACKGROUND_DECAY", "false"),
+        default=False
+    )
+
     # Passive decay rates for resources -- how many minutes to decay 1 level of the resource
     PASSIVE_DECAY_RATE: int = 30  # 30 minutes to decay 1 level - 50 hours for tree to die from full.
     

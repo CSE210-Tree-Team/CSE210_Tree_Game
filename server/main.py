@@ -72,7 +72,10 @@ async def startup_event():
     try:
         print(f"Resolved database path: {RESOLVED_DB_PATH}")
         settings.validate()
-        decay_service.start()
+        if settings.ENABLE_BACKGROUND_DECAY:
+            decay_service.start()
+        else:
+            print("Background decay disabled; decay will be applied on user interactions")
         print("Application started successfully")
     except Exception as e:
         print(f"Error during startup: {e}")
@@ -84,7 +87,8 @@ async def shutdown_event():
     """
     Clean up services when the app shuts down.
     """
-    decay_service.stop()
+    if settings.ENABLE_BACKGROUND_DECAY:
+        decay_service.stop()
     print("Application shutdown complete")
 
 
